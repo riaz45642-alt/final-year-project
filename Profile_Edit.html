@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- ═══ PROFILE EDIT MODAL ═══ -->
+<div class="modal-overlay" id="profile-edit-modal">
+  <div class="modal-box" style="max-width:420px">
+    <button class="modal-close" onclick="closeEditProfile()">✕</button>
+    <div style="font-family:var(--font-display);font-size:20px;font-weight:700;margin-bottom:20px">Edit Profile</div>
+    <div class="input-group"><label>Full Name</label><input type="text" id="edit-name" placeholder="Ahmed Khan"></div>
+    <div class="input-group"><label>Email</label><input type="email" id="edit-email" placeholder="you@example.com"></div>
+    <div class="input-group"><label>Professional Title</label><input type="text" id="edit-title-field" placeholder="e.g. Full Stack Developer"></div>
+    <div class="input-group"><label>Location</label><input type="text" id="edit-location" placeholder="Lahore, Pakistan"></div>
+    <div class="input-group"><label>Skills (comma separated)</label><input type="text" id="edit-skills-field" placeholder="React, Node.js, Python..."></div>
+    <div style="display:flex;gap:10px;margin-top:6px">
+      <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfile()">Save Changes</button>
+      <button class="btn btn-outline" onclick="closeEditProfile()">Cancel</button>
+    </div>
+  </div>
+</div>
+<script src="app.js"></script>
+</body>
+</html>

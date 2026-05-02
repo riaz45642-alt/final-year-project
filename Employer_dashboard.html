@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+      <!-- ════════════════════════════════════════
+         EMPLOYER DASHBOARD
+    ════════════════════════════════════════ -->
+    <section class="page" id="page-employer">
+      <div class="page-header">
+        <div class="flex-between" style="flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title">Employer Hub</div>
+            <div class="page-subtitle">Post jobs, manage applications, and find top talent</div>
+          </div>
+          <button class="btn btn-primary" onclick="switchTab('tab-post')">+ Post New Job</button>
+        </div>
+      </div>
+
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" id="emp-stat-jobs">6</div><div class="stat-change up">▲ 2 this month</div></div>
+        <div class="stat-card"><div class="stat-label">Total Applicants</div><div class="stat-value" id="emp-stat-apps">148</div><div class="stat-change up">▲ 34 this week</div></div>
+        <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value" id="emp-stat-short">23</div><div class="stat-change up">▲ 5 new</div></div>
+        <div class="stat-card"><div class="stat-label">Hired</div><div class="stat-value" id="emp-stat-hired">4</div><div class="stat-change up">▲ 1 this month</div></div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
+        <button class="tab-btn"        id="tab-apps-btn" onclick="switchTab('tab-apps')">👥 Applicants</button>
+        <button class="tab-btn"        id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
+      </div>
+
+      <!-- Tab: My Jobs -->
+      <div class="tab-panel active" id="tab-jobs">
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Job Title</th><th>Department</th><th>Posted</th><th>Applicants</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="posted-jobs-tbody">
+                <tr class="static-row"><td><strong>Senior Frontend Dev</strong></td><td>Engineering</td><td>Apr 10</td><td><strong>48</strong></td><td><span class="status-badge active">● Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
+                <tr class="static-row"><td><strong>UI/UX Designer</strong></td><td>Design</td><td>Apr 5</td><td><strong>32</strong></td><td><span class="status-badge active">● Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
+                <tr class="static-row"><td><strong>Backend Engineer</strong></td><td>Engineering</td><td>Mar 28</td><td><strong>41</strong></td><td><span class="status-badge reviewing">● Reviewing</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
+                <tr class="static-row"><td><strong>Project Manager</strong></td><td>Operations</td><td>Mar 15</td><td><strong>19</strong></td><td><span class="status-badge pending">● Pending</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
+                <tr class="static-row"><td><strong>Data Analyst</strong></td><td>Analytics</td><td>Feb 20</td><td><strong>8</strong></td><td><span class="status-badge closed">Closed</span></td><td><button class="btn btn-danger btn-sm" onclick="toast('Job removed','info')">Remove</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Applicants -->
+      <div class="tab-panel" id="tab-apps">
+        <div class="card">
+          <div class="search-row" style="margin-bottom:16px">
+            <div class="search-input-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search applicants..." oninput="toast('Searching applicants...','info')"></div>
+            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Filter applied','info')">
+              <option>All Jobs</option><option>Senior Frontend Dev</option><option>UI/UX Designer</option>
+            </select>
+            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Status filter applied','info')">
+              <option>All Status</option><option>New</option><option>Shortlisted</option><option>Rejected</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Applicant</th><th>Applied For</th><th>Match</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="applicants-tbody">
+                <tr><td><div class="applicant-name"><div class="applicant-av">AK</div><div><div style="font-weight:600">Ahmed Khan</div><div style="font-size:11.5px;color:var(--text-secondary)">Full Stack Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">96%</strong></td><td>Apr 12</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Ahmed Khan')"><option>Reviewing</option><option>Shortlisted</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
+                <tr><td><div class="applicant-name"><div class="applicant-av">SF</div><div><div style="font-weight:600">Sara Fatima</div><div style="font-size:11.5px;color:var(--text-secondary)">Frontend Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">91%</strong></td><td>Apr 11</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Sara Fatima')"><option>Shortlisted</option><option>Reviewing</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
+                <tr><td><div class="applicant-name"><div class="applicant-av">MU</div><div><div style="font-weight:600">Muhammad Usman</div><div style="font-size:11.5px;color:var(--text-secondary)">UI Designer</div></div></div></td><td>UI/UX Designer</td><td><strong style="color:var(--warning)">78%</strong></td><td>Apr 9</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Muhammad Usman')"><option>Reviewing</option><option>Shortlisted</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
+                <tr><td><div class="applicant-name"><div class="applicant-av">ZA</div><div><div style="font-weight:600">Zara Ali</div><div style="font-size:11.5px;color:var(--text-secondary)">React Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">88%</strong></td><td>Apr 8</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Zara Ali')"><option>Rejected</option><option>Reviewing</option><option>Shortlisted</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Post Job -->
+      <div class="tab-panel" id="tab-post">
+        <div class="card post-job-form">
+          <div class="section-title" style="font-size:18px;margin-bottom:20px">📣 Post a New Job</div>
+          <div class="form-group"><label>Job Title *</label><input type="text" id="pj-title" placeholder="e.g., Senior React Developer"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Department</label><input type="text" id="pj-dept" placeholder="Engineering"></div>
+            <div class="form-group"><label>Job Type *</label><select id="pj-type"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option><option>Freelance</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Location *</label><input type="text" id="pj-location" placeholder="Lahore, Pakistan"></div>
+            <div class="form-group"><label>Work Mode</label><select id="pj-mode"><option>On-site</option><option>Remote</option><option>Hybrid</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Min Salary (Rs/month)</label><input type="text" id="pj-sal-min" placeholder="80,000"></div>
+            <div class="form-group"><label>Max Salary (Rs/month)</label><input type="text" id="pj-sal-max" placeholder="150,000"></div>
+          </div>
+          <div class="form-group"><label>Job Category</label>
+            <select id="pj-category">
+              <option value="tech">Technology</option><option value="medical">Medical</option>
+              <option value="teaching">Teaching / Education</option><option value="civil">Civil / Engineering</option>
+              <option value="finance">Finance</option><option value="design">Design</option>
+              <option value="legal">Legal</option><option value="logistics">Logistics</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Experience Required</label>
+            <select id="pj-exp"><option>Fresh / No Experience</option><option>1-2 Years</option><option>3-5 Years</option><option>5+ Years</option><option>Senior Level</option></select>
+          </div>
+          <div class="form-group"><label>Job Description *</label><textarea id="pj-desc" rows="5" placeholder="Describe the role, responsibilities, requirements..."></textarea></div>
+          <div class="form-group"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="React, Node.js, PostgreSQL"></div>
+          <div class="form-group"><label>Application Deadline</label><input type="date" id="pj-deadline"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="post-job-btn" onclick="postJob()">📣 Publish Job</button>
+            <button class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
+            <button class="btn" style="color:var(--text-muted);border:1px solid var(--border)" onclick="toast('Preview mode coming soon','info')">👁️ Preview</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- end app-layout -->
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-bottom-nav-item active" data-page="home" onclick="navTo('home')">
+    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-label">Jobs</span>
+  </button>
+  <button class="mobile-bottom-nav-item" data-page="saved" onclick="navTo('saved')">
+    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-label">Saved</span>
+  </button>
+  <button class="mobile-bottom-nav-item" data-page="ai" onclick="navTo('ai')">
+    <span class="mobile-nav-icon">🤖</span>
+    <span class="mobile-nav-label">AI</span>
+  </button>
+  <button class="mobile-bottom-nav-item" data-page="cv" onclick="navTo('cv')">
+    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-label">CV</span>
+  </button>
+  <button class="mobile-bottom-nav-item" data-page="profile" onclick="navTo('profile')">
+    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-label">Profile</span>
+  </button>
+</nav>
+<script src="app.js"></script>
+</body>
+</html>

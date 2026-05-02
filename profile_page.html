@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+        <!-- ════════════════════════════════════════
+
+         PROFILE
+    ════════════════════════════════════════ -->
+    <section class="page" id="page-profile">
+      <div class="page-header">
+        <div class="page-title">My Profile</div>
+        <div class="page-subtitle">Manage your career profile and visibility</div>
+      </div>
+
+      <div class="profile-hero-banner">
+        <div class="profile-hero-inner">
+          <div class="profile-avatar-circle" id="prof-avatar">AK</div>
+          <div>
+            <div class="profile-display-name" id="prof-name">Ahmed Khan</div>
+            <div class="profile-title" id="prof-title-sub">Full Stack Developer · 4 years experience</div>
+            <div class="profile-tag-list">
+              <span class="profile-tag">📍 Lahore, Pakistan</span>
+              <span class="profile-tag">💼 Open to Work</span>
+              <span class="profile-tag">⭐ 94% Match Score</span>
+            </div>
+          </div>
+          <button class="edit-profile-btn" onclick="openEditProfile()">✏️ Edit Profile</button>
+        </div>
+      </div>
+
+      <div class="profile-two-col-grid">
+        <div>
+          <div class="card mb-16">
+            <div class="section-title">💼 Work Experience</div>
+            <div class="timeline-item"><div class="timeline-dot">🔷</div><div><div class="timeline-title">Senior Developer</div><div class="timeline-sub">TechNova Solutions</div><div class="timeline-period">Jan 2022 – Present</div></div></div>
+            <div class="timeline-item"><div class="timeline-dot">🌐</div><div><div class="timeline-title">Web Developer</div><div class="timeline-sub">Arbisoft</div><div class="timeline-period">Aug 2020 – Dec 2021</div></div></div>
+            <div class="timeline-item"><div class="timeline-dot">🚀</div><div><div class="timeline-title">Junior Developer</div><div class="timeline-sub">Systems Ltd.</div><div class="timeline-period">Jun 2019 – Jul 2020</div></div></div>
+            <button class="btn btn-outline btn-sm mt-16" onclick="toast('Feature available in full version','info')">+ Add Experience</button>
+          </div>
+          <div class="card">
+            <div class="section-title">🎓 Education</div>
+            <div class="timeline-item"><div class="timeline-dot">🎓</div><div><div class="timeline-title">BS Computer Science</div><div class="timeline-sub">FAST-NUCES, Lahore</div><div class="timeline-period">2015 – 2019 · CGPA: 3.7</div></div></div>
+            <div class="timeline-item"><div class="timeline-dot">📚</div><div><div class="timeline-title">FSc Pre-Engineering</div><div class="timeline-sub">Punjab College, Lahore</div><div class="timeline-period">2013 – 2015 · A Grade</div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card mb-16">
+            <div class="section-title">⚡ Skills</div>
+            <div class="skills-grid">
+              <span class="skill-chip">React.js</span><span class="skill-chip">Node.js</span>
+              <span class="skill-chip">TypeScript</span><span class="skill-chip">Python</span>
+              <span class="skill-chip">PostgreSQL</span><span class="skill-chip green">Docker</span>
+              <span class="skill-chip green">AWS</span><span class="skill-chip orange">Figma</span>
+              <span class="skill-chip">Git</span><span class="skill-chip orange">REST API</span>
+            </div>
+            <button class="btn btn-outline btn-sm mt-16" onclick="toast('Add skill feature coming soon','info')">+ Add Skill</button>
+          </div>
+          <div class="card mb-16">
+            <div class="section-title">📊 Profile Strength</div>
+            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Profile Completeness</span><strong>87%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:87%;background:var(--accent);border-radius:10px"></div></div></div>
+            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Job Match Score</span><strong>94%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:94%;background:var(--success);border-radius:10px"></div></div></div>
+            <div><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>CV Score</span><strong>78%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:78%;background:var(--warning);border-radius:10px"></div></div></div>
+          </div>
+          <div class="card">
+            <div class="section-title">📈 Activity</div>
+            <div style="font-size:13px;color:var(--text-secondary);display:flex;flex-direction:column;gap:10px">
+              <div class="flex-between"><span>Profile views</span><strong>24</strong></div>
+              <div class="flex-between"><span>Applications sent</span><strong id="prof-apps-count">0</strong></div>
+              <div class="flex-between"><span>Interview invites</span><strong>3</strong></div>
+              <div class="flex-between"><span>Saved jobs</span><strong id="prof-saved-count">0</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <script src="app.js"></script>
+</body>
+</html>

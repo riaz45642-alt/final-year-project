@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+      <!-- ════════════════════════════════════════
+         CV GENERATOR
+    ════════════════════════════════════════ -->
+    <section class="page" id="page-cv">
+      <div class="page-header">
+        <div class="page-title">CV Generator</div>
+        <div class="page-subtitle">Build a professional CV and download it as PDF in seconds</div>
+      </div>
+
+      <div class="cv-builder-layout">
+        <!-- FORM LEFT -->
+        <div>
+          <div class="card">
+            <!-- Template Selector -->
+            <div class="form-section">
+              <div class="form-section-title"><span class="num">0</span>Choose Template</div>
+              <div id="template-selector" class="template-grid"></div>
+            </div>
+
+            <!-- Section 1: Personal -->
+            <div class="form-section">
+              <div class="form-section-title"><span class="num">1</span>Personal Information</div>
+              <div class="form-row">
+                <div class="form-group"><label>First Name</label><input type="text" id="cv-fname" data-cv-field placeholder="Ahmed" value="Ahmed"></div>
+                <div class="form-group"><label>Last Name</label><input type="text" id="cv-lname" data-cv-field placeholder="Khan" value="Khan"></div>
+              </div>
+              <div class="form-group"><label>Professional Title</label><input type="text" id="cv-job-title" data-cv-field placeholder="Full Stack Developer" value="Full Stack Developer"></div>
+              <div class="form-row">
+                <div class="form-group"><label>Email</label><input type="email" id="cv-email" data-cv-field placeholder="ahmed@email.com" value="ahmed@email.com"></div>
+                <div class="form-group"><label>Phone</label><input type="tel" id="cv-phone" data-cv-field placeholder="+92 300 1234567" value="+92 300 1234567"></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Location</label><input type="text" id="cv-loc" data-cv-field placeholder="Lahore, Pakistan" value="Lahore, Pakistan"></div>
+                <div class="form-group"><label>LinkedIn (optional)</label><input type="text" placeholder="linkedin.com/in/your-profile"></div>
+              </div>
+              <div class="form-group"><label>Professional Summary</label><textarea id="cv-summary" data-cv-field rows="3">Experienced Full Stack Developer with 4+ years building scalable web applications using React, Node.js, and cloud technologies. Passionate about clean code and user experience.</textarea></div>
+            </div>
+
+            <!-- Section 2: Education -->
+            <div class="form-section">
+              <div class="form-section-title"><span class="num">2</span>Education</div>
+              <div class="form-group"><label>Degree / Qualification</label><input type="text" id="cv-degree" data-cv-field placeholder="BS Computer Science" value="BS Computer Science"></div>
+              <div class="form-row">
+                <div class="form-group"><label>Institution</label><input type="text" id="cv-school" data-cv-field placeholder="FAST-NUCES, Lahore" value="FAST-NUCES, Lahore"></div>
+                <div class="form-group"><label>Year</label><input type="text" id="cv-edu-year" data-cv-field placeholder="2015 – 2019" value="2015 – 2019"></div>
+              </div>
+              <div class="form-group"><label>Grade / CGPA</label><input type="text" placeholder="3.7 / 4.0" value="3.7 / 4.0"></div>
+              <button class="btn btn-outline btn-sm" onclick="toast('Multiple degrees supported in full version','info')">+ Add Another Degree</button>
+            </div>
+
+            <!-- Section 3: Experience -->
+            <div class="form-section">
+              <div class="form-section-title"><span class="num">3</span>Work Experience</div>
+              <div class="form-group"><label>Job Title</label><input type="text" id="cv-exp-title" data-cv-field placeholder="Senior Developer" value="Senior Developer"></div>
+              <div class="form-row">
+                <div class="form-group"><label>Company</label><input type="text" id="cv-exp-company" data-cv-field placeholder="TechNova Solutions" value="TechNova Solutions"></div>
+                <div class="form-group"><label>Duration</label><input type="text" id="cv-exp-dur" data-cv-field placeholder="Jan 2022 – Present" value="Jan 2022 – Present"></div>
+              </div>
+              <div class="form-group"><label>Key Responsibilities</label><textarea id="cv-exp-desc" data-cv-field rows="3">Led a team of 5 developers to build microservices architecture. Improved app performance by 40% through optimization. Mentored junior developers and conducted code reviews.</textarea></div>
+              <button class="btn btn-outline btn-sm" onclick="toast('Multiple positions supported in full version','info')">+ Add Another Position</button>
+            </div>
+
+            <!-- Section 4: Skills -->
+            <div class="form-section">
+              <div class="form-section-title"><span class="num">4</span>Skills</div>
+              <div class="form-group"><label>Technical Skills (comma separated)</label><input type="text" id="cv-skills" data-cv-field placeholder="React.js, Node.js, TypeScript..." value="React.js, Node.js, TypeScript, Python, PostgreSQL, Docker, AWS, Git"></div>
+              <div class="form-group"><label>Soft Skills</label><input type="text" placeholder="Team Leadership, Communication, Problem Solving"></div>
+              <div class="form-group"><label>Languages</label><input type="text" placeholder="English (Fluent), Urdu (Native)"></div>
+            </div>
+
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <button class="btn btn-primary" onclick="updatePreview()">👁️ Refresh Preview</button>
+              <button class="btn btn-success" id="download-cv-btn" onclick="downloadCV()">⬇️ Download CV</button>
+              <button class="btn btn-outline" onclick="toast('Share link copied to clipboard!','success')">🔗 Share Link</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- CV PREVIEW RIGHT -->
+        <div>
+          <div class="cv-preview tpl-blue" id="cv-preview-panel">
+            <div class="cv-preview-header">
+              <div class="cv-preview-name" id="prev-name">Ahmed Khan</div>
+              <div class="cv-preview-job-title" id="prev-job-title">Full Stack Developer</div>
+              <div class="cv-preview-contact">
+                <span id="prev-email">ahmed@email.com</span>
+                <span id="prev-phone">+92 300 1234567</span>
+                <span id="prev-loc">Lahore, Pakistan</span>
+              </div>
+            </div>
+            <div class="cv-preview-body">
+              <div class="cv-section-heading">Profile Summary</div>
+              <p id="prev-summary" style="font-size:11px;color:var(--text-secondary);line-height:1.6">Experienced Full Stack Developer with 4+ years building scalable web applications.</p>
+
+              <div class="cv-section-heading">Education</div>
+              <div class="cv-experience-item">
+                <div class="cv-experience-title" id="prev-degree">BS Computer Science — FAST-NUCES · 2015–2019</div>
+              </div>
+
+              <div class="cv-section-heading">Work Experience</div>
+              <div class="cv-experience-item">
+                <div class="cv-experience-title" id="prev-exp-title">Senior Developer</div>
+                <div class="cv-experience-subtitle" id="prev-exp-sub">TechNova Solutions · Jan 2022 – Present</div>
+                <div class="cv-experience-desc">Led team, built microservices, improved performance by 40%.</div>
+              </div>
+
+              <div class="cv-section-heading">Skills</div>
+              <div class="cv-skills-list" id="prev-skills">
+                <span class="cv-skill-tag">React.js</span><span class="cv-skill-tag">Node.js</span>
+                <span class="cv-skill-tag">TypeScript</span><span class="cv-skill-tag">Python</span>
+                <span class="cv-skill-tag">PostgreSQL</span><span class="cv-skill-tag">Docker</span>
+              </div>
+            </div>
+            <div class="cv-actions-row">
+              <button class="btn btn-success btn-full" onclick="downloadCV()">⬇️ Download as PDF</button>
+              <div style="display:flex;gap:8px">
+                <button class="btn btn-outline" style="flex:1" onclick="toast('Template changed!','info')">🎨 Next Template</button>
+                <button class="btn btn-outline" style="flex:1" onclick="updatePreview()">🔄 Refresh</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+<script src="app.js"></script>
+</body>
+</html>
