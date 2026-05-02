@@ -317,9 +317,16 @@ function updateAuthUI() {
    6. NAVIGATION
 ────────────────────────────────────────────── */
 function showPage(pageId) {
-  document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+  // If SPA pages exist hi nahi → skip (for Employer_dashboard.html)
+  if (!document.querySelector('.page')) return;
+
+  document.querySelectorAll('.page').forEach(page =>
+    page.classList.remove('active')
+  );
+
   const targetPage = document.getElementById('page-' + pageId);
   if (targetPage) targetPage.classList.add('active');
+
   AppState.currentPage = pageId;
 
   // Update sidebar active state
@@ -344,8 +351,17 @@ function showPage(pageId) {
 }
 
 function navTo(pageId) {
-  showPage(pageId);
-  window.scrollTo(0, 0);
+  // Agar SPA pages hain → internal navigation
+  if (document.querySelector('.page')) {
+    showPage(pageId);
+    window.scrollTo(0, 0);
+    return;
+  }
+
+  // Otherwise external pages
+  if (pageId === 'employer') {
+    window.location.href = 'Employer_dashboard.html';
+  }
 }
 
 /* ──────────────────────────────────────────────
@@ -1096,18 +1112,46 @@ function heroSearch() {
   }
 }
 
-/* ──────────────────────────────────────────────
-   17. INIT
-────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Render initial job feed
+
+  // ✅ Check if this is SPA main page (index.html)
+  const isMainApp = document.getElementById('job-feed-grid');
+
+  if (!isMainApp) {
+    //  Employer_dashboard.html ya simple page
+    updateAuthUI();
+
+    // optional safe logs
+    console.log('Standalone page loaded (no SPA init needed)');
+    return;
+  }
+
+  // ✅ ONLY RUN FOR MAIN APP
   filterAndRender();
-
-  // Render CV template selector
   renderTemplateSelector();
-
-  // Update auth UI based on existing session
   updateAuthUI();
+
+  // Render chat history (safe check already exists)
+  const savedChatLog = DB.getChat();
+  if (savedChatLog.length > 2) {
+    const messagesList = document.getElementById('chat-messages');
+    if (messagesList) {
+      savedChatLog.slice(-6).forEach(msg => {
+        if (msg.role === 'user') appendMessage(msg.text, 'user');
+        else appendAIMessage(msg.text, []);
+      });
+    }
+  }
+
+  // Update badges
+  document.querySelectorAll('.sidebar-badge[data-for="saved"], .badge[data-for="saved"]')
+    .forEach(badge => badge.textContent = DB.getSaved().length);
+
+  document.querySelectorAll('.sidebar-badge[data-for="applied"], .badge[data-for="applied"]')
+    .forEach(badge => badge.textContent = DB.getApps().length);
+
+  console.log('TalentBridge initialized ✅');
+});
 
   // Restore recent chat history
   const savedChatLog = DB.getChat();
@@ -1177,4 +1221,94 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   console.log('TalentBridge initialized ✅ | DB:', { users: DB.getUsers().length, saved: DB.getSaved().length, apps: DB.getApps().length });
+document.addEventListener('DOMContentLoaded', () => {
+
+  const isMainApp = document.getElementById('job-feed-grid');
+
+  if (!isMainApp) {
+    updateAuthUI();
+    console.log('Standalone page loaded (no SPA init needed)');
+    return;
+  }
+
+  // =========================
+  // INIT MAIN APP
+  // =========================
+  filterAndRender();
+  renderTemplateSelector();
+  updateAuthUI();
+
+  // =========================
+  // RESTORE CHAT
+  // =========================
+  const savedChatLog = DB.getChat();
+  const messagesList = document.getElementById('chat-messages');
+
+  if (messagesList && savedChatLog.length > 0) {
+    savedChatLog.slice(-6).forEach(msg => {
+      if (msg.role === 'user') {
+        appendMessage(msg.text, 'user');
+      } else {
+        appendAIMessage(msg.text, []);
+      }
+    });
+  }
+
+  // =========================
+  // UPDATE BADGES
+  // =========================
+  const savedCount = DB.getSaved().length;
+  const appliedCount = DB.getApps().length;
+
+  document
+    .querySelectorAll('.sidebar-badge[data-for="saved"], .badge[data-for="saved"]')
+    .forEach(b => b.textContent = savedCount);
+
+  document
+    .querySelectorAll('.sidebar-badge[data-for="applied"], .badge[data-for="applied"]')
+    .forEach(b => b.textContent = appliedCount);
+
+  // =========================
+  // GLOBAL EVENTS
+  // =========================
+
+  // Close dropdown on outside click
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.nav-user-menu') && !e.target.closest('.nav-logged-in')) {
+      closeDropdown();
+    }
+  });
+
+  // Close modal on overlay click
+  document.querySelectorAll('.modal-overlay').forEach(modal => {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.classList.remove('open');
+    });
+  });
+
+  // Main search
+  document.getElementById('main-search')?.addEventListener('input', (e) => {
+    AppState.searchQuery = e.target.value;
+    filterAndRender();
+  });
+
+  // CV live preview
+  document.querySelectorAll('[data-cv-field]').forEach(field => {
+    field.addEventListener('input', updatePreview);
+  });
+
+  // Chat send on Enter
+  document.getElementById('chat-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      sendMsg();
+    }
+  });
+
+  // Hero search
+  document.getElementById('hero-search-input')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') heroSearch();
+  });
+
+  console.log('TalentBridge initialized ✅');
 });
