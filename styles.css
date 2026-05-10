@@ -1231,7 +1231,10 @@ tbody td { padding: 13px 14px; }
 @media (max-width: 600px) {
   /* Slimmer nav */
   .top-nav { padding: 0 14px; }
-  .site-logo { font-size: 17px; }
+  .site-logo { 
+    font-size: 17px; 
+    align-items: center;
+  }
 
   /* Toast position */
   #toast-container { right: 12px; left: 12px; top: calc(var(--nav-height) + 10px); }
