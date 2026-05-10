@@ -1,34 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TalentBridge — Smart Job Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentBridge — CV Generator</title>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
-      <!-- ════════════════════════════════════════
-         CV GENERATOR
-    ════════════════════════════════════════ -->
-    <section class="page" id="page-cv">
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div id="toast-container"></div>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box" id="auth-modal-box"></div>
+</div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav">
+  <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="site-logo" onclick="window.location.href='index.html'">Talent<span>Bridge</span></div>
+  <div class="nav-links">
+    <button class="nav-link-btn" onclick="window.location.href='index.html'">Find Jobs</button>
+    <button class="nav-link-btn" onclick="window.location.href='Employer_dashboard.html'">For Employers</button>
+    <button class="nav-link-btn active" onclick="window.location.href='cv_generator.html'">CV Builder</button>
+    <button class="nav-link-btn" onclick="window.location.href='AI_section.html'">AI Assistant</button>
+    <div class="nav-divider"></div>
+    <div id="nav-logged-out" class="nav-auth-buttons">
+      <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
+      <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
+    </div>
+    <div id="nav-logged-in" class="nav-user-menu hidden">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+        <span id="nav-avatar-initials">AK</span>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="dropdown-item" onclick="window.location.href='profile_page.html';closeDropdown()"><i class="fa-solid fa-circle-user"></i> My Profile</div>
+        <div class="dropdown-item" onclick="window.location.href='My_applications.html';closeDropdown()"><i class="fa-solid fa-list-check"></i> My Applications</div>
+        <div class="dropdown-item" onclick="window.location.href='Save_job.html';closeDropdown()"><i class="fa-solid fa-bookmark"></i> Saved Jobs</div>
+        <div class="dropdown-item" onclick="window.location.href='cv_generator.html';closeDropdown()"><i class="fa-solid fa-file-pdf"></i> CV Generator</div>
+        <hr>
+        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile sidebar overlay -->
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ═══ APP LAYOUT ═══ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='index.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
+    <button class="sidebar-nav-item" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="sidebar-nav-item active" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
+    <button class="sidebar-nav-item" onclick="window.location.href='AI_section.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-robot"></i></span>AI Assistant<span class="badge">New</span></button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
+    <button class="sidebar-nav-item" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
+    <button class="sidebar-nav-item" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
+
+    <div class="sidebar-user-block hidden" id="sidebar-user-block">
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div>
+          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
+          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- CV GENERATOR -->
+    <section class="page active" id="page-cv">
       <div class="page-header">
         <div class="page-title">CV Generator</div>
         <div class="page-subtitle">Build a professional CV and download it as PDF in seconds</div>
       </div>
-
       <div class="cv-builder-layout">
         <!-- FORM LEFT -->
         <div>
           <div class="card">
-            <!-- Template Selector -->
             <div class="form-section">
               <div class="form-section-title"><span class="num">0</span>Choose Template</div>
               <div id="template-selector" class="template-grid"></div>
             </div>
-
-            <!-- Section 1: Personal -->
             <div class="form-section">
               <div class="form-section-title"><span class="num">1</span>Personal Information</div>
               <div class="form-row">
@@ -46,8 +117,6 @@
               </div>
               <div class="form-group"><label>Professional Summary</label><textarea id="cv-summary" data-cv-field rows="3">Experienced Full Stack Developer with 4+ years building scalable web applications using React, Node.js, and cloud technologies. Passionate about clean code and user experience.</textarea></div>
             </div>
-
-            <!-- Section 2: Education -->
             <div class="form-section">
               <div class="form-section-title"><span class="num">2</span>Education</div>
               <div class="form-group"><label>Degree / Qualification</label><input type="text" id="cv-degree" data-cv-field placeholder="BS Computer Science" value="BS Computer Science"></div>
@@ -58,8 +127,6 @@
               <div class="form-group"><label>Grade / CGPA</label><input type="text" placeholder="3.7 / 4.0" value="3.7 / 4.0"></div>
               <button class="btn btn-outline btn-sm" onclick="toast('Multiple degrees supported in full version','info')">+ Add Another Degree</button>
             </div>
-
-            <!-- Section 3: Experience -->
             <div class="form-section">
               <div class="form-section-title"><span class="num">3</span>Work Experience</div>
               <div class="form-group"><label>Job Title</label><input type="text" id="cv-exp-title" data-cv-field placeholder="Senior Developer" value="Senior Developer"></div>
@@ -70,15 +137,12 @@
               <div class="form-group"><label>Key Responsibilities</label><textarea id="cv-exp-desc" data-cv-field rows="3">Led a team of 5 developers to build microservices architecture. Improved app performance by 40% through optimization. Mentored junior developers and conducted code reviews.</textarea></div>
               <button class="btn btn-outline btn-sm" onclick="toast('Multiple positions supported in full version','info')">+ Add Another Position</button>
             </div>
-
-            <!-- Section 4: Skills -->
             <div class="form-section">
               <div class="form-section-title"><span class="num">4</span>Skills</div>
               <div class="form-group"><label>Technical Skills (comma separated)</label><input type="text" id="cv-skills" data-cv-field placeholder="React.js, Node.js, TypeScript..." value="React.js, Node.js, TypeScript, Python, PostgreSQL, Docker, AWS, Git"></div>
               <div class="form-group"><label>Soft Skills</label><input type="text" placeholder="Team Leadership, Communication, Problem Solving"></div>
               <div class="form-group"><label>Languages</label><input type="text" placeholder="English (Fluent), Urdu (Native)"></div>
             </div>
-
             <div style="display:flex;gap:10px;flex-wrap:wrap">
               <button class="btn btn-primary" onclick="updatePreview()">👁️ Refresh Preview</button>
               <button class="btn btn-success" id="download-cv-btn" onclick="downloadCV()">⬇️ Download CV</button>
@@ -86,7 +150,6 @@
             </div>
           </div>
         </div>
-
         <!-- CV PREVIEW RIGHT -->
         <div>
           <div class="cv-preview tpl-blue" id="cv-preview-panel">
@@ -102,19 +165,16 @@
             <div class="cv-preview-body">
               <div class="cv-section-heading">Profile Summary</div>
               <p id="prev-summary" style="font-size:11px;color:var(--text-secondary);line-height:1.6">Experienced Full Stack Developer with 4+ years building scalable web applications.</p>
-
               <div class="cv-section-heading">Education</div>
               <div class="cv-experience-item">
                 <div class="cv-experience-title" id="prev-degree">BS Computer Science — FAST-NUCES · 2015–2019</div>
               </div>
-
               <div class="cv-section-heading">Work Experience</div>
               <div class="cv-experience-item">
                 <div class="cv-experience-title" id="prev-exp-title">Senior Developer</div>
                 <div class="cv-experience-subtitle" id="prev-exp-sub">TechNova Solutions · Jan 2022 – Present</div>
                 <div class="cv-experience-desc">Led team, built microservices, improved performance by 40%.</div>
               </div>
-
               <div class="cv-section-heading">Skills</div>
               <div class="cv-skills-list" id="prev-skills">
                 <span class="cv-skill-tag">React.js</span><span class="cv-skill-tag">Node.js</span>
@@ -133,6 +193,46 @@
         </div>
       </div>
     </section>
-<script src="app.js"></script>
+
+  </main>
+</div><!-- end app-layout -->
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='index.html'">
+    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-label">Jobs</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='Save_job.html'">
+    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-label">Saved</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='AI_section.html'">
+    <span class="mobile-nav-icon">🤖</span>
+    <span class="mobile-nav-label">AI</span>
+  </button>
+  <button class="mobile-bottom-nav-item active" onclick="window.location.href='cv_generator.html'">
+    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-label">CV</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='profile_page.html'">
+    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-label">Profile</span>
+  </button>
+</nav>
+
+<script src="script.js"></script>
+<script>
+  // Page-specific init for cv_generator.html
+  document.addEventListener('DOMContentLoaded', () => {
+    initCommon();
+    renderTemplateSelector();
+    updatePreview();
+    // CV live preview on all tagged inputs
+    document.querySelectorAll('[data-cv-field]').forEach(field => {
+      field.addEventListener('input', updatePreview);
+    });
+  });
+</script>
 </body>
 </html>
