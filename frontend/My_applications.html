@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TalentBridge — Saved Jobs</title>
+  <title>TalentBridge — My Applications</title>
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
@@ -30,10 +30,6 @@
   </button>
   <div class="site-logo" onclick="window.location.href='index.html'">Talent<span>Bridge</span></div>
   <div class="nav-links">
-    <button class="nav-link-btn" onclick="window.location.href='index.html'">Find Jobs</button>
-    <button class="nav-link-btn" onclick="window.location.href='Employer_dashboard.html'">For Employers</button>
-    <button class="nav-link-btn" onclick="window.location.href='cv_generator.html'">CV Builder</button>
-    <button class="nav-link-btn" onclick="window.location.href='AI_section.html'">AI Assistant</button>
     <div class="nav-divider"></div>
     <div id="nav-logged-out" class="nav-auth-buttons">
       <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
@@ -65,8 +61,8 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-section-label">Main</div>
     <button class="sidebar-nav-item" onclick="window.location.href='index.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
-    <button class="sidebar-nav-item active" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
-    <button class="sidebar-nav-item" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+    <button class="sidebar-nav-item" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item active" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
 
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
@@ -91,13 +87,13 @@
   <!-- ═══ MAIN CONTENT ═══ -->
   <main class="main-content">
 
-    <!-- SAVED JOBS -->
-    <section class="page active" id="page-saved">
+    <!-- MY APPLICATIONS -->
+    <section class="page active" id="page-applied">
       <div class="page-header">
-        <div class="page-title">Saved Jobs</div>
-        <div class="page-subtitle">Jobs you've bookmarked for later</div>
+        <div class="page-title">My Applications</div>
+        <div class="page-subtitle">Track the status of your job applications</div>
       </div>
-      <div id="saved-jobs-grid" class="job-grid"></div>
+      <div id="applied-jobs-list"></div>
     </section>
 
   </main>
@@ -109,7 +105,7 @@
     <span class="mobile-nav-icon">🏠</span>
     <span class="mobile-nav-label">Jobs</span>
   </button>
-  <button class="mobile-bottom-nav-item active" onclick="window.location.href='Save_job.html'">
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='Save_job.html'">
     <span class="mobile-nav-icon">🔖</span>
     <span class="mobile-nav-label">Saved</span>
   </button>
@@ -121,18 +117,18 @@
     <span class="mobile-nav-icon">📄</span>
     <span class="mobile-nav-label">CV</span>
   </button>
-  <button class="mobile-bottom-nav-item" onclick="window.location.href='profile_page.html'">
+  <button class="mobile-bottom-nav-item active" onclick="window.location.href='profile_page.html'">
     <span class="mobile-nav-icon">👤</span>
     <span class="mobile-nav-label">Profile</span>
   </button>
 </nav>
 
-<script src="script.js"></script>
+<script src="../js/script.js"></script>
 <script>
-  // Page-specific init for Save_job.html
+  // Page-specific init for My_applications.html
   document.addEventListener('DOMContentLoaded', () => {
     initCommon();
-    renderSavedJobs();
+    renderAppliedJobs();
   });
 </script>
 </body>

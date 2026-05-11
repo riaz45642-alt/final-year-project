@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>TalentBridge — My Profile</title>
   <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="../css/styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
@@ -25,10 +25,6 @@
   </button>
   <div class="site-logo" onclick="window.location.href='index.html'">Talent<span>Bridge</span></div>
   <div class="nav-links">
-    <button class="nav-link-btn" onclick="window.location.href='index.html'">Find Jobs</button>
-    <button class="nav-link-btn" onclick="window.location.href='Employer_dashboard.html'">For Employers</button>
-    <button class="nav-link-btn" onclick="window.location.href='cv_generator.html'">CV Builder</button>
-    <button class="nav-link-btn" onclick="window.location.href='AI_section.html'">AI Assistant</button>
     <div class="nav-divider"></div>
     <div id="nav-logged-out" class="nav-auth-buttons">
       <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
@@ -180,7 +176,7 @@
   </button>
 </nav>
 
-<script src="script.js"></script>
+<script src="../js/script.js"></script>
 <script>
   // Page-specific init for profile_page.html
   document.addEventListener('DOMContentLoaded', () => {
