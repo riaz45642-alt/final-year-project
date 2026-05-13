@@ -204,13 +204,6 @@
         });
       }
     }
-    // Chat: Enter key to send
-    const chatInputField = document.getElementById('chat-input');
-    if (chatInputField) {
-      chatInputField.addEventListener('keydown', e => {
-        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
-      });
-    }
   });
 </script>
 </body>
