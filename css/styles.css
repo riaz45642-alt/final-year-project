@@ -476,3 +476,30 @@ body {
   .mobile-nav-label { font-size: 9px; }
   .mobile-nav-icon { font-size: 16px; }
 }
+/* ═══ TALENTBRIDGE UPDATES ═══ */
+
+/* Center-align brand name in top navbar */
+.top-nav {
+  position: relative;
+}
+.site-logo-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+
+/* Navbar dropdown — Sign Out only */
+.user-dropdown {
+  min-width: 140px;
+}
+
+/* Hide login/signup sidebar button when logged in (controlled by JS, but CSS fallback) */
+#sidebar-login-signup-btn.hide-when-logged-in {
+  display: none !important;
+}
+
+/* Role-based visibility */
+[data-role] {
+  transition: opacity 0.2s;
+}

@@ -25,7 +25,7 @@
   <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
     <span></span><span></span><span></span>
   </button>
-  <div class="site-logo" onclick="window.location.href='index.html'">Talent<span>Bridge</span></div>
+  <div class="site-logo site-logo-center" onclick="window.location.href='index.html'">Talent<span>Bridge</span></div>
   <div class="nav-links">
     <div class="nav-divider"></div>
     <div id="nav-logged-out" class="nav-auth-buttons">
@@ -37,11 +37,6 @@
         <span id="nav-avatar-initials">AK</span>
       </div>
       <div class="user-dropdown" id="user-dropdown">
-        <div class="dropdown-item" onclick="window.location.href='profile_page.html';closeDropdown()"><i class="fa-solid fa-circle-user"></i> My Profile</div>
-        <div class="dropdown-item" onclick="window.location.href='My_applications.html';closeDropdown()"><i class="fa-solid fa-list-check"></i> My Applications</div>
-        <div class="dropdown-item" onclick="window.location.href='Save_job.html';closeDropdown()"><i class="fa-solid fa-bookmark"></i> Saved Jobs</div>
-        <div class="dropdown-item" onclick="window.location.href='cv_generator.html';closeDropdown()"><i class="fa-solid fa-file-pdf"></i> CV Generator</div>
-        <hr>
         <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
       </div>
     </div>
@@ -58,8 +53,8 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-section-label">Main</div>
     <button class="sidebar-nav-item" onclick="window.location.href='index.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
-    <button class="sidebar-nav-item" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
-    <button class="sidebar-nav-item" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
 
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
@@ -67,8 +62,8 @@
 
     <div class="sidebar-section-label">Account</div>
     <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
-    <button class="sidebar-nav-item active" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
-    <button class="sidebar-nav-item" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
+    <button class="sidebar-nav-item active" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
+    <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
 
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
@@ -97,10 +92,10 @@
       </div>
       <!-- Stats -->
       <div class="stats-row">
-        <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" id="emp-stat-jobs">6</div><div class="stat-change up">▲ 2 this month</div></div>
-        <div class="stat-card"><div class="stat-label">Total Applicants</div><div class="stat-value" id="emp-stat-apps">148</div><div class="stat-change up">▲ 34 this week</div></div>
-        <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value" id="emp-stat-short">23</div><div class="stat-change up">▲ 5 new</div></div>
-        <div class="stat-card"><div class="stat-label">Hired</div><div class="stat-value" id="emp-stat-hired">4</div><div class="stat-change up">▲ 1 this month</div></div>
+        <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" id="emp-stat-jobs">0</div><div class="stat-change up" id="emp-stat-jobs-change">No jobs yet</div></div>
+        <div class="stat-card"><div class="stat-label">Total Applicants</div><div class="stat-value" id="emp-stat-apps">0</div><div class="stat-change up" id="emp-stat-apps-change">No applicants yet</div></div>
+        <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value" id="emp-stat-short">0</div><div class="stat-change up" id="emp-stat-short-change">None shortlisted</div></div>
+        <div class="stat-card"><div class="stat-label">Hired</div><div class="stat-value" id="emp-stat-hired">0</div><div class="stat-change up" id="emp-stat-hired-change">None hired yet</div></div>
       </div>
       <!-- Tabs -->
       <div class="tab-row">
@@ -219,7 +214,7 @@
 
 <script src="../js/script.js"></script>
 <script src="js/Employer_dashboard.js"></script>
-<script src="js/auth.js"></script>
+<script src="../js/auth.js"></script>
 
 <script>
   // Page-specific init for Employer_dashboard.html

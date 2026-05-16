@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Talent Bridge — Sign In</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0c10;
+      --surface:   #111318;
+      --border:    rgba(255,255,255,0.08);
+      --text:      #e8eaf0;
+      --muted:     #7a7f96;
+      --accent:    #4f8ef7;
+      --accent2:   #7c3aed;
+      --danger:    #f87171;
+      --success:   #34d399;
+      --input-bg:  #181c26;
+      --radius:    14px;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    /* ── Animated mesh background ── */
+    .bg-mesh {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(79,142,247,.14) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 85%, rgba(124,58,237,.13) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 55% 50%, rgba(79,142,247,.06) 0%, transparent 60%);
+      animation: meshShift 12s ease-in-out infinite alternate;
+    }
+    @keyframes meshShift {
+      from { filter: hue-rotate(0deg); }
+      to   { filter: hue-rotate(25deg); }
+    }
+
+    /* Floating grid lines */
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+    }
+
+    /* ── Card ── */
+    .card {
+      position: relative; z-index: 1;
+      width: min(440px, 94vw);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 44px 40px 40px;
+      box-shadow: 0 32px 80px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.04) inset;
+      animation: cardIn .55s cubic-bezier(.22,1,.36,1) both;
+    }
+    @keyframes cardIn {
+      from { opacity:0; transform: translateY(28px) scale(.97); }
+      to   { opacity:1; transform: none; }
+    }
+
+    /* ── Logo / Header ── */
+    .logo {
+      display: flex; align-items: center; gap: 10px;
+      margin-bottom: 32px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 20px;
+      box-shadow: 0 4px 18px rgba(79,142,247,.35);
+    }
+    .logo-text {
+      font-family: 'Syne', sans-serif;
+      font-weight: 800; font-size: 1.25rem;
+      letter-spacing: -.02em;
+    }
+    .logo-text span { color: var(--accent); }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-weight: 700; font-size: 1.6rem;
+      letter-spacing: -.02em; line-height: 1.2;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      color: var(--muted); font-size: .9rem; margin-bottom: 28px;
+    }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex; gap: 4px;
+      background: var(--input-bg);
+      border-radius: 10px; padding: 4px;
+      margin-bottom: 28px;
+    }
+    .tab {
+      flex: 1; border: none; background: transparent;
+      color: var(--muted); font-family: 'DM Sans', sans-serif;
+      font-size: .9rem; font-weight: 500;
+      padding: 9px; border-radius: 7px;
+      cursor: pointer; transition: all .2s;
+    }
+    .tab.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 2px 8px rgba(0,0,0,.3);
+    }
+
+    /* ── Forms ── */
+    .form-section { display: none; }
+    .form-section.active { display: block; animation: fadeUp .25s ease both; }
+    @keyframes fadeUp {
+      from { opacity:0; transform: translateY(8px); }
+      to   { opacity:1; transform: none; }
+    }
+
+    .field { margin-bottom: 16px; }
+    label {
+      display: block; font-size: .8rem; font-weight: 500;
+      color: var(--muted); margin-bottom: 7px; letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    input[type="email"], input[type="password"], input[type="text"] {
+      width: 100%;
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 15px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79,142,247,.15);
+    }
+    input::placeholder { color: #3a3f55; }
+
+    /* ── Buttons ── */
+    .btn {
+      width: 100%; padding: 13px;
+      border: none; border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: .95rem; font-weight: 600;
+      cursor: pointer; transition: all .2s;
+      display: flex; align-items: center; justify-content: center; gap: 9px;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent), #3b6ee0);
+      color: #fff;
+      box-shadow: 0 4px 18px rgba(79,142,247,.3);
+      margin-bottom: 12px;
+    }
+    .btn-primary:hover { filter: brightness(1.1); transform: translateY(-1px); }
+    .btn-primary:active { transform: none; }
+
+    .btn-google {
+      background: var(--input-bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-google:hover { border-color: rgba(255,255,255,.18); background: #1e2232; }
+
+    .btn:disabled { opacity: .5; cursor: not-allowed; transform: none !important; }
+
+    /* Google icon SVG */
+    .google-icon { width: 18px; height: 18px; flex-shrink: 0; }
+
+    /* ── Divider ── */
+    .divider {
+      display: flex; align-items: center; gap: 12px;
+      margin: 18px 0; color: var(--muted); font-size: .82rem;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1;
+      height: 1px; background: var(--border);
+    }
+
+    /* ── Messages ── */
+    .msg {
+      border-radius: 10px; padding: 11px 14px;
+      font-size: .87rem; margin-bottom: 16px; display: none;
+    }
+    .msg.error   { background: rgba(248,113,113,.1); border:1px solid rgba(248,113,113,.25); color: var(--danger); }
+    .msg.success { background: rgba(52,211,153,.1);  border:1px solid rgba(52,211,153,.25);  color: var(--success); }
+    .msg.show    { display: block; animation: fadeUp .2s ease both; }
+
+    /* ── Forgot password link ── */
+    .forgot {
+      text-align: right; margin-top: -8px; margin-bottom: 16px;
+    }
+    .forgot a {
+      color: var(--accent); font-size: .82rem; text-decoration: none;
+      opacity: .8; transition: opacity .15s;
+    }
+    .forgot a:hover { opacity: 1; }
+
+    /* ── User panel (shown after login) ── */
+    #user-panel {
+      display: none;
+      text-align: center;
+      animation: cardIn .4s cubic-bezier(.22,1,.36,1) both;
+    }
+    #user-panel.show { display: block; }
+    .avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      margin: 0 auto 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: grid; place-items: center;
+      font-size: 2rem;
+      border: 3px solid rgba(255,255,255,.08);
+      overflow: hidden;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .user-name {
+      font-family: 'Syne', sans-serif; font-weight: 700; font-size: 1.3rem;
+      margin-bottom: 4px;
+    }
+    .user-email { color: var(--muted); font-size: .88rem; margin-bottom: 28px; }
+    .badge {
+      display: inline-block;
+      background: rgba(79,142,247,.15); color: var(--accent);
+      border: 1px solid rgba(79,142,247,.25);
+      border-radius: 20px; padding: 4px 14px;
+      font-size: .78rem; font-weight: 600; letter-spacing: .06em;
+      text-transform: uppercase; margin-bottom: 28px;
+    }
+    .btn-signout {
+      background: rgba(248,113,113,.1);
+      border: 1px solid rgba(248,113,113,.2);
+      color: var(--danger);
+    }
+    .btn-signout:hover { background: rgba(248,113,113,.18); }
+
+    /* ── Spinner ── */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid rgba(255,255,255,.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Reset Password Modal ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 100;
+      background: rgba(0,0,0,.7);
+      display: none; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px);
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px; padding: 36px;
+      width: min(380px, 90vw);
+      box-shadow: 0 32px 80px rgba(0,0,0,.6);
+      animation: cardIn .3s cubic-bezier(.22,1,.36,1) both;
+    }
+    .modal h2 {
+      font-family: 'Syne', sans-serif; font-size: 1.25rem;
+      font-weight: 700; margin-bottom: 8px;
+    }
+    .modal p { color: var(--muted); font-size: .88rem; margin-bottom: 20px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .btn-cancel {
+      flex: 1;
+      background: var(--input-bg); border: 1px solid var(--border);
+      color: var(--muted);
+    }
+    .btn-send { flex: 2; }
+  </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+<div class="bg-grid"></div>
+
+<!-- ── Auth Card ── -->
+<div class="card" id="auth-card">
+  <div class="logo">
+    <div class="logo-icon">🌉</div>
+    <div class="logo-text">Talent<span>Bridge</span></div>
+  </div>
+
+  <!-- Auth forms -->
+  <div id="auth-forms">
+    <h1>Welcome back</h1>
+    <p class="subtitle">Sign in to your Talent Bridge account</p>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('login')">Sign In</button>
+      <button class="tab" onclick="switchTab('register')">Create Account</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- ── Login form ── -->
+    <div class="form-section active" id="login-form">
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="login-email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password"/>
+      </div>
+      <div class="forgot"><a href="#" onclick="openResetModal(event)">Forgot password?</a></div>
+      <button class="btn btn-primary" id="login-btn" onclick="emailLogin()">
+        Sign In
+      </button>
+      <div class="divider">or continue with</div>
+      <button class="btn btn-google" id="google-login-btn" onclick="googleLogin()">
+        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+    </div>
+
+    <!-- ── Register form ── -->
+    <div class="form-section" id="register-form">
+      <div class="field">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="John Doe" autocomplete="name"/>
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" autocomplete="email"/>
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Min. 6 characters" autocomplete="new-password"/>
+      </div>
+      <div class="field">
+        <label>I am a</label>
+        <select id="reg-role" style="width:100%;background:var(--input-bg);border:1px solid var(--border);border-radius:10px;padding:12px 15px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.95rem;outline:none;">
+          <option value="seeker">Job Seeker</option>
+          <option value="employer">Employer / Recruiter</option>
+        </select>
+      </div>
+      <button class="btn btn-primary" id="register-btn" onclick="emailRegister()">
+        Create Account
+      </button>
+      <div class="divider">or continue with</div>
+      <button class="btn btn-google" id="google-reg-btn" onclick="googleLogin()">
+        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Sign up with Google
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Logged-in user panel ── -->
+  <div id="user-panel">
+    <div class="avatar" id="user-avatar">👤</div>
+    <div class="user-name" id="user-name">—</div>
+    <div class="user-email" id="user-email-display">—</div>
+    <div class="badge">✓ Authenticated</div>
+    <button class="btn btn-signout" onclick="signOut()">Sign Out</button>
+  </div>
+</div>
+
+<!-- ── Reset Password Modal ── -->
+<div class="modal-overlay" id="reset-modal">
+  <div class="modal">
+    <h2>Reset Password</h2>
+    <p>Enter your email and we'll send you a link to reset your password.</p>
+    <div id="reset-msg" class="msg"></div>
+    <div class="field">
+      <label>Email</label>
+      <input type="email" id="reset-email" placeholder="you@example.com"/>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-cancel" onclick="closeResetModal()">Cancel</button>
+      <button class="btn btn-primary btn-send" id="reset-btn" onclick="sendReset()">Send Link</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Firebase SDK (modular) ── -->
+<script type="module">
+  import { initializeApp }                         from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged,
+           signInWithEmailAndPassword,
+           createUserWithEmailAndPassword,
+           signInWithPopup, GoogleAuthProvider,
+           sendPasswordResetEmail, signOut as fbSignOut,
+           updateProfile }                          from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+  // ── Your Firebase config ──
+  const firebaseConfig = {
+    apiKey:            "AIzaSyCrfCUtWatSi4W2PCoIA-0apJX2i0CJO8w",
+    authDomain:        "talent-bridge1.firebaseapp.com",
+    projectId:         "talent-bridge1",
+    storageBucket:     "talent-bridge1.firebasestorage.app",
+    messagingSenderId: "43218428741",
+    appId:             "1:43218428741:web:031a50e8a83e91af35542c",
+    measurementId:     "G-3XQHW50SMS"
+  };
+
+  const app      = initializeApp(firebaseConfig);
+  const auth     = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // ── Helper: show/hide loading spinner on a button ──
+  function setLoading(btn, loading) {
+    btn.disabled = loading;
+    if (loading) {
+      btn._orig = btn.innerHTML;
+      btn.innerHTML = '<div class="spinner"></div>';
+    } else {
+      btn.innerHTML = btn._orig || btn.innerHTML;
+    }
+  }
+
+  // ── Helper: show message ──
+  function showMsg(id, text, type = 'error') {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = `msg ${type} show`;
+    setTimeout(() => el.classList.remove('show'), 5000);
+  }
+
+  // ── Auth state observer ──
+  // Track whether this is the initial page load check
+  let _initialCheck = true;
+
+  onAuthStateChanged(auth, user => {
+    const forms = document.getElementById('auth-forms');
+    if (user) {
+      // Already logged in — redirect straight to the app
+      window.location.replace('index.html');
+    } else {
+      // Not logged in — show the auth forms
+      if (forms) forms.style.display = 'block';
+    }
+    _initialCheck = false;
+  });
+
+  // ── Email Login ──
+  window.emailLogin = async () => {
+    const btn   = document.getElementById('login-btn');
+    const email = document.getElementById('login-email').value.trim();
+    const pass  = document.getElementById('login-password').value;
+    if (!email || !pass) { showMsg('msg', 'Please fill in all fields.'); return; }
+    setLoading(btn, true);
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      showMsg('msg', 'Signed in! Redirecting...', 'success');
+      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+    } catch (e) {
+      showMsg('msg', friendlyError(e.code));
+    } finally { setLoading(btn, false); }
+  };
+
+  // ── Email Register ──
+  window.emailRegister = async () => {
+    const btn   = document.getElementById('register-btn');
+    const name  = document.getElementById('reg-name').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
+    const pass  = document.getElementById('reg-password').value;
+    const role  = document.getElementById('reg-role')?.value || 'seeker';
+    if (!name || !email || !pass) { showMsg('msg', 'Please fill in all fields.'); return; }
+    if (pass.length < 6) { showMsg('msg', 'Password must be at least 6 characters.'); return; }
+    setLoading(btn, true);
+    try {
+      const cred = await createUserWithEmailAndPassword(auth, email, pass);
+      await updateProfile(cred.user, { displayName: name });
+      // Save role in localStorage session
+      const initials = name.split(' ').map(w => w[0]||'').join('').slice(0,2).toUpperCase() || 'U';
+      const appUser = { id: cred.user.uid, name, email, role, avatar: initials, joinedAt: Date.now() };
+      localStorage.setItem('tb_session', JSON.stringify(appUser));
+      showMsg('msg', 'Account created! Redirecting...', 'success');
+      setTimeout(() => {
+        if (role === 'employer') window.location.href = 'Employer_dashboard.html';
+        else window.location.href = 'index.html';
+      }, 800);
+    } catch (e) {
+      showMsg('msg', friendlyError(e.code));
+    } finally { setLoading(btn, false); }
+  };
+
+  // ── Google Login ──
+  window.googleLogin = async () => {
+    try {
+      await signInWithPopup(auth, provider);
+    } catch (e) {
+      if (e.code !== 'auth/popup-closed-by-user')
+        showMsg('msg', friendlyError(e.code));
+    }
+  };
+
+  // ── Sign Out ──
+  window.signOut = async () => {
+    await fbSignOut(auth);
+  };
+
+  // ── Password Reset ──
+  window.sendReset = async () => {
+    const btn   = document.getElementById('reset-btn');
+    const email = document.getElementById('reset-email').value.trim();
+    if (!email) { showMsg('reset-msg', 'Please enter your email.'); return; }
+    setLoading(btn, true);
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showMsg('reset-msg', 'Reset link sent! Check your inbox.', 'success');
+      setTimeout(closeResetModal, 2500);
+    } catch (e) {
+      showMsg('reset-msg', friendlyError(e.code));
+    } finally { setLoading(btn, false); }
+  };
+
+  // ── Friendly error messages ──
+  function friendlyError(code) {
+    const map = {
+      'auth/invalid-email':            'Invalid email address.',
+      'auth/user-not-found':           'No account found with this email.',
+      'auth/wrong-password':           'Incorrect password. Try again.',
+      'auth/email-already-in-use':     'This email is already registered.',
+      'auth/weak-password':            'Password is too weak.',
+      'auth/too-many-requests':        'Too many attempts. Please wait a moment.',
+      'auth/network-request-failed':   'Network error. Check your connection.',
+      'auth/invalid-credential':       'Invalid credentials. Check your email and password.',
+      'auth/popup-blocked':            'Popup blocked. Allow popups for this site.',
+    };
+    return map[code] || `Something went wrong (${code}).`;
+  }
+
+  // Enter key support
+  document.getElementById('login-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.emailLogin();
+  });
+  document.getElementById('reg-password').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.emailRegister();
+  });
+  document.getElementById('reset-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') window.sendReset();
+  });
+</script>
+
+<script>
+  // ── Tab switching ──
+  function switchTab(tab) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+      t.classList.toggle('active', (i === 0) === (tab === 'login'));
+    });
+    document.getElementById('login-form').classList.toggle('active', tab === 'login');
+    document.getElementById('register-form').classList.toggle('active', tab === 'register');
+    document.getElementById('msg').classList.remove('show');
+    const h1 = document.querySelector('h1');
+    const sub = document.querySelector('.subtitle');
+    if (tab === 'login') {
+      h1.textContent  = 'Welcome back';
+      sub.textContent = 'Sign in to your Talent Bridge account';
+    } else {
+      h1.textContent  = 'Join Talent Bridge';
+      sub.textContent = 'Create your free account today';
+    }
+  }
+
+  // Apply URL params on load
+  (function() {
+    const params = new URLSearchParams(window.location.search);
+    const mode   = params.get('mode');
+    const role   = params.get('role');
+    if (mode === 'signup') {
+      switchTab('register');
+    }
+    if (role) {
+      const roleSelect = document.getElementById('reg-role');
+      if (roleSelect) roleSelect.value = role;
+      if (mode !== 'login') switchTab('register');
+    }
+  })();
+
+  // ── Reset modal ──
+  function openResetModal(e) {
+    e && e.preventDefault();
+    const loginEmail = document.getElementById('login-email').value;
+    if (loginEmail) document.getElementById('reset-email').value = loginEmail;
+    document.getElementById('reset-modal').classList.add('show');
+  }
+  function closeResetModal() {
+    document.getElementById('reset-modal').classList.remove('show');
+    document.getElementById('reset-msg').classList.remove('show');
+  }
+  // Close modal on overlay click
+  document.getElementById('reset-modal').addEventListener('click', function(e) {
+    if (e.target === this) closeResetModal();
+  });
+</script>
+</body>
+</html>

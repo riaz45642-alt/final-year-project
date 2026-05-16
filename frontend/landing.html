@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentBridge — Find Your Dream Job</title>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0b0e1a;
+      --surface: #111526;
+      --border: rgba(255,255,255,0.07);
+      --accent: #4f6ef7;
+      --accent2: #6c4ef7;
+      --text: #e8eaf0;
+      --muted: #7a7f96;
+      --font-display: 'Clash Display', sans-serif;
+      --font-body: 'Instrument Sans', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ── Background ── */
+    .bg-glow {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 10%, rgba(79,110,247,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 45% at 85% 80%, rgba(108,78,247,.14) 0%, transparent 55%),
+        radial-gradient(ellipse 40% 35% at 55% 45%, rgba(79,110,247,.07) 0%, transparent 60%);
+    }
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.022) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 64px;
+      background: rgba(11,14,26,0.8);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      font-family: var(--font-display);
+      font-size: 22px; font-weight: 700;
+      color: var(--accent); letter-spacing: -0.5px;
+      text-decoration: none;
+    }
+    .nav-logo span { color: var(--text); }
+    .nav-actions { display: flex; gap: 10px; align-items: center; }
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 9px 20px; border-radius: 10px;
+      font-family: var(--font-body); font-size: 14px; font-weight: 600;
+      cursor: pointer; transition: all 0.18s; text-decoration: none;
+      border: none;
+    }
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text);
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      box-shadow: 0 4px 18px rgba(79,110,247,.3);
+    }
+    .btn-primary:hover { background: #3d5be8; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(79,110,247,.4); }
+    .btn-lg { padding: 14px 32px; font-size: 15px; border-radius: 12px; }
+
+    /* ── Hero ── */
+    .hero {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center;
+      padding: 130px 24px 80px;
+      min-height: 100vh;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(79,110,247,.12);
+      border: 1px solid rgba(79,110,247,.3);
+      border-radius: 30px; padding: 6px 16px;
+      font-size: 13px; color: #8fa8ff; font-weight: 500;
+      margin-bottom: 28px;
+      animation: fadeDown 0.6s ease both;
+    }
+    .hero-title {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 6vw, 72px);
+      font-weight: 700; line-height: 1.1;
+      letter-spacing: -1.5px; margin-bottom: 20px;
+      animation: fadeDown 0.6s 0.1s ease both;
+    }
+    .hero-title .accent { color: var(--accent); }
+    .hero-sub {
+      font-size: clamp(15px, 2vw, 18px);
+      color: var(--muted); max-width: 560px;
+      line-height: 1.7; margin-bottom: 44px;
+      animation: fadeDown 0.6s 0.2s ease both;
+    }
+    .hero-cta {
+      display: flex; gap: 14px; flex-wrap: wrap;
+      justify-content: center; margin-bottom: 60px;
+      animation: fadeDown 0.6s 0.3s ease both;
+    }
+    .hero-stats {
+      display: flex; gap: 44px; justify-content: center; flex-wrap: wrap;
+      animation: fadeDown 0.6s 0.4s ease both;
+    }
+    .stat-item { text-align: center; }
+    .stat-num {
+      font-family: var(--font-display);
+      font-size: 30px; font-weight: 700; color: var(--text);
+    }
+    .stat-lbl { font-size: 13px; color: var(--muted); margin-top: 4px; }
+
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-16px); }
+      to   { opacity: 1; transform: none; }
+    }
+
+    /* ── How It Works ── */
+    .section {
+      position: relative; z-index: 1;
+      padding: 80px 24px;
+      max-width: 1100px; margin: 0 auto;
+    }
+    .section-tag {
+      text-align: center; font-size: 13px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: .1em;
+      color: var(--accent); margin-bottom: 12px;
+    }
+    .section-title {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: clamp(26px, 4vw, 42px);
+      font-weight: 700; letter-spacing: -0.5px;
+      margin-bottom: 52px;
+    }
+
+    /* ── Role Cards ── */
+    .role-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px; margin-bottom: 40px;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 18px; padding: 32px;
+      cursor: pointer; transition: all 0.2s;
+      text-align: center;
+      text-decoration: none; color: inherit;
+      display: block;
+    }
+    .role-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-4px);
+      box-shadow: 0 16px 48px rgba(79,110,247,.15);
+    }
+    .role-icon {
+      width: 64px; height: 64px; border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px; margin: 0 auto 20px;
+    }
+    .role-icon.seeker { background: rgba(79,110,247,.15); }
+    .role-icon.employer { background: rgba(108,78,247,.15); }
+    .role-title {
+      font-family: var(--font-display);
+      font-size: 20px; font-weight: 700; margin-bottom: 10px;
+    }
+    .role-desc { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .role-features { list-style: none; text-align: left; }
+    .role-features li {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 13.5px; color: var(--muted); margin-bottom: 8px;
+    }
+    .role-features li i { color: var(--accent); font-size: 12px; }
+    .role-cta {
+      display: inline-flex; align-items: center; gap: 8px;
+      margin-top: 20px; font-size: 14px; font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* ── Steps ── */
+    .steps-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 32px;
+    }
+    .step { text-align: center; }
+    .step-num {
+      width: 48px; height: 48px; border-radius: 12px;
+      background: rgba(79,110,247,.12);
+      border: 1px solid rgba(79,110,247,.25);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display); font-weight: 700;
+      font-size: 18px; color: var(--accent);
+      margin: 0 auto 16px;
+    }
+    .step-title { font-weight: 600; margin-bottom: 8px; }
+    .step-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+    /* ── Footer ── */
+    .footer {
+      position: relative; z-index: 1;
+      text-align: center; padding: 32px 24px;
+      border-top: 1px solid var(--border);
+      color: var(--muted); font-size: 13px;
+    }
+    .footer strong { color: var(--accent); }
+
+    /* ── Divider ── */
+    .divider-line {
+      border: none; border-top: 1px solid var(--border);
+      margin: 0; position: relative; z-index: 1;
+    }
+
+    @media (max-width: 600px) {
+      .navbar { padding: 0 20px; }
+      .hero-cta { flex-direction: column; align-items: center; }
+      .hero-stats { gap: 28px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+<div class="bg-grid"></div>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a class="nav-logo" href="landing.html">Talent<span>Bridge</span></a>
+  <div class="nav-actions">
+    <a class="btn btn-ghost" href="auth.html">Sign In</a>
+    <a class="btn btn-primary" href="auth.html">Get Started Free</a>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <div class="hero-badge">
+    <i class="fa-solid fa-star"></i>
+    Pakistan's Smart Job Portal — 2,400+ Jobs This Week
+  </div>
+  <h1 class="hero-title">
+    Your Career Starts<br>
+    Here with <span class="accent">TalentBridge</span>
+  </h1>
+  <p class="hero-sub">
+    AI-powered job matching, smart CV builder, and direct employer connections — all in one place. Find your dream job or hire top talent today.
+  </p>
+  <div class="hero-cta">
+    <a class="btn btn-primary btn-lg" href="auth.html?mode=signup">
+      <i class="fa-solid fa-rocket"></i>
+      Get Started Free
+    </a>
+    <a class="btn btn-ghost btn-lg" href="auth.html?mode=login">
+      <i class="fa-solid fa-sign-in-alt"></i>
+      Sign In
+    </a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">12K+</div>
+      <div class="stat-lbl">Active Jobs</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">3.8K</div>
+      <div class="stat-lbl">Companies</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">94%</div>
+      <div class="stat-lbl">Match Rate</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">50K+</div>
+      <div class="stat-lbl">Job Seekers</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider-line">
+
+<!-- Choose Your Role -->
+<div class="section">
+  <div class="section-tag">Who Are You?</div>
+  <h2 class="section-title">Choose Your Role to Get Started</h2>
+  <div class="role-grid">
+
+    <!-- Job Seeker -->
+    <a class="role-card" href="auth.html?role=seeker">
+      <div class="role-icon seeker"><i class="fa-solid fa-user-tie"></i></div>
+      <div class="role-title">Job Seeker</div>
+      <div class="role-desc">Find your dream job with AI-powered matching and build a professional CV in minutes.</div>
+      <ul class="role-features">
+        <li><i class="fa-solid fa-check"></i> Browse thousands of job listings</li>
+        <li><i class="fa-solid fa-check"></i> AI-powered job matching</li>
+        <li><i class="fa-solid fa-check"></i> Smart CV generator</li>
+        <li><i class="fa-solid fa-check"></i> Track your applications</li>
+        <li><i class="fa-solid fa-check"></i> Save favourite jobs</li>
+      </ul>
+      <div class="role-cta">Find Jobs <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+    <!-- Employer -->
+    <a class="role-card" href="auth.html?role=employer">
+      <div class="role-icon employer"><i class="fa-solid fa-building"></i></div>
+      <div class="role-title">Employer / Recruiter</div>
+      <div class="role-desc">Post jobs and connect with qualified candidates through our smart hiring platform.</div>
+      <ul class="role-features">
+        <li><i class="fa-solid fa-check"></i> Post unlimited job listings</li>
+        <li><i class="fa-solid fa-check"></i> Review applications easily</li>
+        <li><i class="fa-solid fa-check"></i> Shortlist & hire candidates</li>
+        <li><i class="fa-solid fa-check"></i> Real-time hiring dashboard</li>
+        <li><i class="fa-solid fa-check"></i> AI-assisted screening</li>
+      </ul>
+      <div class="role-cta">Start Hiring <i class="fa-solid fa-arrow-right"></i></div>
+    </a>
+
+  </div>
+</div>
+
+<hr class="divider-line">
+
+<!-- How It Works -->
+<div class="section">
+  <div class="section-tag">Simple Process</div>
+  <h2 class="section-title">How TalentBridge Works</h2>
+  <div class="steps-grid">
+    <div class="step">
+      <div class="step-num">1</div>
+      <div class="step-title">Create Account</div>
+      <div class="step-desc">Sign up free in under a minute. Choose your role as a Job Seeker or Employer.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <div class="step-title">Set Up Profile</div>
+      <div class="step-desc">Complete your profile or post your first job to get the most out of TalentBridge.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <div class="step-title">Get Matched</div>
+      <div class="step-desc">Our AI matches job seekers with the right jobs and employers with the right talent.</div>
+    </div>
+    <div class="step">
+      <div class="step-num">4</div>
+      <div class="step-title">Connect &amp; Succeed</div>
+      <div class="step-desc">Apply, get shortlisted, and land your dream job — or hire your perfect candidate.</div>
+    </div>
+  </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+  <p>&copy; 2025 <strong>TalentBridge</strong> — Connecting Talent with Opportunity</p>
+</footer>
+
+<script>
+  // If already logged in, redirect to main app
+  const session = localStorage.getItem('tb_session');
+  if (session) {
+    try {
+      const user = JSON.parse(session);
+      if (user && user.id) {
+        if (user.role === 'employer') window.location.href = 'Employer_dashboard.html';
+        else window.location.href = 'index.html';
+      }
+    } catch(e) {}
+  }
+</script>
+</body>
+</html>

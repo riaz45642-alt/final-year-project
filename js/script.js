@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════
-//  TALENTBRIDGE — script.js  (FIXED)
+//  TALENTBRIDGE — script.js  (UPDATED)
 // ══════════════════════════════════════════════
 
 /* ──────────────────────────────────────────────
@@ -50,8 +50,7 @@ const DB = {
 /* ──────────────────────────────────────────────
    2. JOBS DATA
 ────────────────────────────────────────────── */
-const STATIC_JOBS = [
-  ];
+const STATIC_JOBS = [];
 
 function getAllJobs() {
   const posted = DB.getPostedJobs().map(j => ({ ...j, id: j.id || 'pj_'+j.postedAt, posted:'Just posted' }));
@@ -88,17 +87,41 @@ function toast(message, type = 'info', duration = 3000) {
 }
 
 /* ──────────────────────────────────────────────
-   5. AUTH UI UPDATE  ← FIXED: safe null-checks
+   5. ROLE-BASED ACCESS CONTROL
+────────────────────────────────────────────── */
+function applyRoleBasedUI() {
+  const user = AppState.currentUser;
+  const role = user ? user.role : null;
+
+  // Elements only for job seekers
+  const seekerOnlyItems = document.querySelectorAll('[data-role="seeker"]');
+  // Elements only for employers
+  const employerOnlyItems = document.querySelectorAll('[data-role="employer"]');
+
+  seekerOnlyItems.forEach(el => {
+    el.style.display = (role === 'employer') ? 'none' : '';
+  });
+  employerOnlyItems.forEach(el => {
+    el.style.display = (role === 'seeker') ? 'none' : '';
+  });
+}
+
+/* ──────────────────────────────────────────────
+   6. AUTH UI UPDATE
 ────────────────────────────────────────────── */
 function updateAuthUI() {
   const user         = AppState.currentUser;
   const loggedOutEl  = document.getElementById('nav-logged-out');
   const loggedInEl   = document.getElementById('nav-logged-in');
   const sbBlock      = document.getElementById('sidebar-user-block');
+  const loginSignupBtn = document.getElementById('sidebar-login-signup-btn');
 
   if (user) {
     if (loggedOutEl) loggedOutEl.classList.add('hidden');
     if (loggedInEl)  loggedInEl.classList.remove('hidden');
+
+    // Hide login/signup sidebar button when logged in
+    if (loginSignupBtn) loginSignupBtn.style.display = 'none';
 
     const initialsEl = document.getElementById('nav-avatar-initials');
     if (initialsEl) initialsEl.textContent = user.avatar || user.name.slice(0,2).toUpperCase();
@@ -124,11 +147,17 @@ function updateAuthUI() {
     if (loggedOutEl) loggedOutEl.classList.remove('hidden');
     if (loggedInEl)  loggedInEl.classList.add('hidden');
     if (sbBlock)     sbBlock.classList.add('hidden');
+
+    // Show login/signup button when logged out
+    if (loginSignupBtn) loginSignupBtn.style.display = '';
   }
+
+  // Apply role-based visibility
+  applyRoleBasedUI();
 }
 
 /* ──────────────────────────────────────────────
-   6. NAVIGATION
+   7. NAVIGATION
 ────────────────────────────────────────────── */
 function showPage(pageId) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -169,7 +198,7 @@ function openDropdown()  { document.getElementById('user-dropdown')?.classList.t
 function closeDropdown() { document.getElementById('user-dropdown')?.classList.remove('open'); }
 
 /* ──────────────────────────────────────────────
-   7. JOB DETAIL MODAL
+   8. JOB DETAIL MODAL
 ────────────────────────────────────────────── */
 function openJobDetail(jobId) {
   const job = getAllJobs().find(j => j.id === jobId);
@@ -178,6 +207,9 @@ function openJobDetail(jobId) {
   if (!modalBox) return;
   const isApplied    = DB.hasApplied(jobId);
   const isBookmarked = DB.isSaved(jobId);
+  const user = AppState.currentUser;
+  const isEmployer = user && user.role === 'employer';
+
   modalBox.innerHTML = `
     <button class="modal-close" onclick="closeJobDetail()">✕</button>
     <div class="job-detail-content">
@@ -185,7 +217,7 @@ function openJobDetail(jobId) {
         <div class="job-detail-logo">${job.emoji||'🏢'}</div>
         <div style="flex:1">
           <div class="job-detail-title">${job.title}</div>
-          <div style="font-size:14px;color:var(--text-secondary);margin-top:4px">${job.company}</div>
+          <div style="font-size:14px;color:var(--text-secondary);margin-top:4px">${job.company||''}</div>
           <div class="job-meta" style="margin-top:8px">
             <span class="job-meta-item">📍 ${job.location}</span>
             <span class="job-meta-item">⏰ ${job.type}</span>
@@ -205,6 +237,7 @@ function openJobDetail(jobId) {
         ${job.desc||'<em>No description provided.</em>'}
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
+        ${!isEmployer ? `
         <button class="btn btn-primary" id="modal-apply-btn"
           onclick="applyJob('${job.id}', this)" ${isApplied?'disabled':''}>
           ${isApplied?'✓ Applied':'Apply Now →'}
@@ -213,6 +246,7 @@ function openJobDetail(jobId) {
           onclick="toggleBookmarkModal('${job.id}',this)">
           ${isBookmarked?'🔖 Saved':'🔖 Save Job'}
         </button>
+        ` : ''}
         <button class="btn btn-outline" onclick="findSimilarJobs('${job.title}')">🤖 Find Similar</button>
       </div>
     </div>`;
@@ -240,7 +274,7 @@ function findSimilarJobs(jobTitle) {
 }
 
 /* ──────────────────────────────────────────────
-   8. JOB FEED
+   9. JOB FEED
 ────────────────────────────────────────────── */
 function renderJobFeed(jobsList) {
   const feedGrid = document.getElementById('job-feed-grid');
@@ -265,15 +299,17 @@ function renderJobFeed(jobsList) {
 }
 
 function buildJobCardHTML(job) {
+  const user = AppState.currentUser;
+  const isEmployer = user && user.role === 'employer';
   return `
   <div class="job-card" onclick="openJobDetail('${job.id}')">
     <div class="job-card-top">
       <div class="company-logo">${job.emoji||'🏢'}</div>
-      <button class="job-bookmark ${DB.isSaved(job.id)?'saved':''}" data-bookmark="${job.id}"
-        onclick="event.stopPropagation();toggleBookmark('${job.id}',this)">🔖</button>
+      ${!isEmployer ? `<button class="job-bookmark ${DB.isSaved(job.id)?'saved':''}" data-bookmark="${job.id}"
+        onclick="event.stopPropagation();toggleBookmark('${job.id}',this)">🔖</button>` : ''}
     </div>
     <div class="job-title">${job.title}</div>
-    <div class="company-name">${job.company}</div>
+    <div class="company-name">${job.company||''}</div>
     <div class="job-meta">
       <span class="job-meta-item">📍 ${job.location}</span>
       <span class="job-meta-item">⏰ ${job.type}</span>
@@ -285,11 +321,11 @@ function buildJobCardHTML(job) {
     </div>
     <div class="job-footer">
       <div class="salary">Rs ${formatSalary(job.salaryMin)}–${formatSalary(job.salaryMax)} <span>/month</span></div>
-      <button class="apply-btn ${DB.hasApplied(job.id)?'applied':''}" data-apply="${job.id}"
+      ${!isEmployer ? `<button class="apply-btn ${DB.hasApplied(job.id)?'applied':''}" data-apply="${job.id}"
         onclick="event.stopPropagation();applyJob('${job.id}',this)"
         ${DB.hasApplied(job.id)?'disabled':''}>
         ${DB.hasApplied(job.id)?'✓ Applied':'Apply Now →'}
-      </button>
+      </button>` : `<span class="tag">View Only</span>`}
     </div>
   </div>`;
 }
@@ -303,7 +339,7 @@ function filterAndRender() {
     const q = AppState.searchQuery.toLowerCase();
     jobs = jobs.filter(j =>
       j.title.toLowerCase().includes(q) ||
-      j.company.toLowerCase().includes(q) ||
+      (j.company||'').toLowerCase().includes(q) ||
       (j.tags||[]).some(t => t.toLowerCase().includes(q)) ||
       j.location.toLowerCase().includes(q)
     );
@@ -328,6 +364,7 @@ function toggleBookmark(jobId, btn) {
 
 function applyJob(jobId, btn) {
   if (!AppState.currentUser) { toast('Please sign in to apply','warning'); openAuth('login'); return; }
+  if (AppState.currentUser.role === 'employer') { toast('Employers cannot apply for jobs','warning'); return; }
   if (DB.hasApplied(jobId)) return;
   const job = getAllJobs().find(j => j.id === jobId);
   if (btn) { btn.textContent = 'Applying...'; btn.disabled = true; }
@@ -347,7 +384,7 @@ function updateSidebarBadges() {
 }
 
 /* ──────────────────────────────────────────────
-   9. APPLIED JOBS PAGE
+   10. APPLIED JOBS PAGE
 ────────────────────────────────────────────── */
 function renderAppliedJobs() {
   const list = document.getElementById('applied-jobs-list');
@@ -378,7 +415,7 @@ function renderAppliedJobs() {
 }
 
 /* ──────────────────────────────────────────────
-   10. SAVED JOBS PAGE
+   11. SAVED JOBS PAGE
 ────────────────────────────────────────────── */
 function renderSavedJobs() {
   const grid = document.getElementById('saved-jobs-grid');
@@ -392,7 +429,7 @@ function renderSavedJobs() {
 }
 
 /* ──────────────────────────────────────────────
-   11. TABS
+   12. TABS
 ────────────────────────────────────────────── */
 function switchTab(tabId) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -431,7 +468,7 @@ function renderApplicantsTable() {
 }
 
 /* ──────────────────────────────────────────────
-   12. HERO SEARCH
+   13. HERO SEARCH
 ────────────────────────────────────────────── */
 function heroSearch() {
   const val = document.getElementById('hero-search-input')?.value.trim();
@@ -439,25 +476,19 @@ function heroSearch() {
 }
 
 /* ──────────────────────────────────────────────
-   13. initCommon()  ← THIS WAS MISSING — FIXED
-       Called by every sub-page's DOMContentLoaded
+   14. initCommon()
 ────────────────────────────────────────────── */
 function initCommon() {
-  // Restore session
-  AppState.currentUser = DB.getSession();
-
-  // Update auth UI safely
+  if (!AppState.currentUser) {
+    AppState.currentUser = DB.getSession();
+  }
   updateAuthUI();
-
-  // Update sidebar badges
   updateSidebarBadges();
 
-  // Close dropdown on outside click
   document.addEventListener('click', e => {
     if (!e.target.closest('.nav-user-menu')) closeDropdown();
   });
 
-  // Close modals on overlay click
   document.querySelectorAll('.modal-overlay').forEach(el => {
     el.addEventListener('click', e => { if (e.target === el) el.classList.remove('open'); });
   });
@@ -466,14 +497,11 @@ function initCommon() {
 }
 
 /* ──────────────────────────────────────────────
-   14. INDEX.HTML DOMContentLoaded  (only fires
-       on pages that have job-feed-grid, etc.)
+   15. DOMContentLoaded
 ────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
-  // Always run common init
   initCommon();
 
-  // Only run feed-related init if on index/feed page
   if (document.getElementById('job-feed-grid')) {
     filterAndRender();
 
@@ -493,13 +521,11 @@ document.addEventListener('DOMContentLoaded', () => {
     if (heroInput) heroInput.addEventListener('keydown', e => { if(e.key==='Enter') heroSearch(); });
   }
 
-  // CV template selector — only on cv_generator page
   if (document.getElementById('template-selector') && typeof renderTemplateSelector === 'function') {
     renderTemplateSelector();
     document.querySelectorAll('[data-cv-field]').forEach(f => f.addEventListener('input', updatePreview));
   }
 
-  // Employer dashboard
   if (document.getElementById('emp-stat-jobs') && typeof refreshEmployerStats === 'function') {
     refreshEmployerStats();
   }
