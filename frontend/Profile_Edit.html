@@ -226,11 +226,14 @@
 </nav>
 
 <script src="../js/script.js"></script>
+<script src="../js/guard.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/profile_edit.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', () => {
     initCommon && initCommon();
+    // 🔒 ROLE GUARD: must be logged in to edit profile
+    Guard.requireLogin();
 
     // Wait for auth to settle before prefilling
     function initPage() {
@@ -258,7 +261,7 @@
   /* ──────────────────────────────────────────────
      SAVE ALL
   ────────────────────────────────────────────── */
-  function saveProfilePage() {
+  async function saveProfilePage() {
     const newName  = document.getElementById('edit-name').value.trim();
     const newEmail = document.getElementById('edit-email').value.trim();
     if (!newName || !newEmail) { toast('Name and email are required', 'error'); return; }
@@ -266,27 +269,35 @@
     const saveBtn = document.getElementById('save-profile-btn');
     saveBtn.textContent = 'Saving...'; saveBtn.disabled = true;
 
-    setTimeout(() => {
-      const user = AppState.currentUser;
-      if (!user) { toast('Please sign in first', 'warning'); return; }
+    const user = AppState.currentUser || DB.getSession();
+    if (!user) { toast('Please sign in first', 'warning'); saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false; return; }
 
-      user.name     = newName;
-      user.email    = newEmail;
-      user.avatar   = newName.split(' ').map(w => w[0] || '').join('').slice(0,2).toUpperCase();
-      user.title    = document.getElementById('edit-title-field')?.value.trim()  || user.title    || '';
-      user.location = document.getElementById('edit-location')?.value.trim()     || user.location || '';
-      user.bio      = document.getElementById('edit-bio')?.value.trim()          || user.bio      || '';
-      // skills & experience are already kept in _peSkills / _peExperience in-memory; persist them here
-      user.skills     = (window._peSkills     || []);
-      user.experience = (window._peExperience || []);
+    // Update all fields
+    user.name     = newName;
+    user.email    = newEmail;
+    user.avatar   = newName.split(' ').map(w => w[0] || '').join('').slice(0,2).toUpperCase();
+    user.title    = (document.getElementById('edit-title-field')?.value || '').trim()  || user.title    || '';
+    user.location = (document.getElementById('edit-location')?.value    || '').trim()  || user.location || '';
+    user.bio      = (document.getElementById('edit-bio')?.value         || '').trim()  || user.bio      || '';
+    // Skills & experience come from in-memory arrays managed by the skill/exp editors
+    user.skills     = (window._peSkills     || []);
+    user.experience = (window._peExperience || []);
 
-      DB.setSession(user);
-      if (typeof updateAuthUI === 'function') updateAuthUI();
+    // 1. Update localStorage session cache (instant UI update)
+    DB.setSession(user);
+    AppState.currentUser = user;
+    if (typeof updateAuthUI === 'function') updateAuthUI();
 
-      saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false;
+    // 🔧 TiDB: 2. Persist full profile to TiDB users table
+    const result = await DB.saveProfile(user);
+    if (!result || !result.success) {
+      toast('Warning: saved locally but could not reach server. Check if backend is running.', 'warning');
+    } else {
       toast('Profile updated successfully! ✅', 'success');
-      setTimeout(() => window.location.href = 'profile_page.html', 900);
-    }, 700);
+    }
+
+    saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false;
+    setTimeout(() => { window.location.href = 'profile_page.html'; }, 900);
   }
 
   /* ──────────────────────────────────────────────

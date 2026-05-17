@@ -203,65 +203,19 @@
 </nav>
 
 <script src="../js/script.js"></script>
+<script src="../js/guard.js"></script>
 <script src="../js/auth.js"></script>
 <script src="../js/Employer_dashboard.js"></script>
 
 <script>
-  // Page-specific init for Employer_dashboard.html
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', function() {
     initCommon && initCommon();
-
-    // Role guard: redirect non-employers away after auth is ready
-    function checkEmployerAccess() {
-      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
-                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-
-      if (!user) {
-        // Not logged in — let them see the page but show auth prompt
-        return;
-      }
-      if (user.role !== 'employer') {
-        // Logged in but not employer — redirect to home
-        if (typeof toast === 'function') toast('Employer Hub is only for employers.', 'warning');
-        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
-      }
-    }
-
-    // Show Employer Hub nav item only for employers; update sidebar visibility
-    function updateEmployerNav() {
-      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
-                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-
-      const role = user ? user.role : null;
-      // Show/hide seeker-only nav items
-      document.querySelectorAll('[data-role="seeker"]').forEach(el => {
-        el.style.display = (role === 'employer') ? 'none' : '';
-      });
-      // Show/hide employer-only nav items
-      document.querySelectorAll('[data-role="employer"]').forEach(el => {
-        el.style.display = (role === 'employer') ? '' : 'none';
-      });
-    }
-
-    // Wait a tick for Firebase auth state to settle, then check
-    setTimeout(() => {
-      checkEmployerAccess();
-      updateEmployerNav();
-      refreshEmployerStats && refreshEmployerStats();
-      renderPostedJobsTable && renderPostedJobsTable();
-      renderApplicantsTable && renderApplicantsTable();
-    }, 800);
-
-    // Also re-run when auth state changes (Firebase fires fbReady)
-    document.addEventListener('fbReady', () => {
-      setTimeout(() => {
-        checkEmployerAccess();
-        updateEmployerNav();
-        refreshEmployerStats && refreshEmployerStats();
-        renderPostedJobsTable && renderPostedJobsTable();
-        renderApplicantsTable && renderApplicantsTable();
-      }, 400);
-    });
+    // 🔒 ROLE GUARD: only employers allowed
+    Guard.requireEmployer();
+    // Load dashboard data (guard redirects if wrong role; this runs for valid employers)
+    refreshEmployerStats   && refreshEmployerStats();
+    renderPostedJobsTable  && renderPostedJobsTable();
+    renderApplicantsTable  && renderApplicantsTable();
   });
 </script>
 </body>

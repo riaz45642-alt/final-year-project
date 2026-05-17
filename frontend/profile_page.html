@@ -67,10 +67,10 @@
 
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
-        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div class="sidebar-user-avatar" id="sb-avatar"></div>
         <div>
-          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
-          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+          <div class="sidebar-user-name" id="sb-name"></div>
+          <div class="sidebar-user-role" id="sb-role"></div>
         </div>
       </div>
     </div>
@@ -87,14 +87,14 @@
       </div>
       <div class="profile-hero-banner">
         <div class="profile-hero-inner">
-          <div class="profile-avatar-circle" id="prof-avatar">AK</div>
+          <div class="profile-avatar-circle" id="prof-avatar"></div>
           <div>
-            <div class="profile-display-name" id="prof-name">Ahmed Khan</div>
-            <div class="profile-title" id="prof-title-sub">Full Stack Developer · 4 years experience</div>
+            <div class="profile-display-name" id="prof-name"></div>
+            <div class="profile-title" id="prof-title-sub"></div>
             <div class="profile-tag-list">
-              <span class="profile-tag"><i class="fa-solid fa-location-arrow"></i>  Lahore, Pakistan</span>
-              <span class="profile-tag"><i class="fa-solid fa-briefcase"></i>   Open to Work</span>
-              <span class="profile-tag"><i class="fa-solid fa-star"></i>   94% Match Score</span>
+              <span class="profile-tag"><i class="fa-solid fa-location-arrow"></i> </span>
+              <span class="profile-tag"><i class="fa-solid fa-briefcase"></i></span>
+              <span class="profile-tag"><i class="fa-solid fa-star"></i></span>
             </div>
           </div>
           <button class="edit-profile-btn" onclick="window.location.href='Profile_Edit.html'"><i class="fa-solid fa-pen"></i> Edit Profile</button>
@@ -106,18 +106,18 @@
           <div class="card mb-16">
             <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
               <span><i class="fa-solid fa-briefcase"></i> Work Experience</span>
-              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500">+ Edit</a>
+              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500"></a>
             </div>
             <div id="prof-experience-list">
               <!-- filled by JS -->
-              <div style="color:var(--text-secondary,#888);font-size:13px;text-align:center;padding:16px 0" id="prof-exp-empty">No experience added yet — <a href="Profile_Edit.html" style="color:var(--accent)">add some</a></div>
+              <div style="color:var(--text-secondary,#888);font-size:13px;text-align:center;padding:16px 0" id="prof-exp-empty">No experience added yet — <a href="Profile_Edit.html" style="color:var(--accent)"></a></div>
             </div>
           </div>
           <!-- Education — stays static for now -->
           <div class="card">
             <div class="section-title"><i class="fa-solid fa-book-open"></i> Education</div>
-            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-computer"></i></div><div><div class="timeline-title">BS Computer Science</div><div class="timeline-sub">FAST-NUCES, Lahore</div><div class="timeline-period">2015 – 2019 · CGPA: 3.7</div></div></div>
-            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-compass-drafting"></i></div><div><div class="timeline-title">FSc Pre-Engineering</div><div class="timeline-sub">Punjab College, Lahore</div><div class="timeline-period">2013 – 2015 · A Grade</div></div></div>
+            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-computer"></i></div><div><div class="timeline-title"></div><div class="timeline-sub"></div><div class="timeline-period"></div></div></div>
+            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-compass-drafting"></i></div><div><div class="timeline-title"></div><div class="timeline-sub"></div><div class="timeline-period"></div></div></div>
           </div>
         </div>
         <div>
@@ -129,25 +129,10 @@
             </div>
             <div class="skills-grid" id="prof-skills-grid">
               <!-- filled by JS -->
-              <span style="color:var(--text-secondary,#888);font-size:13px" id="prof-skills-empty">No skills added yet — <a href="Profile_Edit.html" style="color:var(--accent)">add some</a></span>
+              <span style="color:var(--text-secondary,#888);font-size:13px" id="prof-skills-empty"></span><a href="Profile_Edit.html" style="color:var(--accent)">add some</a></span>
             </div>
           </div>
-          <!-- Profile Strength -->
-          <div class="card mb-16">
-            <div class="section-title"><i class="fa-solid fa-address-book"></i> Profile Strength</div>
-            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Profile Completeness</span><strong id="prof-completeness-pct">0%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div id="prof-completeness-bar" style="height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width .5s"></div></div></div>
-            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Job Match Score</span><strong>94%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:94%;background:var(--success);border-radius:10px"></div></div></div>
-            <div><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>CV Score</span><strong>78%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:78%;background:var(--warning);border-radius:10px"></div></div></div>
-          </div>
-          <!-- Activity -->
-          <div class="card">
-            <div class="section-title"><i class="fa-solid fa-chart-line"></i> Activity</div>
-            <div style="font-size:13px;color:var(--text-secondary);display:flex;flex-direction:column;gap:10px">
-              <div class="flex-between"><span>Profile views</span><strong>24</strong></div>
-              <div class="flex-between"><span>Applications sent</span><strong id="prof-apps-count">0</strong></div>
-              <div class="flex-between"><span>Interview invites</span><strong>3</strong></div>
-              <div class="flex-between"><span>Saved jobs</span><strong id="prof-saved-count">0</strong></div>
-            </div>
+        
           </div>
         </div>
       </div>

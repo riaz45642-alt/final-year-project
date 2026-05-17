@@ -214,13 +214,15 @@
 </nav>
 
 <script src="../js/script.js"></script>
-<script src="js/cv_generator.js"></script>
+<script src="../js/guard.js"></script>
+<!-- cv_generator.js does not exist as a separate file; all CV logic is inline below -->
 <script src="../js/auth.js"></script>
 
 <script>
-  // Page-specific init for cv_generator.html
   document.addEventListener('DOMContentLoaded', () => {
     initCommon();
+    // 🔒 ROLE GUARD: must be logged in to use CV generator
+    Guard.requireLogin();
     renderTemplateSelector();
     updatePreview();
     // CV live preview on all tagged inputs
