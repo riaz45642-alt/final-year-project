@@ -1,14 +1,14 @@
 /* ═══════════════════════════════════════════════
-   TalentBridge — Smart Job Portal
-   auth.css  —  Login / Signup / Auth Form Styles
-   Covers: auth modal content, social login buttons,
-           dividers, input groups, form toggles
+   TalentBridge — auth.css
+   Login / Signup modal styles
 ═══════════════════════════════════════════════ */
 
-/* ─── AUTH MODAL CONTENT ─── */
 .auth-logo { text-align: center; margin-bottom: 24px; }
-.auth-logo .site-logo { font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent); }
-.auth-logo .site-logo span { color: var(--text-primary); }
+.logo {
+  font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent);
+  display: inline-block;
+}
+.logo span { color: var(--text-primary); }
 .auth-title {
   font-family: var(--font-display);
   font-size: 22px; font-weight: 700;
@@ -16,18 +16,6 @@
 }
 .auth-subtitle { text-align: center; color: var(--text-secondary); font-size: 13.5px; margin-bottom: 24px; }
 
-/* ─── SOCIAL LOGIN BUTTONS ─── */
-.social-login-btn {
-  width: 100%; padding: 10px 14px;
-  border-radius: 10px; border: 1px solid var(--border-mid);
-  background: transparent;
-  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 9px; color: var(--text-primary); transition: background-color 0.15s;
-  margin-bottom: 10px;
-}
-.social-login-btn:hover { background: var(--bg); }
-/* Keep .social-btn as alias for JS-generated HTML */
 .social-btn {
   width: 100%; padding: 10px 14px;
   border-radius: 10px; border: 1px solid var(--border-mid);
@@ -39,40 +27,24 @@
 }
 .social-btn:hover { background: var(--bg); }
 
-/* ─── OR DIVIDER ─── */
-.auth-or-divider {
-  text-align: center; color: var(--text-muted);
-  font-size: 12.5px; margin: 14px 0;
-  position: relative;
-}
-.auth-or-divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border-mid); }
-.auth-or-divider span { background:white; padding:0 12px; position:relative; }
-/* Keep .divider as alias for JS-generated HTML */
 .divider {
   text-align: center; color: var(--text-muted);
   font-size: 12.5px; margin: 14px 0;
   position: relative;
 }
 .divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border-mid); }
-.divider span { background:white; padding:0 12px; position:relative; }
+.divider span { background: white; padding: 0 12px; position: relative; }
 
-/* ─── AUTH LINKS & TOGGLES ─── */
-.auth-toggle-link { color: var(--accent); cursor: pointer; font-weight: 600; }
-.auth-toggle-link:hover { text-decoration: underline; }
-/* Keep .auth-link as alias for JS-generated HTML */
 .auth-link { color: var(--accent); cursor: pointer; font-weight: 600; }
 .auth-link:hover { text-decoration: underline; }
-.auth-toggle-row { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
-/* Keep .form-toggle-row as alias for JS-generated HTML */
 .form-toggle-row { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
 
-/* ─── INPUT GROUPS (auth forms) ─── */
 .input-group { margin-bottom: 13px; }
 .input-group label {
   display: block; font-size: 12.5px; font-weight: 600;
   color: var(--text-secondary); margin-bottom: 5px;
 }
-.input-group input, .input-group select, .input-group textarea {
+.input-group input, .input-group select {
   width: 100%; padding: 9px 12px;
   border-radius: 9px; border: 1px solid var(--border-mid);
   background: var(--surface);
@@ -80,7 +52,7 @@
   color: var(--text-primary); outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
-.input-group input:focus, .input-group select:focus, .input-group textarea:focus {
+.input-group input:focus, .input-group select:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgba(79,110,247,0.1);
 }
@@ -92,8 +64,6 @@
 .input-group.has-error .error-msg { display: block; }
 .input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
-/* ─── RESPONSIVE ─── */
 @media (max-width: 600px) {
-  /* Auth modal name row */
   .input-row { grid-template-columns: 1fr; }
 }

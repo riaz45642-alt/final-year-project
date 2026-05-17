@@ -58,7 +58,6 @@
 
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item active" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
-    <button class="sidebar-nav-item" onclick="window.location.href='AI_section.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-robot"></i></span>AI Assistant<span class="badge">New</span></button>
 
     <div class="sidebar-section-label">Account</div>
     <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
@@ -137,8 +136,8 @@
               <div class="form-group"><label>Languages</label><input type="text" placeholder="English (Fluent), Urdu (Native)"></div>
             </div>
             <div style="display:flex;gap:10px;flex-wrap:wrap">
-              <button class="btn btn-primary" onclick="updatePreview()">👁️ Refresh Preview</button>
-              <button class="btn btn-success" id="download-cv-btn" onclick="downloadCV()">⬇️ Download CV</button>
+              <button class="btn btn-primary" onclick="updatePreview()"><i class="fa-solid fa-chart-line"></i> Refresh Preview</button>
+              <button class="btn btn-success" id="download-cv-btn" onclick="downloadCV()"><i class="fa-solid fa-file-arrow-down"></i> Download CV</button>
               <button class="btn btn-outline" onclick="toast('Share link copied to clipboard!','success')">🔗 Share Link</button>
             </div>
           </div>
@@ -176,10 +175,10 @@
               </div>
             </div>
             <div class="cv-actions-row">
-              <button class="btn btn-success btn-full" onclick="downloadCV()">⬇️ Download as PDF</button>
+              <button class="btn btn-success btn-full" onclick="downloadCV()"><i class="fa-solid fa-file-arrow-down"></i> Download as PDF</button>
               <div style="display:flex;gap:8px">
-                <button class="btn btn-outline" style="flex:1" onclick="toast('Template changed!','info')">🎨 Next Template</button>
-                <button class="btn btn-outline" style="flex:1" onclick="updatePreview()">🔄 Refresh</button>
+                <button class="btn btn-outline" style="flex:1" onclick="toast('Template changed!','info')"><i class="fa-solid fa-palette"></i> Next Template</button>
+                <button class="btn btn-outline" style="flex:1" onclick="updatePreview()"><i class="fa-solid fa-arrow-rotate-right"></i> Refresh</button>
               </div>
             </div>
           </div>

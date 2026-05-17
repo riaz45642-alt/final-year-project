@@ -46,7 +46,7 @@ const _FB_CONFIG = {
     /* auth state observer */
     onAuthStateChanged(auth, fbUser => {
       if (fbUser) {
-        const appUser = window._toAppUser(fbUser);
+        const appUser = window._toAppUser(fbUser); // reads saved role from localStorage
         if (typeof DB !== 'undefined')       DB.setSession(appUser);
         if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
       } else {
@@ -65,14 +65,27 @@ const _FB_CONFIG = {
 /* ── Helpers ── */
 window._FB_CONFIG = _FB_CONFIG;
 
-window._toAppUser = function (fbUser) {
+window._toAppUser = function (fbUser, overrideRole) {
   const name     = fbUser.displayName || fbUser.email || 'User';
   const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || 'U';
+
+  // Role priority: 1) explicit override (signup), 2) saved in localStorage, 3) default 'seeker'
+  var savedRole = 'seeker';
+  try {
+    var stored = localStorage.getItem('tb_user_role_' + fbUser.uid);
+    if (stored === 'employer' || stored === 'seeker') savedRole = stored;
+  } catch(e) {}
+
+  var role = overrideRole || savedRole;
+
+  // Persist role so it survives future logins
+  try { localStorage.setItem('tb_user_role_' + fbUser.uid, role); } catch(e) {}
+
   return {
     id:       fbUser.uid,
     name:     name,
     email:    fbUser.email,
-    role:     'seeker',
+    role:     role,
     avatar:   fbUser.photoURL || initials,
     joinedAt: Date.now()
   };
@@ -232,6 +245,7 @@ function socialLogin(provider) {
     closeAuth();
     if (typeof updateAuthUI === 'function') updateAuthUI();
     if (typeof toast === 'function') toast('Signed in with Google! Welcome, ' + result.user.displayName.split(' ')[0] + ' \uD83D\uDC4B', 'success');
+    if (appUser.role === 'employer') window.location.href = 'Employer_dashboard.html';
   }).catch(function (e) {
     if (e.code !== 'auth/popup-closed-by-user') {
       if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
@@ -323,7 +337,7 @@ function handleSignup() {
       return cred;
     });
   }).then(function (cred) {
-    var appUser = Object.assign({}, window._toAppUser(cred.user), { name: fullName, role: role });
+    var appUser = Object.assign({}, window._toAppUser(cred.user, role), { name: fullName });
     if (typeof DB !== 'undefined')       DB.setSession(appUser);
     if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
     closeAuth();

@@ -132,10 +132,70 @@ function deleteJob(jobId) {
   toast('Job removed', 'info');
 }
 
-function changeApplicantStatus(selectEl, applicantName) {
-  // Update status in DB
+function changeApplicantStatus(selectEl, applicantId) {
   const apps = DB.getApps();
-  // Find by name match (best effort since we don't store names in apps)
-  toast(`${applicantName} status → ${selectEl.value}`, 'info');
+  const idx = apps.findIndex(a => a.id === applicantId);
+  if (idx !== -1) {
+    apps[idx].status = selectEl.value;
+    DB._set('apps', apps);
+  }
+  const label = selectEl.closest('tr')?.querySelector('.applicant-name div div')?.textContent || 'Applicant';
+  toast(`${label} status → ${selectEl.value}`, 'info');
   refreshEmployerStats();
+}
+
+function renderApplicantsTable() {
+  const tbody = document.getElementById('applicants-tbody');
+  if (!tbody) return;
+
+  const user = AppState.currentUser;
+  const allPosted = DB.getPostedJobs();
+  const myJobs = user ? allPosted.filter(j => j.postedBy === user.id) : allPosted;
+  const myJobIds = myJobs.map(j => j.id);
+  const allApps = DB.getApps().filter(a => myJobIds.includes(a.jobId));
+
+  // Remove only dynamic rows, keep nothing (we'll replace all)
+  tbody.innerHTML = '';
+
+  if (allApps.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text-secondary,#888);padding:32px">No applicants yet — publish a job to start receiving applications.</td></tr>';
+    return;
+  }
+
+  allApps.forEach(app => {
+    const job = myJobs.find(j => j.id === app.jobId);
+    const jobTitle = job ? job.title : '—';
+    const name = app.seekerName || app.name || 'Applicant';
+    const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '??';
+    const date = app.appliedAt ? new Date(app.appliedAt).toLocaleDateString('en-PK', { month: 'short', day: 'numeric' }) : '—';
+    const status = app.status || 'Reviewing';
+    const statusOptions = ['Reviewing', 'Shortlisted', 'Interview', 'Offered', 'Rejected'];
+    const optionsHTML = statusOptions.map(s =>
+      `<option value="${s}"${s === status ? ' selected' : ''}>${s}</option>`
+    ).join('');
+
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>
+        <div class="applicant-name">
+          <div class="applicant-av">${initials}</div>
+          <div>
+            <div style="font-weight:600">${name}</div>
+            <div style="font-size:11.5px;color:var(--text-secondary,#888)">${app.seekerTitle || ''}</div>
+          </div>
+        </div>
+      </td>
+      <td>${jobTitle}</td>
+      <td>—</td>
+      <td>${date}</td>
+      <td>
+        <select style="border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer"
+          onchange="changeApplicantStatus(this,'${app.id}')">
+          ${optionsHTML}
+        </select>
+      </td>
+      <td><button class="btn btn-outline btn-sm" onclick="toast('CV preview coming soon','info')">View CV</button></td>
+    `;
+    tbody.appendChild(tr);
+  });
 }

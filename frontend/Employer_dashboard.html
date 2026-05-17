@@ -58,7 +58,6 @@
 
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
-    <button class="sidebar-nav-item" onclick="window.location.href='AI_section.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-robot"></i></span>AI Assistant<span class="badge">New</span></button>
 
     <div class="sidebar-section-label">Account</div>
     <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
@@ -110,11 +109,6 @@
             <table>
               <thead><tr><th>Job Title</th><th>Department</th><th>Posted</th><th>Applicants</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="posted-jobs-tbody">
-                <tr class="static-row"><td><strong>Senior Frontend Dev</strong></td><td>Engineering</td><td>Apr 10</td><td><strong>48</strong></td><td><span class="status-badge active">● Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
-                <tr class="static-row"><td><strong>UI/UX Designer</strong></td><td>Design</td><td>Apr 5</td><td><strong>32</strong></td><td><span class="status-badge active">● Active</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
-                <tr class="static-row"><td><strong>Backend Engineer</strong></td><td>Engineering</td><td>Mar 28</td><td><strong>41</strong></td><td><span class="status-badge reviewing">● Reviewing</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
-                <tr class="static-row"><td><strong>Project Manager</strong></td><td>Operations</td><td>Mar 15</td><td><strong>19</strong></td><td><span class="status-badge pending">● Pending</span></td><td><button class="btn btn-outline btn-sm" onclick="toast('Job details opened','info')">View</button></td></tr>
-                <tr class="static-row"><td><strong>Data Analyst</strong></td><td>Analytics</td><td>Feb 20</td><td><strong>8</strong></td><td><span class="status-badge closed">Closed</span></td><td><button class="btn btn-danger btn-sm" onclick="toast('Job removed','info')">Remove</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -136,10 +130,6 @@
             <table>
               <thead><tr><th>Applicant</th><th>Applied For</th><th>Match</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="applicants-tbody">
-                <tr><td><div class="applicant-name"><div class="applicant-av">AK</div><div><div style="font-weight:600">Ahmed Khan</div><div style="font-size:11.5px;color:var(--text-secondary)">Full Stack Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">96%</strong></td><td>Apr 12</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Ahmed Khan')"><option>Reviewing</option><option>Shortlisted</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
-                <tr><td><div class="applicant-name"><div class="applicant-av">SF</div><div><div style="font-weight:600">Sara Fatima</div><div style="font-size:11.5px;color:var(--text-secondary)">Frontend Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">91%</strong></td><td>Apr 11</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Sara Fatima')"><option>Shortlisted</option><option>Reviewing</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
-                <tr><td><div class="applicant-name"><div class="applicant-av">MU</div><div><div style="font-weight:600">Muhammad Usman</div><div style="font-size:11.5px;color:var(--text-secondary)">UI Designer</div></div></div></td><td>UI/UX Designer</td><td><strong style="color:var(--warning)">78%</strong></td><td>Apr 9</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Muhammad Usman')"><option>Reviewing</option><option>Shortlisted</option><option>Interview</option><option>Offered</option><option>Rejected</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
-                <tr><td><div class="applicant-name"><div class="applicant-av">ZA</div><div><div style="font-weight:600">Zara Ali</div><div style="font-size:11.5px;color:var(--text-secondary)">React Dev</div></div></div></td><td>Senior Frontend Dev</td><td><strong style="color:var(--success)">88%</strong></td><td>Apr 8</td><td><select style="border:1px solid var(--border-mid);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,'Zara Ali')"><option>Rejected</option><option>Reviewing</option><option>Shortlisted</option></select></td><td><button class="btn btn-outline btn-sm" onclick="toast('Opening CV...','info')">View CV</button></td></tr>
               </tbody>
             </table>
           </div>
@@ -213,16 +203,65 @@
 </nav>
 
 <script src="../js/script.js"></script>
-<script src="js/Employer_dashboard.js"></script>
 <script src="../js/auth.js"></script>
+<script src="js/Employer_dashboard.js"></script>
 
 <script>
   // Page-specific init for Employer_dashboard.html
   document.addEventListener('DOMContentLoaded', () => {
-    initCommon();
-    refreshEmployerStats();
-    renderPostedJobsTable();
-    renderApplicantsTable();
+    initCommon && initCommon();
+
+    // Role guard: redirect non-employers away after auth is ready
+    function checkEmployerAccess() {
+      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
+                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+
+      if (!user) {
+        // Not logged in — let them see the page but show auth prompt
+        return;
+      }
+      if (user.role !== 'employer') {
+        // Logged in but not employer — redirect to home
+        if (typeof toast === 'function') toast('Employer Hub is only for employers.', 'warning');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1200);
+      }
+    }
+
+    // Show Employer Hub nav item only for employers; update sidebar visibility
+    function updateEmployerNav() {
+      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
+                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+
+      const role = user ? user.role : null;
+      // Show/hide seeker-only nav items
+      document.querySelectorAll('[data-role="seeker"]').forEach(el => {
+        el.style.display = (role === 'employer') ? 'none' : '';
+      });
+      // Show/hide employer-only nav items
+      document.querySelectorAll('[data-role="employer"]').forEach(el => {
+        el.style.display = (role === 'employer') ? '' : 'none';
+      });
+    }
+
+    // Wait a tick for Firebase auth state to settle, then check
+    setTimeout(() => {
+      checkEmployerAccess();
+      updateEmployerNav();
+      refreshEmployerStats && refreshEmployerStats();
+      renderPostedJobsTable && renderPostedJobsTable();
+      renderApplicantsTable && renderApplicantsTable();
+    }, 800);
+
+    // Also re-run when auth state changes (Firebase fires fbReady)
+    document.addEventListener('fbReady', () => {
+      setTimeout(() => {
+        checkEmployerAccess();
+        updateEmployerNav();
+        refreshEmployerStats && refreshEmployerStats();
+        renderPostedJobsTable && renderPostedJobsTable();
+        renderApplicantsTable && renderApplicantsTable();
+      }, 400);
+    });
   });
 </script>
 </body>
