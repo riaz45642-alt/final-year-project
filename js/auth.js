@@ -46,8 +46,13 @@ const _FB_CONFIG = {
     /* auth state observer */
     onAuthStateChanged(auth, fbUser => {
       if (fbUser) {
-        const appUser = window._toAppUser(fbUser); // reads saved role from localStorage
-        if (typeof DB !== 'undefined')       DB.setSession(appUser);
+        // 🔥 Firebase: build app user from Firebase token
+        const appUser = window._toAppUser(fbUser); // reads saved role from localStorage cache
+        // 🔧 TiDB: upsert user profile row in TiDB on every login
+        if (typeof DB !== 'undefined') {
+          DB.setSession(appUser);                   // update localStorage session cache
+          DB.saveProfile(appUser);                  // 🔧 TiDB: POST /api/users — upsert into TiDB users table
+        }
         if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
       } else {
         if (typeof DB !== 'undefined')       DB.clearSession();
@@ -69,7 +74,9 @@ window._toAppUser = function (fbUser, overrideRole) {
   const name     = fbUser.displayName || fbUser.email || 'User';
   const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || 'U';
 
-  // Role priority: 1) explicit override (signup), 2) saved in localStorage, 3) default 'seeker'
+  // 🔥 Firebase: role is not stored in Firebase — we cache it in localStorage
+  //    so it survives page refresh without an extra TiDB round-trip.
+  //    Real source of truth is the TiDB users table (role column).
   var savedRole = 'seeker';
   try {
     var stored = localStorage.getItem('tb_user_role_' + fbUser.uid);
@@ -78,7 +85,7 @@ window._toAppUser = function (fbUser, overrideRole) {
 
   var role = overrideRole || savedRole;
 
-  // Persist role so it survives future logins
+  // 🔥 Firebase: persist role in localStorage cache so next page load is instant
   try { localStorage.setItem('tb_user_role_' + fbUser.uid, role); } catch(e) {}
 
   return {

@@ -1,49 +1,49 @@
 /* ──────────────────────────────────────────────
-   14. PROFILE EDIT
-   - openEditProfile / closeEditProfile: legacy modal (used from other pages)
-   - saveProfile: legacy save (basic name/email only)
-   - All skill & experience logic lives in Profile_Edit.html
-     but globals are exposed here for reuse.
+   PROFILE EDIT — profile_edit.js
+   TiDB Edition: profile data saved to TiDB via
+   /api/users endpoint. No localStorage for data.
 ────────────────────────────────────────────── */
 
 function openEditProfile() {
-  if (!AppState.currentUser) { toast('Please sign in first', 'warning'); openAuth(); return; }
-  const currentUser = AppState.currentUser;
-  const nameEl  = document.getElementById('edit-name');
-  const emailEl = document.getElementById('edit-email');
-  if (nameEl)  nameEl.value  = currentUser.name  || '';
-  if (emailEl) emailEl.value = currentUser.email || '';
-  const modal = document.getElementById('profile-edit-modal');
-  if (modal) modal.classList.add('open');
+  if (!AppState.currentUser) { toast("Please sign in first","warning"); openAuth(); return; }
+  var u = AppState.currentUser;
+  var nameEl  = document.getElementById("edit-name");
+  var emailEl = document.getElementById("edit-email");
+  if (nameEl)  nameEl.value  = u.name  || "";
+  if (emailEl) emailEl.value = u.email || "";
+  var modal = document.getElementById("profile-edit-modal");
+  if (modal) modal.classList.add("open");
 }
 
 function closeEditProfile() {
-  const modal = document.getElementById('profile-edit-modal');
-  if (modal) modal.classList.remove('open');
+  var modal = document.getElementById("profile-edit-modal");
+  if (modal) modal.classList.remove("open");
 }
 
-function saveProfile() {
-  const newName  = document.getElementById('edit-name')?.value.trim();
-  const newEmail = document.getElementById('edit-email')?.value.trim();
-  if (!newName || !newEmail) { toast('Name and email are required', 'error'); return; }
+async function saveProfile() {
+  var newName  = document.getElementById("edit-name")  ? document.getElementById("edit-name").value.trim()  : "";
+  var newEmail = document.getElementById("edit-email") ? document.getElementById("edit-email").value.trim() : "";
+  if (!newName || !newEmail) { toast("Name and email are required","error"); return; }
 
-  const saveBtn = document.getElementById('save-profile-btn');
-  if (saveBtn) { saveBtn.textContent = 'Saving...'; saveBtn.disabled = true; }
+  var saveBtn = document.getElementById("save-profile-btn");
+  if (saveBtn) { saveBtn.textContent = "Saving..."; saveBtn.disabled = true; }
 
-  setTimeout(() => {
-    AppState.currentUser.name   = newName;
-    AppState.currentUser.email  = newEmail;
-    AppState.currentUser.avatar = newName.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase();
+  // Update local session cache first (Firebase UID + updated display name)
+  // 🔥 Firebase: update the cached session so the nav updates immediately
+  AppState.currentUser.name  = newName;
+  AppState.currentUser.email = newEmail;
+  AppState.currentUser.avatar = newName.split(" ").map(function(w){ return w[0]||""; }).join("").slice(0,2).toUpperCase();
+  DB.setSession(AppState.currentUser);
 
-    DB.setSession(AppState.currentUser);
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-    closeEditProfile();
-    if (saveBtn) { saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false; }
-    toast('Profile updated successfully!', 'success');
-  }, 700);
+  // 🔧 TiDB: POST /api/users  → upsert profile row in TiDB users table
+  await DB.saveProfile(AppState.currentUser);
+
+  if (typeof updateAuthUI === "function") updateAuthUI();
+  closeEditProfile();
+  if (saveBtn) { saveBtn.textContent = "Save Changes"; saveBtn.disabled = false; }
+  toast("Profile updated successfully!","success");
 }
 
-/* ── Expose globals ── */
 window.openEditProfile  = openEditProfile;
 window.closeEditProfile = closeEditProfile;
 window.saveProfile      = saveProfile;
