@@ -456,8 +456,18 @@
   onAuthStateChanged(auth, user => {
     const forms = document.getElementById('auth-forms');
     if (user) {
-      // Already logged in — redirect straight to the app
-      window.location.replace('index.html');
+      // Already logged in — redirect based on saved role
+      let role = 'seeker';
+      try {
+        const stored = localStorage.getItem('tb_user_role_' + user.uid);
+        if (stored === 'employer' || stored === 'seeker') role = stored;
+        else {
+          const session = JSON.parse(localStorage.getItem('tb_session') || '{}');
+          if (session.role) role = session.role;
+        }
+      } catch(e) {}
+      if (role === 'employer') window.location.replace('Employer_dashboard.html');
+      else window.location.replace('index.html');
     } else {
       // Not logged in — show the auth forms
       if (forms) forms.style.display = 'block';
@@ -475,7 +485,15 @@
     try {
       await signInWithEmailAndPassword(auth, email, pass);
       showMsg('msg', 'Signed in! Redirecting...', 'success');
-      setTimeout(() => { window.location.href = 'index.html'; }, 800);
+      setTimeout(() => {
+        let role = 'seeker';
+        try {
+          const session = JSON.parse(localStorage.getItem('tb_session') || '{}');
+          if (session.role) role = session.role;
+        } catch(e) {}
+        if (role === 'employer') window.location.href = 'Employer_dashboard.html';
+        else window.location.href = 'index.html';
+      }, 800);
     } catch (e) {
       showMsg('msg', friendlyError(e.code));
     } finally { setLoading(btn, false); }
@@ -494,10 +512,22 @@
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, pass);
       await updateProfile(cred.user, { displayName: name });
-      // Save role in localStorage session
+      // Save role using the same key pattern as auth.js (_toAppUser)
       const initials = name.split(' ').map(w => w[0]||'').join('').slice(0,2).toUpperCase() || 'U';
       const appUser = { id: cred.user.uid, name, email, role, avatar: initials, joinedAt: Date.now() };
+      // Store session cache (same format as auth.js)
       localStorage.setItem('tb_session', JSON.stringify(appUser));
+      // Store role by UID key so auth.js _toAppUser can restore it
+      localStorage.setItem('tb_user_role_' + cred.user.uid, role);
+      // Persist profile to TiDB backend
+      const apiBase = (window.TB_API_BASE) || 'http://localhost:5000/api';
+      try {
+        await fetch(apiBase + '/users', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(appUser)
+        });
+      } catch(e) { console.warn('TiDB profile save failed:', e); }
       showMsg('msg', 'Account created! Redirecting...', 'success');
       setTimeout(() => {
         if (role === 'employer') window.location.href = 'Employer_dashboard.html';
