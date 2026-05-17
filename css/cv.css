@@ -3,23 +3,153 @@
    CV Generator page styles
 ═══════════════════════════════════════════════ */
 
-.cv-builder-layout { display: grid; grid-template-columns: 1fr 360px; gap: 20px; align-items: start; }
+.cv-builder-layout { 
+  display: grid;
+   grid-template-columns: 1fr 360px; 
+   gap: 20px;
+    align-items: start; }
 
-.form-section { margin-bottom: 24px; }
+/* ─────────────────────────────────────
+   IMPROVED FORM SECTIONS - Mature Look
+   ───────────────────────────────────── */
+
+.form-section {
+    margin-bottom: 32px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    transition: all 0.2s ease;
+}
+
+.form-section:hover {
+    box-shadow: var(--shadow-sm);
+    border-color: var(--border-mid);
+}
+
 .form-section-title {
-  font-family: var(--font-display); font-size: 15px; font-weight: 600;
-  margin-bottom: 14px; padding-bottom: 10px;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
+
 .form-section-title .num {
-  width: 22px; height: 22px; border-radius: 50%;
-  background: var(--accent); color: white; font-size: 11px;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--font-body); flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
 }
-.cv-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
-.cv-form-group { margin-bottom: 12px; }
+
+/* Form Groups & Inputs */
+.cv-form-group {
+    margin-bottom: 18px;
+}
+
+.cv-form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+}
+
+.cv-form-group input,
+.cv-form-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border-mid);
+    border-radius: 8px;
+    font-size: 14px;
+    background: var(--bg);
+    transition: all 0.2s ease;
+    color: var(--text-primary);
+}
+
+.cv-form-group input:focus,
+.cv-form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
+    background: white;
+}
+
+/* Two-column layout */
+.cv-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+/* Add Button Styling */
+.btn-outline.btn-sm {
+    margin-top: 8px;
+    padding: 8px 16px;
+    font-size: 13.5px;
+    border: 1.5px solid var(--border-mid);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+}
+
+.btn-outline.btn-sm:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-light);
+}
+
+/* ─── Specific Section Improvements ─── */
+
+.form-section:nth-child(2) .form-section-title {   /* Personal Info */
+    color: #1e40af;
+}
+.form-section:nth-child(3) .form-section-title {   /* Education */
+    color: #166534;
+}
+.form-section:nth-child(4) .form-section-title {   /* Experience */
+    color: #9f1239;
+}
+.form-section:nth-child(5) .form-section-title {   /* Skills */
+    color: #854d0e;
+}
+
+/* Better textarea */
+textarea {
+    resize: vertical;
+    min-height: 88px;
+    line-height: 1.55;
+}
+
+/* Skills Input Enhancement */
+#cv-skills {
+    font-family: monospace;
+    letter-spacing: 0.3px;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+    .form-section {
+        padding: 20px;
+    }
+    
+    .cv-form-row {
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+}
 
 /* ─── TEMPLATE SELECTOR ─── */
 .template-grid {
@@ -99,3 +229,5 @@
   .cv-builder-layout { grid-template-columns: 1fr; }
   .cv-preview { position: static; }
 }
+.cv-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+.cv-form-group { margin-bottom: 12px; }

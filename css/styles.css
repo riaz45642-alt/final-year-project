@@ -6,6 +6,28 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
+  --font-display: 'Clash Display', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+
+  --accent: #4f6ef7;
+  --accent-light: #e8edff;
+
+  --bg: #f8f9fb;
+  --surface: #ffffff;
+
+  --text-primary: #1a1a2e;
+  --text-secondary: #6b7280;
+  --text-muted: #9ca3af;
+
+  --border: #e5e7eb;
+  --border-mid: #d1d5db;
+
+  --success: #16a34a;
+  --success-light: #dcfce7;
+
+  --radius-lg: 14px;
+
+  --shadow-md: 0 10px 25px rgba(0,0,0,0.08);
   --accent: #4f6ef7;
   --accent-light: #e8edff;
   --accent-mid: #c5d0ff;
