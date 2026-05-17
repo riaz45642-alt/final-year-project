@@ -124,11 +124,11 @@
 <script src="../js/saved_jobpage.js"></script>
 <script src="../js/auth.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    initCommon();
+  document.addEventListener('DOMContentLoaded', async function() {
+    await initCommon();
     // 🔒 ROLE GUARD: job seekers only
     Guard.requireSeeker();
-    renderSavedJobs();
+    await renderSavedJobs();
   });
 </script>
 </body>

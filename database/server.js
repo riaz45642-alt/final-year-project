@@ -90,6 +90,26 @@ app.get("/api/setup", async (req, res) => {
       )
     `);
 
+    // CV Data table — full CV details per user
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS cv_data (
+        user_id           VARCHAR(128) PRIMARY KEY,
+        first_name        VARCHAR(100),
+        last_name         VARCHAR(100),
+        job_title         VARCHAR(150),
+        email             VARCHAR(255),
+        phone             VARCHAR(30),
+        location          VARCHAR(100),
+        summary           TEXT,
+        skills            TEXT,
+        education         TEXT,
+        experience        TEXT,
+        selected_template VARCHAR(20) DEFAULT 'blue',
+        last_updated      TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
+      )
+    `);
+
     res.json({ success: true, message: "All tables created successfully in TiDB." });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -354,6 +374,67 @@ app.post("/api/users", async (req, res) => {
         u.avatar||"", u.title||"", u.bio||"",
         JSON.stringify(u.skills||[]), JSON.stringify(u.experience||[]),
         u.joinedAt||Date.now(), Date.now()
+      ]
+    );
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+/* ─────────────────────────────────────────────
+   CV DATA ROUTES  (cv_data table)
+───────────────────────────────────────────── */
+// 🔧 TiDB: GET full CV data for a user from cv_data table
+app.get("/api/cv/:uid", async (req, res) => {
+  try {
+    const [rows] = await db.query("SELECT * FROM cv_data WHERE user_id = ?", [req.params.uid]);
+    if (!rows.length) return res.json(null);
+    const r = rows[0];
+    res.json({
+      user_id:           r.user_id,
+      first_name:        r.first_name,
+      last_name:         r.last_name,
+      job_title:         r.job_title,
+      email:             r.email,
+      phone:             r.phone,
+      location:          r.location,
+      summary:           r.summary,
+      skills:            r.skills,
+      education:         r.education  ? JSON.parse(r.education)  : [],
+      experience:        r.experience ? JSON.parse(r.experience) : [],
+      selected_template: r.selected_template || 'blue',
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// 🔧 TiDB: POST — upsert full CV data into cv_data table
+app.post("/api/cv", async (req, res) => {
+  try {
+    const c = req.body;
+    if (!c.user_id) return res.status(400).json({ error: "user_id required" });
+    await db.query(
+      `INSERT INTO cv_data
+         (user_id, first_name, last_name, job_title, email, phone, location,
+          summary, skills, education, experience, selected_template)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+       ON DUPLICATE KEY UPDATE
+         first_name=VALUES(first_name), last_name=VALUES(last_name),
+         job_title=VALUES(job_title), email=VALUES(email), phone=VALUES(phone),
+         location=VALUES(location), summary=VALUES(summary), skills=VALUES(skills),
+         education=VALUES(education), experience=VALUES(experience),
+         selected_template=VALUES(selected_template)`,
+      [
+        c.user_id,
+        c.first_name || '', c.last_name || '',
+        c.job_title  || '', c.email || '', c.phone || '', c.location || '',
+        c.summary    || '',
+        c.skills     || '',
+        typeof c.education  === 'string' ? c.education  : JSON.stringify(c.education  || []),
+        typeof c.experience === 'string' ? c.experience : JSON.stringify(c.experience || []),
+        c.selected_template || 'blue',
       ]
     );
     res.json({ success: true });

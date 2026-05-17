@@ -230,20 +230,31 @@
 <script src="../js/auth.js"></script>
 <script src="../js/profile_edit.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    initCommon && initCommon();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await (initCommon && initCommon());
     // 🔒 ROLE GUARD: must be logged in to edit profile
     Guard.requireLogin();
 
-    // Wait for auth to settle before prefilling
-    function initPage() {
-      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
-                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+    // Wait for auth to settle, then fetch full profile from TiDB
+    async function initPage() {
+      let user = (typeof AppState !== 'undefined' && AppState.currentUser)
+               || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
       if (!user) {
         if (typeof toast === 'function') toast('Please sign in to edit your profile', 'warning');
         if (typeof openAuth === 'function') openAuth('login');
         return;
       }
+
+      // Fetch full profile from TiDB (richer than session cache)
+      try {
+        const dbProfile = await DB.getProfile(user.id);
+        if (dbProfile) {
+          user = Object.assign({}, user, dbProfile);
+          AppState.currentUser = user;
+          DB.setSession(user);
+        }
+      } catch(e) { /* offline — use session cache */ }
+
       document.getElementById('edit-name').value  = user.name  || '';
       document.getElementById('edit-email').value = user.email || '';
       if (document.getElementById('edit-title-field'))  document.getElementById('edit-title-field').value  = user.title    || '';
@@ -254,8 +265,8 @@
       renderExperienceList();
     }
 
-    setTimeout(initPage, 600);
-    document.addEventListener('fbReady', () => setTimeout(initPage, 300));
+    initPage();
+    document.addEventListener('fbReady', () => initPage());
   });
 
   /* ──────────────────────────────────────────────

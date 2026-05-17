@@ -146,24 +146,40 @@
 <script src="../js/script.js"></script>
 <script src="../js/auth.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
+  document.addEventListener('DOMContentLoaded', async () => {
     initCommon && initCommon();
 
-    function renderProfile() {
-      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
-                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-
-      // ── Activity counts ──
-      const appsCountEl  = document.getElementById('prof-apps-count');
-      const savedCountEl = document.getElementById('prof-saved-count');
-      if (appsCountEl)  appsCountEl.textContent  = DB.getApps().length;
-      if (savedCountEl) savedCountEl.textContent = DB.getSaved().length;
+    async function renderProfile() {
+      // Try AppState first, then session cache
+      let user = (typeof AppState !== 'undefined' && AppState.currentUser)
+               || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
 
       if (!user) return;
 
+      // ── Fetch full profile from TiDB (richer than session cache) ──
+      try {
+        const dbProfile = await DB.getProfile(user.id);
+        if (dbProfile) {
+          // Merge DB data into user object (DB is source of truth)
+          user = Object.assign({}, user, dbProfile);
+          // Keep AppState in sync
+          if (typeof AppState !== 'undefined') AppState.currentUser = user;
+        }
+      } catch(e) { /* offline — fall back to session data */ }
+
+      // ── Activity counts (async) ──
+      const [apps, saved] = await Promise.all([
+        DB.getApps().catch(() => []),
+        DB.getSaved().catch(() => []),
+      ]);
+      const appsCountEl  = document.getElementById('prof-apps-count');
+      const savedCountEl = document.getElementById('prof-saved-count');
+      if (appsCountEl)  appsCountEl.textContent  = apps.length;
+      if (savedCountEl) savedCountEl.textContent = saved.length;
+
       // ── Hero banner ──
-      const profName  = document.getElementById('prof-name');
-      const profSub   = document.getElementById('prof-title-sub');
+      const profName   = document.getElementById('prof-name');
+      const profSub    = document.getElementById('prof-title-sub');
       const profAvatar = document.getElementById('prof-avatar');
       if (profName)   profName.textContent   = user.name || 'User';
       if (profAvatar) profAvatar.textContent = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
@@ -270,9 +286,8 @@
     }
 
     // Run immediately, then again after Firebase auth settles
-    renderProfile();
-    setTimeout(renderProfile, 700);
-    document.addEventListener('fbReady', () => setTimeout(renderProfile, 300));
+    await renderProfile();
+    document.addEventListener('fbReady', () => renderProfile());
   });
 </script>
 </body>

@@ -444,8 +444,9 @@ function downloadCV() {
 
 /* ────────────────────────────────────────────────
    9. SAVE TO BACKEND (TiDB)
-   Saves current CV data associated with the
-   logged-in user's profile.
+   Saves current CV data to the cv_data table
+   AND syncs name/skills/experience to users table
+   so the profile page stays up to date.
 ────────────────────────────────────────────────── */
 async function saveCVToBackend() {
   var user = (typeof AppState !== 'undefined' && AppState.currentUser)
@@ -456,64 +457,121 @@ async function saveCVToBackend() {
     return;
   }
 
+  var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : 'http://localhost:5000/api';
+
+  // ── 1. Save full CV to cv_data table ──
   var cvPayload = {
+    user_id:           user.id,
+    first_name:        getField('cv-fname'),
+    last_name:         getField('cv-lname'),
+    job_title:         getField('cv-job-title'),
+    email:             getField('cv-email') || user.email || '',
+    phone:             getField('cv-phone'),
+    location:          getField('cv-loc'),
+    summary:           getField('cv-summary'),
+    skills:            cvData.skills.join(', '),
+    education:         JSON.stringify(cvData.education),
+    experience:        JSON.stringify(cvData.experience),
+    selected_template: selectedTemplate,
+  };
+
+  // ── 2. Also sync profile fields to users table ──
+  var profilePayload = {
     id:         user.id,
-    name:       (getField('cv-fname') + ' ' + getField('cv-lname')).trim() || user.name,
-    email:      getField('cv-email') || user.email,
-    title:      getField('cv-job-title'),
-    bio:        getField('cv-summary'),
+    name:       ((cvPayload.first_name + ' ' + cvPayload.last_name).trim()) || user.name,
+    email:      cvPayload.email,
+    role:       user.role || 'seeker',
+    title:      cvPayload.job_title,
+    bio:        cvPayload.summary,
     skills:     cvData.skills,
     experience: cvData.experience,
-    education:  cvData.education,
   };
 
   try {
-    // 🔧 TiDB: POST /api/users — upsert CV/profile data into TiDB users table
-    var res = await fetch((typeof API_BASE !== 'undefined' ? API_BASE : 'http://localhost:5000/api') + '/users', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(cvPayload),
-    });
-    var data = await res.json();
-    if (data && data.success) {
-      if (typeof toast === 'function') toast('CV saved to your profile! ✅', 'success');
+    var [r1, r2] = await Promise.all([
+      fetch(apiBase + '/cv', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cvPayload),
+      }),
+      fetch(apiBase + '/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(profilePayload),
+      }),
+    ]);
+
+    var d1 = await r1.json();
+    if (d1 && d1.success) {
+      if (typeof toast === 'function') toast('CV saved successfully! ✅', 'success');
     } else {
-      if (typeof toast === 'function') toast('Saved locally (server offline)', 'warning');
+      if (typeof toast === 'function') toast('Save failed — check your connection', 'warning');
     }
   } catch (e) {
-    if (typeof toast === 'function') toast('Saved locally (server offline)', 'warning');
+    if (typeof toast === 'function') toast('Could not reach server — check your connection', 'error');
+    console.error('[saveCVToBackend]', e);
   }
 }
 
 /* ────────────────────────────────────────────────
    10. INIT — called on DOMContentLoaded
+   Pre-populates fields from TiDB if user is
+   logged in. Falls back to session cache.
 ────────────────────────────────────────────────── */
-function initCVGenerator() {
-  // Pre-populate from logged-in user profile if available
+async function initCVGenerator() {
   var user = (typeof AppState !== 'undefined' && AppState.currentUser)
            || (function() { try { return JSON.parse(localStorage.getItem('tb_session')); } catch(e) {} return null; })();
 
-  if (user) {
-    // Pre-fill name from session
-    var nameParts = (user.name || '').split(' ');
-    var fnameEl = document.getElementById('cv-fname');
-    var lnameEl = document.getElementById('cv-lname');
-    if (fnameEl && !fnameEl.value) fnameEl.value = nameParts[0] || '';
-    if (lnameEl && !lnameEl.value) lnameEl.value = nameParts.slice(1).join(' ') || '';
-    var emailEl = document.getElementById('cv-email');
-    if (emailEl && !emailEl.value && user.email) emailEl.value = user.email;
-    var titleEl = document.getElementById('cv-job-title');
-    if (titleEl && !titleEl.value && user.title) titleEl.value = user.title;
-    var summaryEl = document.getElementById('cv-summary');
-    if (summaryEl && !summaryEl.value && user.bio) summaryEl.value = user.bio;
+  if (user && user.id) {
+    // Try to load saved CV from TiDB cv_data table
+    try {
+      var apiBase = (typeof API_BASE !== 'undefined') ? API_BASE : 'http://localhost:5000/api';
+      var res = await fetch(apiBase + '/cv/' + user.id);
+      if (res.ok) {
+        var saved = await res.json();
+        if (saved) {
+          var set = function(id, val) { var el = document.getElementById(id); if (el && val && !el.value) el.value = val; };
+          var nameParts = (saved.name || user.name || '').split(' ');
+          set('cv-fname',     saved.first_name || nameParts[0] || '');
+          set('cv-lname',     saved.last_name  || nameParts.slice(1).join(' ') || '');
+          set('cv-job-title', saved.job_title || saved.title || user.title || '');
+          set('cv-email',     saved.email || user.email || '');
+          set('cv-phone',     saved.phone || '');
+          set('cv-loc',       saved.location || '');
+          set('cv-summary',   saved.summary || saved.bio || user.bio || '');
 
-    // Pre-populate skills from profile
-    if (user.skills && Array.isArray(user.skills) && user.skills.length && cvData.skills.length === 0) {
-      cvData.skills = user.skills.slice();
-    }
-    // Pre-populate experience from profile
-    if (user.experience && Array.isArray(user.experience) && user.experience.length && cvData.experience.length === 0) {
-      cvData.experience = user.experience.slice();
+          if (saved.skills && cvData.skills.length === 0) {
+            var skills = typeof saved.skills === 'string'
+              ? saved.skills.split(',').map(function(s){ return s.trim(); }).filter(Boolean)
+              : (Array.isArray(saved.skills) ? saved.skills : []);
+            cvData.skills = skills;
+          }
+          if (saved.education && cvData.education.length === 0) {
+            var edu = Array.isArray(saved.education) ? saved.education
+              : (typeof saved.education === 'string' ? JSON.parse(saved.education) : []);
+            if (edu.length) cvData.education = edu;
+          }
+          if (saved.experience && cvData.experience.length === 0) {
+            var exp = Array.isArray(saved.experience) ? saved.experience
+              : (typeof saved.experience === 'string' ? JSON.parse(saved.experience) : []);
+            if (exp.length) cvData.experience = exp;
+          }
+          if (saved.selected_template) selectedTemplate = saved.selected_template;
+        }
+      }
+    } catch(e) {
+      // Offline or no CV yet — fall back to session/profile data below
+      if (user) {
+        var set2 = function(id, val) { var el = document.getElementById(id); if (el && val && !el.value) el.value = val; };
+        var parts = (user.name || '').split(' ');
+        set2('cv-fname',     parts[0] || '');
+        set2('cv-lname',     parts.slice(1).join(' ') || '');
+        set2('cv-email',     user.email || '');
+        set2('cv-job-title', user.title || '');
+        set2('cv-summary',   user.bio   || '');
+        if (user.skills && Array.isArray(user.skills) && cvData.skills.length === 0) cvData.skills = user.skills.slice();
+        if (user.experience && Array.isArray(user.experience) && cvData.experience.length === 0) cvData.experience = user.experience.slice();
+      }
     }
   }
 
@@ -536,7 +594,10 @@ function initCVGenerator() {
 
   // Apply template
   var panel = document.getElementById('cv-preview-panel');
-  if (panel) panel.classList.add('tpl-' + selectedTemplate);
+  if (panel) {
+    CV_TEMPLATES.forEach(function(t) { panel.classList.remove('tpl-' + t.id); });
+    panel.classList.add('tpl-' + selectedTemplate);
+  }
 }
 
 // Expose globals used by inline onclick attributes

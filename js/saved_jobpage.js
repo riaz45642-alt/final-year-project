@@ -1,14 +1,37 @@
 /* ──────────────────────────────────────────────
-   9. SAVED JOBS PAGE
+   SAVED JOBS PAGE — saved_jobpage.js
+   Async TiDB edition: data fetched from API.
 ────────────────────────────────────────────── */
-function renderSavedJobs() {
+
+async function renderSavedJobs() {
   const savedGrid = document.getElementById('saved-jobs-grid');
   if (!savedGrid) return;
-  const savedIds  = DB.getSaved();
-  const savedJobs = getAllJobs().filter(job => savedIds.includes(job.id));
+
+  // Show loading state
+  savedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading saved jobs…</p></div>';
+
+  // Fetch saved IDs and all jobs from TiDB
+  const [savedIds, allJobs] = await Promise.all([
+    DB.getSaved(),
+    getAllJobs(),
+  ]);
+
+  const savedJobs = allJobs.filter(job => savedIds.includes(job.id));
+
   if (!savedJobs.length) {
-    savedGrid.innerHTML = `<div class="empty-state"><div class="empty-icon">🔖</div><h3>No saved jobs yet</h3><p>Browse jobs and click the bookmark icon to save them here</p><button class="btn btn-primary" style="margin-top:16px" onclick="showPage('home')">Browse Jobs</button></div>`;
+    savedGrid.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔖</div>
+        <h3>No saved jobs yet</h3>
+        <p>Browse jobs and click the bookmark icon to save them here</p>
+        <button class="btn btn-primary" style="margin-top:16px"
+          onclick="window.location.href='index.html'">Browse Jobs</button>
+      </div>`;
     return;
   }
-  savedGrid.innerHTML = savedJobs.map(job => buildJobCardHTML(job)).join('');
+
+  savedGrid.innerHTML = savedJobs.map(job => buildJobCardHTML(job, savedIds, [])).join('');
 }
+
+// Expose globally (called from HTML inline handler)
+window.renderSavedJobs = renderSavedJobs;

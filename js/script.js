@@ -4,12 +4,14 @@
 
 /* ──────────────────────────────────────────────
    CONFIGURATION
-   🔧 CHANGE THIS: Set your backend URL here.
-      Locally:   "http://localhost:5000"
-      Deployed:  "https://your-backend.onrender.com"
+   API_BASE points to your Express/TiDB backend.
+   • Development : http://localhost:5000/api
+   • Production  : set window.TB_API_BASE before
+                   this script loads, OR update the
+                   fallback string below.
 ────────────────────────────────────────────── */
-// 🔧 TODO: Replace with your deployed backend URL when you go live
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = (typeof window !== "undefined" && window.TB_API_BASE)
+  || "http://localhost:5000/api";
 
 /* ──────────────────────────────────────────────
    1. DATABASE LAYER — TiDB via REST API
@@ -134,6 +136,12 @@ const DB = {
   async getProfile(uid) { return await this._get("/users/" + uid); },
   // 🔧 TiDB: POST /api/users  → upsert user profile row in TiDB
   async saveProfile(profileData) { return await this._post("/users", profileData); },
+
+  /* ── CV Data — TiDB ── */
+  // 🔧 TiDB: GET /api/cv/:uid  → fetch full CV data from TiDB cv_data table
+  async getCV(uid) { return await this._get("/cv/" + uid); },
+  // 🔧 TiDB: POST /api/cv  → upsert full CV data in TiDB cv_data table
+  async saveCV(cvData) { return await this._post("/cv", cvData); },
 };
 
 /* ──────────────────────────────────────────────

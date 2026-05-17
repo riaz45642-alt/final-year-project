@@ -195,16 +195,70 @@
 <script src="../js/auth.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    initCommon();
+  document.addEventListener('DOMContentLoaded', async () => {
+    await initCommon();
     // 🔒 ROLE GUARD: must be logged in to use CV generator
     Guard.requireLogin();
+
+    // Load saved CV data from TiDB if user is logged in
+    const user = AppState.currentUser;
+    if (user && user.id) {
+      try {
+        const saved = await DB.getCV(user.id);
+        if (saved) {
+          // Pre-fill basic fields from cv_data table
+          const set = (id, val) => { const el = document.getElementById(id); if (el && val) el.value = val; };
+          const nameParts = (saved.name || user.name || '').split(' ');
+          set('cv-fname',    saved.first_name || nameParts[0] || '');
+          set('cv-lname',    saved.last_name  || nameParts.slice(1).join(' ') || '');
+          set('cv-job-title', saved.job_title || saved.title || user.title || '');
+          set('cv-email',    saved.email || user.email || '');
+          set('cv-phone',    saved.phone || '');
+          set('cv-loc',      saved.location || '');
+          set('cv-summary',  saved.summary || saved.bio || user.bio || '');
+
+          // Skills
+          if (saved.skills) {
+            const skills = typeof saved.skills === 'string'
+              ? saved.skills.split(',').map(s => s.trim()).filter(Boolean)
+              : (Array.isArray(saved.skills) ? saved.skills : []);
+            if (skills.length) cvData.skills = skills;
+          }
+          // Education
+          if (saved.education) {
+            const edu = typeof saved.education === 'string' ? JSON.parse(saved.education) : saved.education;
+            if (Array.isArray(edu) && edu.length) cvData.education = edu;
+          }
+          // Experience
+          if (saved.experience) {
+            const exp = typeof saved.experience === 'string' ? JSON.parse(saved.experience) : saved.experience;
+            if (Array.isArray(exp) && exp.length) cvData.experience = exp;
+          }
+          // Template
+          if (saved.selected_template) selectTemplate(saved.selected_template);
+        }
+      } catch(e) { console.warn('CV load failed:', e); }
+    }
+
+    // Init all sections
     renderTemplateSelector();
+    renderEducationEntries();
+    renderExperienceEntries();
+    renderSkillTags();
     updatePreview();
-    // CV live preview on all tagged inputs
+
+    // Wire live preview on all tagged inputs
     document.querySelectorAll('[data-cv-field]').forEach(field => {
       field.addEventListener('input', updatePreview);
     });
+
+    // Skill wrap click
+    const wrap = document.getElementById('skill-tags-wrap');
+    if (wrap) wrap.addEventListener('click', focusSkillInput);
+
+    // Apply initial template class
+    const panel = document.getElementById('cv-preview-panel');
+    if (panel) panel.classList.add('tpl-blue');
   });
 </script>
 </body>
