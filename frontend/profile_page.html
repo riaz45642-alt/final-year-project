@@ -102,13 +102,18 @@
       </div>
       <div class="profile-two-col-grid">
         <div>
+          <!-- Work Experience — dynamic -->
           <div class="card mb-16">
-            <div class="section-title"><i class="fa-solid fa-briefcase"></i> Work Experience</div>
-            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-briefcase"></i></div><div><div class="timeline-title">Senior Developer</div><div class="timeline-sub">TechNova Solutions</div><div class="timeline-period">Jan 2022 – Present</div></div></div>
-            <div class="timeline-item"><div class="timeline-dot"><i class="fa-brands fa-chrome"></i></div><div><div class="timeline-title">Web Developer</div><div class="timeline-sub">Arbisoft</div><div class="timeline-period">Aug 2020 – Dec 2021</div></div></div>
-            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-rocket"></i></div><div><div class="timeline-title">Junior Developer</div><div class="timeline-sub">Systems Ltd.</div><div class="timeline-period">Jun 2019 – Jul 2020</div></div></div>
-            <button class="btn btn-outline btn-sm mt-16" onclick="toast('Feature available in full version','info')">+ Add Experience</button>
+            <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+              <span><i class="fa-solid fa-briefcase"></i> Work Experience</span>
+              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500">+ Edit</a>
+            </div>
+            <div id="prof-experience-list">
+              <!-- filled by JS -->
+              <div style="color:var(--text-secondary,#888);font-size:13px;text-align:center;padding:16px 0" id="prof-exp-empty">No experience added yet — <a href="Profile_Edit.html" style="color:var(--accent)">add some</a></div>
+            </div>
           </div>
+          <!-- Education — stays static for now -->
           <div class="card">
             <div class="section-title"><i class="fa-solid fa-book-open"></i> Education</div>
             <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-computer"></i></div><div><div class="timeline-title">BS Computer Science</div><div class="timeline-sub">FAST-NUCES, Lahore</div><div class="timeline-period">2015 – 2019 · CGPA: 3.7</div></div></div>
@@ -116,23 +121,25 @@
           </div>
         </div>
         <div>
+          <!-- Skills — dynamic -->
           <div class="card mb-16">
-            <div class="section-title"><i class="fa-solid fa-star"></i> Skills</div>
-            <div class="skills-grid">
-              <span class="skill-chip">React.js</span><span class="skill-chip">Node.js</span>
-              <span class="skill-chip">TypeScript</span><span class="skill-chip">Python</span>
-              <span class="skill-chip">PostgreSQL</span><span class="skill-chip green">Docker</span>
-              <span class="skill-chip green">AWS</span><span class="skill-chip orange">Figma</span>
-              <span class="skill-chip">Git</span><span class="skill-chip orange">REST API</span>
+            <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+              <span><i class="fa-solid fa-star"></i> Skills</span>
+              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500">+ Edit</a>
             </div>
-            <button class="btn btn-outline btn-sm mt-16" onclick="toast('Add skill feature coming soon','info')">+ Add Skill</button>
+            <div class="skills-grid" id="prof-skills-grid">
+              <!-- filled by JS -->
+              <span style="color:var(--text-secondary,#888);font-size:13px" id="prof-skills-empty">No skills added yet — <a href="Profile_Edit.html" style="color:var(--accent)">add some</a></span>
+            </div>
           </div>
+          <!-- Profile Strength -->
           <div class="card mb-16">
-            <div class="section-title"><i class="fa-solid fa-address-book"></i>Profile Strength</div>
-            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Profile Completeness</span><strong>87%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:87%;background:var(--accent);border-radius:10px"></div></div></div>
+            <div class="section-title"><i class="fa-solid fa-address-book"></i> Profile Strength</div>
+            <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Profile Completeness</span><strong id="prof-completeness-pct">0%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div id="prof-completeness-bar" style="height:100%;width:0%;background:var(--accent);border-radius:10px;transition:width .5s"></div></div></div>
             <div style="margin-bottom:12px"><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>Job Match Score</span><strong>94%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:94%;background:var(--success);border-radius:10px"></div></div></div>
             <div><div class="flex-between" style="font-size:13px;margin-bottom:6px"><span>CV Score</span><strong>78%</strong></div><div style="height:8px;border-radius:10px;background:var(--bg);overflow:hidden"><div style="height:100%;width:78%;background:var(--warning);border-radius:10px"></div></div></div>
           </div>
+          <!-- Activity -->
           <div class="card">
             <div class="section-title"><i class="fa-solid fa-chart-line"></i> Activity</div>
             <div style="font-size:13px;color:var(--text-secondary);display:flex;flex-direction:column;gap:10px">
@@ -154,24 +161,133 @@
 <script src="../js/script.js"></script>
 <script src="../js/auth.js"></script>
 <script>
-  // Page-specific init for profile_page.html
   document.addEventListener('DOMContentLoaded', () => {
-    initCommon();
-    // Update activity counts from DB
-    const appsCountEl  = document.getElementById('prof-apps-count');
-    const savedCountEl = document.getElementById('prof-saved-count');
-    if (appsCountEl)  appsCountEl.textContent  = DB.getApps().length;
-    if (savedCountEl) savedCountEl.textContent = DB.getSaved().length;
-    // Reflect current user in profile hero
-    const user = AppState.currentUser;
-    if (user) {
-      const profName    = document.getElementById('prof-name');
-      const profTitleSub = document.getElementById('prof-title-sub');
-      const profAvatar  = document.getElementById('prof-avatar');
-      if (profName)     profName.textContent     = user.name;
-      if (profTitleSub) profTitleSub.textContent = user.role === 'employer' ? 'Employer Account' : 'Job Seeker';
-      if (profAvatar)   profAvatar.textContent   = user.avatar || user.name.slice(0, 2).toUpperCase();
+    initCommon && initCommon();
+
+    function renderProfile() {
+      const user = (typeof AppState !== 'undefined' && AppState.currentUser)
+                 || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+
+      // ── Activity counts ──
+      const appsCountEl  = document.getElementById('prof-apps-count');
+      const savedCountEl = document.getElementById('prof-saved-count');
+      if (appsCountEl)  appsCountEl.textContent  = DB.getApps().length;
+      if (savedCountEl) savedCountEl.textContent = DB.getSaved().length;
+
+      if (!user) return;
+
+      // ── Hero banner ──
+      const profName  = document.getElementById('prof-name');
+      const profSub   = document.getElementById('prof-title-sub');
+      const profAvatar = document.getElementById('prof-avatar');
+      if (profName)   profName.textContent   = user.name || 'User';
+      if (profAvatar) profAvatar.textContent = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
+
+      // Sub-title: show professional title if saved, else role label
+      const titleLabel = user.title
+        ? user.title + (user.location ? ' · ' + user.location : '')
+        : (user.role === 'employer' ? 'Employer Account' : 'Job Seeker');
+      if (profSub) profSub.textContent = titleLabel;
+
+      // ── Skills ──
+      renderSkills(user);
+
+      // ── Experience ──
+      renderExperience(user);
+
+      // ── Profile completeness ──
+      calcCompleteness(user);
     }
+
+    /* ---------- SKILLS ---------- */
+    function renderSkills(user) {
+      const grid  = document.getElementById('prof-skills-grid');
+      const empty = document.getElementById('prof-skills-empty');
+      if (!grid) return;
+
+      const raw = user.skills;
+      let skills = [];
+      if (Array.isArray(raw) && raw.length) {
+        skills = raw.map(s => typeof s === 'string' ? { name: s, level: '' } : s);
+      } else if (typeof raw === 'string' && raw.trim()) {
+        skills = raw.split(',').map(s => ({ name: s.trim(), level: '' })).filter(s => s.name);
+      }
+
+      // Remove old chips
+      grid.querySelectorAll('.skill-chip,.skill-chip-dyn').forEach(el => el.remove());
+
+      if (!skills.length) {
+        if (empty) empty.style.display = '';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      const levelColor = { Expert:'green', Advanced:'green', Intermediate:'', Beginner:'orange', '':'', undefined:'' };
+      skills.forEach(skill => {
+        const chip = document.createElement('span');
+        const cls  = levelColor[skill.level] || '';
+        chip.className = 'skill-chip skill-chip-dyn' + (cls ? ' ' + cls : '');
+        chip.title = skill.level || '';
+        chip.textContent = skill.name;
+        grid.appendChild(chip);
+      });
+    }
+
+    /* ---------- EXPERIENCE ---------- */
+    function renderExperience(user) {
+      const list  = document.getElementById('prof-experience-list');
+      const empty = document.getElementById('prof-exp-empty');
+      if (!list) return;
+
+      const exps = Array.isArray(user.experience) ? user.experience : [];
+      list.querySelectorAll('.timeline-item-dyn').forEach(el => el.remove());
+
+      if (!exps.length) {
+        if (empty) empty.style.display = '';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      exps.forEach(exp => {
+        const endLabel = exp.current ? 'Present' : (exp.endDate || '');
+        const period   = [exp.startDate, endLabel].filter(Boolean).join(' – ');
+        const div = document.createElement('div');
+        div.className = 'timeline-item timeline-item-dyn';
+        div.innerHTML = `
+          <div class="timeline-dot"><i class="fa-solid fa-briefcase"></i></div>
+          <div>
+            <div class="timeline-title">${exp.title || ''}</div>
+            <div class="timeline-sub">${exp.company || ''}</div>
+            ${exp.location ? `<div class="timeline-sub" style="font-size:12px;opacity:.7">${exp.location}</div>` : ''}
+            <div class="timeline-period">${period}</div>
+            ${exp.description ? `<div style="font-size:13px;color:var(--text-secondary,#888);margin-top:6px;line-height:1.5">${exp.description}</div>` : ''}
+          </div>`;
+        list.appendChild(div);
+      });
+    }
+
+    /* ---------- COMPLETENESS SCORE ---------- */
+    function calcCompleteness(user) {
+      const checks = [
+        !!user.name,
+        !!user.email,
+        !!user.title,
+        !!user.location,
+        !!user.bio,
+        (Array.isArray(user.skills) ? user.skills.length : (user.skills||'').length) > 0,
+        (Array.isArray(user.experience) ? user.experience.length : 0) > 0,
+      ];
+      const pct = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+      const pctEl = document.getElementById('prof-completeness-pct');
+      const barEl = document.getElementById('prof-completeness-bar');
+      if (pctEl) pctEl.textContent = pct + '%';
+      if (barEl) setTimeout(() => barEl.style.width = pct + '%', 200);
+    }
+
+    // Run immediately, then again after Firebase auth settles
+    renderProfile();
+    setTimeout(renderProfile, 700);
+    document.addEventListener('fbReady', () => setTimeout(renderProfile, 300));
   });
 </script>
 </body>
