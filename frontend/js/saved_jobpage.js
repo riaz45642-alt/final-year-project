@@ -25,7 +25,7 @@ async function renderSavedJobs() {
         <h3>No saved jobs yet</h3>
         <p>Browse jobs and click the bookmark icon to save them here</p>
         <button class="btn btn-primary" style="margin-top:16px"
-          onclick="window.location.href='index.html'">Browse Jobs</button>
+          onclick="window.location.href='dashboard.html'">Browse Jobs</button>
       </div>`;
     return;
   }

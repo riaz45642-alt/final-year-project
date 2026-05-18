@@ -467,7 +467,7 @@
         }
       } catch(e) {}
       if (role === 'employer') window.location.replace('Employer_dashboard.html');
-      else window.location.replace('index.html');
+      else window.location.replace('dashboard.html');
     } else {
       // Not logged in — show the auth forms
       if (forms) forms.style.display = 'block';
@@ -492,7 +492,7 @@
           if (session.role) role = session.role;
         } catch(e) {}
         if (role === 'employer') window.location.href = 'Employer_dashboard.html';
-        else window.location.href = 'index.html';
+        else window.location.href = 'dashboard.html';
       }, 800);
     } catch (e) {
       showMsg('msg', friendlyError(e.code));
@@ -531,7 +531,7 @@
       showMsg('msg', 'Account created! Redirecting...', 'success');
       setTimeout(() => {
         if (role === 'employer') window.location.href = 'Employer_dashboard.html';
-        else window.location.href = 'index.html';
+        else window.location.href = 'dashboard.html';
       }, 800);
     } catch (e) {
       showMsg('msg', friendlyError(e.code));

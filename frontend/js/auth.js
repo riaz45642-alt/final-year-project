@@ -343,7 +343,7 @@ function handleLogin() {
       if (user) {
         if (typeof toast === 'function') toast('Welcome back, ' + user.name.split(' ')[0] + '! \uD83D\uDC4B', 'success');
         if (user.role === 'employer') window.location.href = 'Employer_dashboard.html';
-        // Seekers stay on job feed (index.html)
+        // Seekers stay on job feed (dashboard.html)
       }
     }, { once: true });
 
@@ -445,7 +445,7 @@ function logout() {
     } catch(e) {}
     if (typeof closeDropdown === 'function') closeDropdown();
     if (typeof toast === 'function') toast('You have been logged out.', 'info');
-    setTimeout(function () { window.location.href = 'landing.html'; }, 600);
+    setTimeout(function () { window.location.href = 'index.html'; }, 600);
   };
   if (window._fbSignOut) window._fbSignOut().then(doLogout).catch(doLogout);
   else doLogout();

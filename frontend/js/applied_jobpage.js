@@ -24,7 +24,7 @@ async function renderAppliedJobs() {
         <h3>No applications yet</h3>
         <p>Apply to jobs and track your progress here</p>
         <button class="btn btn-primary" style="margin-top:16px"
-          onclick="window.location.href='index.html'">Find Jobs</button>
+          onclick="window.location.href='dashboard.html'">Find Jobs</button>
       </div>`;
     return;
   }
@@ -57,7 +57,7 @@ async function renderAppliedJobs() {
       </div>
       <span class="status-badge ${cssClass}">● ${status}</span>
       <button class="btn btn-outline btn-sm"
-        onclick="window.location.href='index.html'">View Job</button>
+        onclick="window.location.href='dashboard.html'">View Job</button>
     </div>`;
   }).join('');
 }

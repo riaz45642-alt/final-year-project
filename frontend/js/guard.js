@@ -157,7 +157,7 @@
           // FIX: This now only triggers after DB confirms the role is NOT employer.
           // Previously this could trigger on stale localStorage cache.
           showToast('Employer Hub is only for employers.', 'warning');
-          setTimeout(function () { window.location.href = opts.fallbackUrl || 'index.html'; }, 900);
+          setTimeout(function () { window.location.href = opts.fallbackUrl || 'dashboard.html'; }, 900);
         }
         // role === 'employer' → access granted
       });

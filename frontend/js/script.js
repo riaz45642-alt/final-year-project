@@ -469,7 +469,7 @@ async function renderAppliedJobs() {
   if (!list) return;
   var apps = await DB.getApps();
   if (!AppState.currentUser || !apps.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No applications yet</h3><p>Apply to jobs and track your progress here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'index.html\'">Find Jobs</button></div>';
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No applications yet</h3><p>Apply to jobs and track your progress here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'dashboard.html\'">Find Jobs</button></div>';
     return;
   }
   var jobs = await getAllJobs();
@@ -503,7 +503,7 @@ async function renderSavedJobs() {
   var allJobs  = await getAllJobs();
   var saved    = allJobs.filter(function(j){ return savedIds.includes(j.id); });
   if (!saved.length) {
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔖</div><h3>No saved jobs yet</h3><p>Browse jobs and click the bookmark icon to save them here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'index.html\'">Browse Jobs</button></div>';
+    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔖</div><h3>No saved jobs yet</h3><p>Browse jobs and click the bookmark icon to save them here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'dashboard.html\'">Browse Jobs</button></div>';
     return;
   }
   grid.innerHTML = saved.map(function(job){ return buildJobCardHTML(job, savedIds, []); }).join("");
