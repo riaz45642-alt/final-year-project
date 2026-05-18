@@ -473,6 +473,27 @@ function timeAgo(ts) {
    START
 ───────────────────────────────────────────── */
 const PORT = process.env.PORT || 5000;
+
+// ?? PATCH � Switch user role between 'seeker' and 'employer'
+app.patch("/api/users/:uid/role", async (req, res) => {
+  const { uid } = req.params;
+  const { role } = req.body;
+  if (!["seeker", "employer"].includes(role)) {
+    return res.status(400).json({ error: "Invalid role. Must be seeker or employer." });
+  }
+  try {
+    const [result] = await db.query(
+      "UPDATE users SET role = ?, updated_at = ? WHERE uid = ?",
+      [role, Date.now(), uid]
+    );
+    if (result.affectedRows === 0)
+      return res.status(404).json({ error: "User not found." });
+    res.json({ success: true, uid, role });
+  } catch (err) {
+    console.error("Role switch error:", err);
+    res.status(500).json({ error: "Failed to update role." });
+  }
+});
 app.listen(PORT, function() {
   console.log("TalentBridge server running on port " + PORT);
   console.log("TiDB host:", process.env.DB_HOST);

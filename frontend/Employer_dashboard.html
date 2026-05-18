@@ -9,7 +9,25 @@
   <link rel="stylesheet" href="css/jobs.css">
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-</head>
+  <style>
+    .role-switch-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: transparent;
+      border: 2px solid #4f46e5;
+      color: #4f46e5;
+      border-radius: 8px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, transform 0.15s;
+      white-space: nowrap;
+      font-family: var(--font-body, inherit);
+    }
+    .role-switch-btn:hover { background: #4f46e5; color: #fff; transform: translateY(-1px); }
+  </style></head>
 <body>
 
 <!-- ═══ TOAST CONTAINER ═══ -->
@@ -86,7 +104,10 @@
             <div class="page-title">Employer Hub</div>
             <div class="page-subtitle">Post jobs, manage applications, and find top talent</div>
           </div>
+          <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
           <button class="btn btn-primary" onclick="switchTab('tab-post')">+ Post New Job</button>
+          <button class="role-switch-btn" onclick="switchToSeeker()"><i class="fa-solid fa-magnifying-glass"></i> Switch to Job Seeker</button>
+        </div>
         </div>
       </div>
       <!-- Stats -->
@@ -243,6 +264,27 @@
       });
     }
   });
-</script>
+    // ?? Role Switch: Employer ? Seeker
+    async function switchToSeeker() {
+      const user = firebase.auth().currentUser;
+      if (!user) { toast('Not logged in', 'error'); return; }
+      const confirmed = confirm('Switch to Job Seeker view?\nYour employer data is saved � you can switch back anytime.');
+      if (!confirmed) return;
+      try {
+        const res = await fetch(window.TB_API_BASE.replace('/api','') + '/api/users/' + user.uid + '/role', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: 'seeker' })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Switch failed');
+        toast('Switched to Job Seeker! Redirecting...', 'success');
+        setTimeout(() => window.location.href = 'dashboard.html', 900);
+      } catch (err) {
+        console.error(err);
+        toast('Could not switch role. Please try again.', 'error');
+      }
+    }
+  </script>
 </body>
 </html>
