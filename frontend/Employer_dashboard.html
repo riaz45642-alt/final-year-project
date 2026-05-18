@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ï»¿<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -268,7 +268,7 @@
     async function switchToSeeker() {
       const user = firebase.auth().currentUser;
       if (!user) { toast('Not logged in', 'error'); return; }
-      const confirmed = confirm('Switch to Job Seeker view?\nYour employer data is saved — you can switch back anytime.');
+      const confirmed = confirm('Switch to Job Seeker view?\nYour employer data is saved ï¿½ you can switch back anytime.');
       if (!confirmed) return;
       try {
         const res = await fetch(window.TB_API_BASE.replace('/api','') + '/api/users/' + user.uid + '/role', {
