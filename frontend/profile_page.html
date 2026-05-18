@@ -37,9 +37,10 @@
       <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
         <span id="nav-avatar-initials">AK</span>
       </div>
-      <div class="user-dropdown" id="user-dropdown">
-        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
-      </div>
+      <button class="nav-signout-btn" onclick="logout()" title="Sign Out">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+      <div class="user-dropdown" id="user-dropdown" style="display:none"></div>
     </div>
   </div>
 </nav>
@@ -68,9 +69,17 @@
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
         <div class="sidebar-user-avatar" id="sb-avatar"></div>
-        <div>
+        <div class="sidebar-user-details">
           <div class="sidebar-user-name" id="sb-name"></div>
           <div class="sidebar-user-role" id="sb-role"></div>
+        </div>
+        <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
+          <span class="role-toggle-label" id="toggle-label-left">JS</span>
+          <label class="role-toggle-switch">
+            <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
+            <span class="role-toggle-slider"></span>
+          </label>
+          <span class="role-toggle-label" id="toggle-label-right">EM</span>
         </div>
       </div>
     </div>

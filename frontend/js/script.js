@@ -224,6 +224,7 @@ function updateAuthUI() {
       if (sbAv)   sbAv.textContent   = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
       if (sbName) sbName.textContent = user.name;
       if (sbRole) sbRole.textContent = user.role === "employer" ? "Employer" : "Job Seeker";
+      syncRoleToggle();
     }
 
     var profName = document.getElementById("prof-name");
@@ -590,3 +591,72 @@ document.addEventListener("DOMContentLoaded", async function() {
     refreshEmployerStats();
   }
 });
+
+/* ──────────────────────────────────────────────
+   ROLE TOGGLE — switch between Job Seeker & Employer
+────────────────────────────────────────────── */
+var _roleToggleActive = false;
+
+function handleRoleToggle(isEmployer) {
+  var user = AppState.currentUser;
+  if (!user) return;
+
+  _roleToggleActive = true;
+  var newRole = isEmployer ? 'employer' : 'seeker';
+
+  // Lock checkbox immediately — prevent any snap back
+  var cb = document.getElementById('role-toggle-checkbox');
+  if (cb) { cb.checked = isEmployer; cb.disabled = true; }
+
+  // Update AppState immediately
+  user.role = newRole;
+  AppState.currentUser = user;
+
+  // Update ALL storage keys auth.js uses
+  var uid = user.uid || user.id;
+  try {
+    // Key 1: tb_user_role_{uid} — what auth.js reads on next load
+    if (uid) localStorage.setItem('tb_user_role_' + uid, newRole);
+    // Key 2: talentbridge_user
+    var s1 = JSON.parse(localStorage.getItem('talentbridge_user') || '{}');
+    s1.role = newRole; localStorage.setItem('talentbridge_user', JSON.stringify(s1));
+    // Key 3: tb_session
+    var s2 = JSON.parse(localStorage.getItem('tb_session') || '{}');
+    if (s2 && s2.uid) { s2.role = newRole; localStorage.setItem('tb_session', JSON.stringify(s2)); }
+  } catch(e) {}
+  try {
+    var ss = JSON.parse(sessionStorage.getItem('talentbridge_user') || '{}');
+    if (ss && ss.uid) { ss.role = newRole; sessionStorage.setItem('talentbridge_user', JSON.stringify(ss)); }
+  } catch(e) {}
+
+  // Update sidebar label
+  var sbRole = document.getElementById('sb-role');
+  if (sbRole) sbRole.textContent = isEmployer ? 'Employer' : 'Job Seeker';
+
+  // Save new role to DB using existing POST /api/users endpoint
+  var apiBase = (typeof window.TB_API_BASE !== 'undefined') ? window.TB_API_BASE : '';
+  var payload = Object.assign({}, user, { uid: uid, id: uid, role: newRole });
+
+  fetch(apiBase + '/users', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  }).then(function(res) { return res.json(); })
+  .then(function(data) {
+    console.log('[toggle] DB role updated to', newRole, data);
+  }).catch(function(err) {
+    console.warn('[toggle] DB update failed, redirecting anyway:', err);
+  }).finally(function() {
+    setTimeout(function() {
+      window.location.href = isEmployer ? 'Employer_dashboard.html' : 'dashboard.html';
+    }, 300);
+  });
+}
+
+function syncRoleToggle() {
+  if (_roleToggleActive) return;
+  var user = AppState.currentUser;
+  var cb = document.getElementById('role-toggle-checkbox');
+  if (!cb || !user) return;
+  cb.checked = (user.role === 'employer');
+}

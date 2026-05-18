@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -9,17 +9,7 @@
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/jobs.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-  <style>
-    .role-switch-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 8px 16px; background: transparent;
-      border: 2px solid #4f46e5; color: #4f46e5;
-      border-radius: 8px; font-size: 0.82rem; font-weight: 600;
-      cursor: pointer; transition: background 0.2s, color 0.2s, transform 0.15s;
-      white-space: nowrap; font-family: var(--font-body, inherit);
-    }
-    .role-switch-btn:hover { background: #4f46e5; color: #fff; transform: translateY(-1px); }
-  </style></head>
+</head>
 <body>
 
 <!-- ═══ TOAST CONTAINER ═══ -->
@@ -51,9 +41,10 @@
       <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
         <span id="nav-avatar-initials">AK</span>
       </div>
-      <div class="user-dropdown" id="user-dropdown">
-        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
-      </div>
+      <button class="nav-signout-btn" onclick="logout()" title="Sign Out">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+      <div class="user-dropdown" id="user-dropdown" style="display:none"></div>
     </div>
   </div>
 </nav>
@@ -82,9 +73,17 @@
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
         <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
-        <div>
+        <div class="sidebar-user-details">
           <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
           <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+        </div>
+        <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
+          <span class="role-toggle-label" id="toggle-label-left">JS</span>
+          <label class="role-toggle-switch">
+            <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
+            <span class="role-toggle-slider"></span>
+          </label>
+          <span class="role-toggle-label" id="toggle-label-right">EM</span>
         </div>
       </div>
     </div>
@@ -312,21 +311,6 @@
   document.addEventListener('DOMContentLoaded', async () => {
     await initCommon();
 
-    // Redirect employer to their dashboard — wait for Firebase to settle first
-    function checkEmployerRedirect() {
-      var u = (typeof AppState !== 'undefined' && AppState.currentUser)
-             || (function(){ try { var s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-      if (u && u.role === 'employer') {
-        window.location.href = 'Employer_dashboard.html';
-        return true;
-      }
-      return false;
-    }
-    if (!checkEmployerRedirect()) {
-      // Also check once Firebase auth resolves (handles page-refresh case)
-      document.addEventListener('fbReady', function() { checkEmployerRedirect(); }, { once: true });
-    }
-
     // Render job feed (async — hits TiDB)
     await filterAndRender();
 
@@ -356,88 +340,6 @@
       heroSearchField.addEventListener('keydown', function(e) { if (e.key === 'Enter') heroSearch(); });
     }
   });
-
-  // ?? Role Switch: Seeker ? Employer
-  async function switchToEmployer() {
-    const user = firebase.auth().currentUser;
-    if (!user) { toast('Not logged in', 'error'); return; }
-    const confirmed = confirm('Switch to Employer Hub?\nYour seeker data is saved � you can switch back anytime.');
-    if (!confirmed) return;
-    try {
-      const res = await fetch(window.TB_API_BASE.replace('/api','') + '/api/users/' + user.uid + '/role', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role: 'employer' })
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Switch failed');
-      toast('Switched to Employer Hub! Redirecting...', 'success');
-      setTimeout(() => window.location.href = 'Employer_dashboard.html', 900);
-    } catch (err) {
-      console.error(err);
-      toast('Could not switch role. Please try again.', 'error');
-    }
-  }
-  </script>
-
-  <script>
-    // ── Sidebar Role Toggle ──────────────────────────────────────
-    async function handleRoleToggle(targetRole) {
-      var seekerBtn   = document.getElementById('toggle-seeker');
-      var employerBtn = document.getElementById('toggle-employer');
-      if (!seekerBtn || !employerBtn) return;
-
-      // Already on this role
-      var currentRole = (typeof AppState !== 'undefined' && AppState.currentUser)
-                        ? AppState.currentUser.role : null;
-      if (currentRole === targetRole) return;
-
-      var user = (typeof firebase !== 'undefined') ? firebase.auth().currentUser : null;
-      if (!user) { if (typeof toast === 'function') toast('Please sign in first.', 'warning'); return; }
-
-      // Disable both buttons while switching
-      seekerBtn.disabled = true; employerBtn.disabled = true;
-      seekerBtn.textContent   = targetRole === 'seeker'   ? 'Switching...' : '🔍 Seeker';
-      employerBtn.textContent = targetRole === 'employer' ? 'Switching...' : '🏢 Employer';
-
-      try {
-        var base = (window.TB_API_BASE || '').replace(/\/api\/?$/, '');
-        var res  = await fetch(base + '/api/users/' + user.uid + '/role', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ role: targetRole })
-        });
-        var data = await res.json();
-        if (!res.ok) throw new Error(data.error || 'Switch failed');
-
-        if (typeof toast === 'function') toast('Switching to ' + (targetRole === 'employer' ? 'Employer Hub' : 'Job Seeker') + '...', 'success');
-        setTimeout(function () {
-          window.location.href = targetRole === 'employer' ? 'Employer_dashboard.html' : 'dashboard.html';
-        }, 800);
-      } catch (err) {
-        console.error('Role toggle error:', err);
-        if (typeof toast === 'function') toast('Could not switch role: ' + err.message, 'error');
-        // Re-enable buttons
-        seekerBtn.disabled = false; employerBtn.disabled = false;
-        seekerBtn.textContent   = '🔍 Seeker';
-        employerBtn.textContent = '🏢 Employer';
-      }
-    }
-
-    // Set active state on toggle when auth resolves
-    document.addEventListener('authRoleReady', function (e) {
-      var role = e.detail && e.detail.role;
-      var seekerBtn   = document.getElementById('toggle-seeker');
-      var employerBtn = document.getElementById('toggle-employer');
-      if (!seekerBtn || !employerBtn) return;
-      if (role === 'employer') {
-        employerBtn.classList.add('active');
-        seekerBtn.classList.remove('active');
-      } else {
-        seekerBtn.classList.add('active');
-        employerBtn.classList.remove('active');
-      }
-    });
-  </script>
+</script>
 </body>
 </html>
