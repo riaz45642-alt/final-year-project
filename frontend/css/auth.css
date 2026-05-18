@@ -1,0 +1,69 @@
+/* ═══════════════════════════════════════════════
+   TalentBridge — auth.css
+   Login / Signup modal styles
+═══════════════════════════════════════════════ */
+
+.auth-logo { text-align: center; margin-bottom: 24px; }
+.logo {
+  font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent);
+  display: inline-block;
+}
+.logo span { color: var(--text-primary); }
+.auth-title {
+  font-family: var(--font-display);
+  font-size: 22px; font-weight: 700;
+  text-align: center; margin-bottom: 4px;
+}
+.auth-subtitle { text-align: center; color: var(--text-secondary); font-size: 13.5px; margin-bottom: 24px; }
+
+.social-btn {
+  width: 100%; padding: 10px 14px;
+  border-radius: 10px; border: 1px solid var(--border-mid);
+  background: transparent;
+  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 9px; color: var(--text-primary); transition: background-color 0.15s;
+  margin-bottom: 10px;
+}
+.social-btn:hover { background: var(--bg); }
+
+.divider {
+  text-align: center; color: var(--text-muted);
+  font-size: 12.5px; margin: 14px 0;
+  position: relative;
+}
+.divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border-mid); }
+.divider span { background: white; padding: 0 12px; position: relative; }
+
+.auth-link { color: var(--accent); cursor: pointer; font-weight: 600; }
+.auth-link:hover { text-decoration: underline; }
+.form-toggle-row { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
+
+.input-group { margin-bottom: 13px; }
+.input-group label {
+  display: block; font-size: 12.5px; font-weight: 600;
+  color: var(--text-secondary); margin-bottom: 5px;
+}
+.input-group input, .input-group select {
+  width: 100%; padding: 9px 12px;
+  border-radius: 9px; border: 1px solid var(--border-mid);
+  background: var(--surface);
+  font-family: var(--font-body); font-size: 13.5px;
+  color: var(--text-primary); outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.input-group input:focus, .input-group select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(79,110,247,0.1);
+}
+.input-group .error-msg {
+  font-size: 11.5px; color: var(--danger);
+  margin-top: 4px; display: none;
+}
+.input-group.has-error input { border-color: var(--danger); }
+.input-group.has-error .error-msg { display: block; }
+.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+@media (max-width: 600px) {
+  .input-row { grid-template-columns: 1fr; }
+}

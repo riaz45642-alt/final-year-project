@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentBridge — Saved Jobs</title>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/jobs.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div id="toast-container"></div>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box" id="auth-modal-box"></div>
+</div>
+
+<!-- ═══ JOB DETAIL MODAL ═══ -->
+<div class="modal-overlay" id="job-detail-modal">
+  <div class="modal-box" id="job-detail-box" style="max-width:560px"></div>
+</div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav">
+  <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="site-logo site-logo-center" onclick="window.location.href='dashboard.html'">Talent<span>Bridge</span></div>
+  <div class="nav-links">
+    <div class="nav-divider"></div>
+    <div id="nav-logged-out" class="nav-auth-buttons">
+      <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
+      <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
+    </div>
+    <div id="nav-logged-in" class="nav-user-menu hidden">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+        <span id="nav-avatar-initials">AK</span>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile sidebar overlay -->
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ═══ APP LAYOUT ═══ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
+    <button class="sidebar-nav-item active" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
+    <button class="sidebar-nav-item" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
+    <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
+
+    <div class="sidebar-user-block hidden" id="sidebar-user-block">
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div>
+          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
+          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- SAVED JOBS -->
+    <section class="page active" id="page-saved">
+      <div class="page-header">
+        <div class="page-title">Saved Jobs</div>
+        <div class="page-subtitle">Jobs you've bookmarked for later</div>
+      </div>
+      <div id="saved-jobs-grid" class="job-grid"></div>
+    </section>
+
+  </main>
+</div><!-- end app-layout -->
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='dashboard.html'">
+    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-label">Jobs</span>
+  </button>
+  <button class="mobile-bottom-nav-item active" onclick="window.location.href='Save_job.html'">
+    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-label">Saved</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='AI_section.html'">
+    <span class="mobile-nav-icon">🤖</span>
+    <span class="mobile-nav-label">AI</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='cv_generator.html'">
+    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-label">CV</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='profile_page.html'">
+    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-label">Profile</span>
+  </button>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/script.js"></script>
+<script src="js/guard.js"></script>
+<script src="js/saved_jobpage.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async function() {
+    await initCommon();
+    // 🔒 ROLE GUARD: job seekers only
+    Guard.requireSeeker();
+    await renderSavedJobs();
+    // Re-render once Firebase settles (covers page-refresh with no session cache yet)
+    // FIX: Re-render after DB auth confirmed (real user data available)
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail) await renderSavedJobs();
+    }, { once: true });
+  });
+</script>
+</body>
+</html>

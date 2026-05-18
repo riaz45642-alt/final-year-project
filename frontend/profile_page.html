@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentBridge — My Profile</title>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="css/jobs.css">
+  <link rel="stylesheet" href="css/profile_page.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div id="toast-container"></div>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box" id="auth-modal-box"></div>
+</div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav">
+  <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="site-logo site-logo-center" onclick="window.location.href='dashboard.html'">Talent<span>Bridge</span></div>
+  <div class="nav-links">
+    <div class="nav-divider"></div>
+    <div id="nav-logged-out" class="nav-auth-buttons">
+      <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
+      <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
+    </div>
+    <div id="nav-logged-in" class="nav-user-menu hidden">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+        <span id="nav-avatar-initials">AK</span>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile sidebar overlay -->
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ═══ APP LAYOUT ═══ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="sidebar-nav-item active" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
+    <button class="sidebar-nav-item" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
+    <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
+
+    <div class="sidebar-user-block hidden" id="sidebar-user-block">
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-avatar" id="sb-avatar"></div>
+        <div>
+          <div class="sidebar-user-name" id="sb-name"></div>
+          <div class="sidebar-user-role" id="sb-role"></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- PROFILE -->
+    <section class="page active" id="page-profile">
+      <div class="page-header">
+        <div class="page-title">My Profile</div>
+        <div class="page-subtitle">Manage your career profile and visibility</div>
+      </div>
+      <div class="profile-hero-banner">
+        <div class="profile-hero-inner">
+          <div class="profile-avatar-circle" id="prof-avatar"></div>
+          <div>
+            <div class="profile-display-name" id="prof-name"></div>
+            <div class="profile-title" id="prof-title-sub"></div>
+            <div class="profile-tag-list">
+              <span class="profile-tag"><i class="fa-solid fa-location-arrow"></i> </span>
+              <span class="profile-tag"><i class="fa-solid fa-briefcase"></i></span>
+              <span class="profile-tag"><i class="fa-solid fa-star"></i></span>
+            </div>
+          </div>
+          <button class="edit-profile-btn" onclick="window.location.href='Profile_Edit.html'"><i class="fa-solid fa-pen"></i> Edit Profile</button>
+        </div>
+      </div>
+      <div class="profile-two-col-grid">
+        <div>
+          <!-- Work Experience — dynamic -->
+          <div class="card mb-16">
+            <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+              <span><i class="fa-solid fa-briefcase"></i> Work Experience</span>
+              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500"></a>
+            </div>
+            <div id="prof-experience-list">
+              <!-- filled by JS -->
+              <div style="color:var(--text-secondary,#888);font-size:13px;text-align:center;padding:16px 0" id="prof-exp-empty">No experience added yet — <a href="Profile_Edit.html" style="color:var(--accent)"></a></div>
+            </div>
+          </div>
+          <!-- Education — stays static for now -->
+          <div class="card">
+            <div class="section-title"><i class="fa-solid fa-book-open"></i> Education</div>
+            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-computer"></i></div><div><div class="timeline-title"></div><div class="timeline-sub"></div><div class="timeline-period"></div></div></div>
+            <div class="timeline-item"><div class="timeline-dot"><i class="fa-solid fa-compass-drafting"></i></div><div><div class="timeline-title"></div><div class="timeline-sub"></div><div class="timeline-period"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <!-- Skills — dynamic -->
+          <div class="card mb-16">
+            <div class="section-title" style="display:flex;align-items:center;justify-content:space-between">
+              <span><i class="fa-solid fa-star"></i> Skills</span>
+              <a href="Profile_Edit.html" style="font-size:12px;color:var(--accent);text-decoration:none;font-weight:500">+ Edit</a>
+            </div>
+            <div class="skills-grid" id="prof-skills-grid">
+              <!-- filled by JS -->
+              <span style="color:var(--text-secondary,#888);font-size:13px" id="prof-skills-empty"></span><a href="Profile_Edit.html" style="color:var(--accent)">add some</a></span>
+            </div>
+          </div>
+        
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- end app-layout -->
+
+
+
+<script src="js/config.js"></script>
+<script src="js/script.js"></script>
+<script src="js/guard.js"></script>
+<script src="js/auth.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', async () => {
+    await (initCommon && initCommon());
+    Guard.requireLogin();
+
+    // FIX: Render with cached session immediately for instant display
+    await renderProfile();
+
+    // FIX: Re-render once DB role + profile data confirmed (replaces fbReady)
+    // authRoleReady fires after TiDB fetch, so profile fields are fully populated
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail) await renderProfile();
+    }, { once: true });
+
+    async function renderProfile() {
+      // Try AppState first, then session cache
+      let user = (typeof AppState !== 'undefined' && AppState.currentUser)
+               || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+
+      if (!user) return;
+
+      // ── Fetch full profile from TiDB (richer than session cache) ──
+      try {
+        const dbProfile = await DB.getProfile(user.id);
+        if (dbProfile) {
+          // Merge DB data into user object (DB is source of truth)
+          user = Object.assign({}, user, dbProfile);
+          // Keep AppState in sync
+          if (typeof AppState !== 'undefined') AppState.currentUser = user;
+        }
+      } catch(e) { /* offline — fall back to session data */ }
+
+      // ── Activity counts (async) ──
+      const [apps, saved] = await Promise.all([
+        DB.getApps().catch(() => []),
+        DB.getSaved().catch(() => []),
+      ]);
+      const appsCountEl  = document.getElementById('prof-apps-count');
+      const savedCountEl = document.getElementById('prof-saved-count');
+      if (appsCountEl)  appsCountEl.textContent  = apps.length;
+      if (savedCountEl) savedCountEl.textContent = saved.length;
+
+      // ── Hero banner ──
+      const profName   = document.getElementById('prof-name');
+      const profSub    = document.getElementById('prof-title-sub');
+      const profAvatar = document.getElementById('prof-avatar');
+      if (profName)   profName.textContent   = user.name || 'User';
+      if (profAvatar) profAvatar.textContent = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
+
+      // Sub-title: show professional title if saved, else role label
+      const titleLabel = user.title
+        ? user.title + (user.location ? ' · ' + user.location : '')
+        : (user.role === 'employer' ? 'Employer Account' : 'Job Seeker');
+      if (profSub) profSub.textContent = titleLabel;
+
+      // ── Skills ──
+      renderSkills(user);
+
+      // ── Experience ──
+      renderExperience(user);
+
+      // ── Profile completeness ──
+      calcCompleteness(user);
+    }
+
+    /* ---------- SKILLS ---------- */
+    function renderSkills(user) {
+      const grid  = document.getElementById('prof-skills-grid');
+      const empty = document.getElementById('prof-skills-empty');
+      if (!grid) return;
+
+      const raw = user.skills;
+      let skills = [];
+      if (Array.isArray(raw) && raw.length) {
+        skills = raw.map(s => typeof s === 'string' ? { name: s, level: '' } : s);
+      } else if (typeof raw === 'string' && raw.trim()) {
+        skills = raw.split(',').map(s => ({ name: s.trim(), level: '' })).filter(s => s.name);
+      }
+
+      // Remove old chips
+      grid.querySelectorAll('.skill-chip,.skill-chip-dyn').forEach(el => el.remove());
+
+      if (!skills.length) {
+        if (empty) empty.style.display = '';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      const levelColor = { Expert:'green', Advanced:'green', Intermediate:'', Beginner:'orange', '':'', undefined:'' };
+      skills.forEach(skill => {
+        const chip = document.createElement('span');
+        const cls  = levelColor[skill.level] || '';
+        chip.className = 'skill-chip skill-chip-dyn' + (cls ? ' ' + cls : '');
+        chip.title = skill.level || '';
+        chip.textContent = skill.name;
+        grid.appendChild(chip);
+      });
+    }
+
+    /* ---------- EXPERIENCE ---------- */
+    function renderExperience(user) {
+      const list  = document.getElementById('prof-experience-list');
+      const empty = document.getElementById('prof-exp-empty');
+      if (!list) return;
+
+      const exps = Array.isArray(user.experience) ? user.experience : [];
+      list.querySelectorAll('.timeline-item-dyn').forEach(el => el.remove());
+
+      if (!exps.length) {
+        if (empty) empty.style.display = '';
+        return;
+      }
+      if (empty) empty.style.display = 'none';
+
+      exps.forEach(exp => {
+        const endLabel = exp.current ? 'Present' : (exp.endDate || '');
+        const period   = [exp.startDate, endLabel].filter(Boolean).join(' – ');
+        const div = document.createElement('div');
+        div.className = 'timeline-item timeline-item-dyn';
+        div.innerHTML = `
+          <div class="timeline-dot"><i class="fa-solid fa-briefcase"></i></div>
+          <div>
+            <div class="timeline-title">${exp.title || ''}</div>
+            <div class="timeline-sub">${exp.company || ''}</div>
+            ${exp.location ? `<div class="timeline-sub" style="font-size:12px;opacity:.7">${exp.location}</div>` : ''}
+            <div class="timeline-period">${period}</div>
+            ${exp.description ? `<div style="font-size:13px;color:var(--text-secondary,#888);margin-top:6px;line-height:1.5">${exp.description}</div>` : ''}
+          </div>`;
+        list.appendChild(div);
+      });
+    }
+
+    /* ---------- COMPLETENESS SCORE ---------- */
+    function calcCompleteness(user) {
+      const checks = [
+        !!user.name,
+        !!user.email,
+        !!user.title,
+        !!user.location,
+        !!user.bio,
+        (Array.isArray(user.skills) ? user.skills.length : (user.skills||'').length) > 0,
+        (Array.isArray(user.experience) ? user.experience.length : 0) > 0,
+      ];
+      const pct = Math.round((checks.filter(Boolean).length / checks.length) * 100);
+      const pctEl = document.getElementById('prof-completeness-pct');
+      const barEl = document.getElementById('prof-completeness-bar');
+      if (pctEl) pctEl.textContent = pct + '%';
+      if (barEl) setTimeout(() => barEl.style.width = pct + '%', 200);
+    }
+
+    // (authRoleReady listener above handles DB-accurate re-render)
+  });
+</script>
+</body>
+</html>

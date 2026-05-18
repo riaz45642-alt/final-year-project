@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TalentBridge — Employer Hub</title>
+  <link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/jobs.css">
+  <link rel="stylesheet" href="css/auth.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div id="toast-container"></div>
+
+<!-- ═══ AUTH MODAL ═══ -->
+<div class="modal-overlay" id="auth-modal">
+  <div class="modal-box" id="auth-modal-box"></div>
+</div>
+
+<!-- ═══ TOP NAV ═══ -->
+<nav class="top-nav">
+  <button class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleMobileSidebar()" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="site-logo site-logo-center" onclick="window.location.href='dashboard.html'">Talent<span>Bridge</span></div>
+  <div class="nav-links">
+    <div class="nav-divider"></div>
+    <div id="nav-logged-out" class="nav-auth-buttons">
+      <button class="nav-link-btn" onclick="openAuth('login')">Sign In</button>
+      <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
+    </div>
+    <div id="nav-logged-in" class="nav-user-menu hidden">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+        <span id="nav-avatar-initials">AK</span>
+      </div>
+      <div class="user-dropdown" id="user-dropdown">
+        <div class="dropdown-item danger" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> Sign Out</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Mobile sidebar overlay -->
+<div class="mobile-sidebar-overlay" id="mobile-sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+<!-- ═══ APP LAYOUT ═══ -->
+<div class="app-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-section-label">Main</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-house"></i></span>Job Feed</button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='Save_job.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-bookmark"></i></span>Saved Jobs<span class="badge" id="sb-saved-count">0</span></button>
+    <button class="sidebar-nav-item" data-role="seeker" onclick="window.location.href='My_applications.html';closeMobileSidebar()"><span class="nav-icon"></span>My Applications<span class="badge" id="sb-applied-count">0</span></button>
+
+    <div class="sidebar-section-label">Tools</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
+
+    <div class="sidebar-section-label">Account</div>
+    <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
+    <button class="sidebar-nav-item active" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
+    <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
+
+    <div class="sidebar-user-block hidden" id="sidebar-user-block">
+      <div class="sidebar-user-info">
+        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div>
+          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
+          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN CONTENT ═══ -->
+  <main class="main-content">
+
+    <!-- EMPLOYER DASHBOARD -->
+    <section class="page active" id="page-employer">
+      <div class="page-header">
+        <div class="flex-between" style="flex-wrap:wrap;gap:12px">
+          <div>
+            <div class="page-title">Employer Hub</div>
+            <div class="page-subtitle">Post jobs, manage applications, and find top talent</div>
+          </div>
+          <button class="btn btn-primary" onclick="switchTab('tab-post')">+ Post New Job</button>
+        </div>
+      </div>
+      <!-- Stats -->
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Active Jobs</div><div class="stat-value" id="emp-stat-jobs">0</div><div class="stat-change up" id="emp-stat-jobs-change">No jobs yet</div></div>
+        <div class="stat-card"><div class="stat-label">Total Applicants</div><div class="stat-value" id="emp-stat-apps">0</div><div class="stat-change up" id="emp-stat-apps-change">No applicants yet</div></div>
+        <div class="stat-card"><div class="stat-label">Shortlisted</div><div class="stat-value" id="emp-stat-short">0</div><div class="stat-change up" id="emp-stat-short-change">None shortlisted</div></div>
+        <div class="stat-card"><div class="stat-label">Hired</div><div class="stat-value" id="emp-stat-hired">0</div><div class="stat-change up" id="emp-stat-hired-change">None hired yet</div></div>
+      </div>
+      <!-- Tabs -->
+      <div class="tab-row">
+        <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
+        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps')">👥 Applicants</button>
+        <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
+      </div>
+      <!-- Tab: My Jobs -->
+      <div class="tab-panel active" id="tab-jobs">
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Job Title</th><th>Department</th><th>Posted</th><th>Applicants</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="posted-jobs-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Applicants -->
+      <div class="tab-panel" id="tab-apps">
+        <div class="card">
+          <div class="search-row" style="margin-bottom:16px">
+            <div class="search-input-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search applicants..." oninput="toast('Searching applicants...','info')"></div>
+            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Filter applied','info')">
+              <option>All Jobs</option><option>Senior Frontend Dev</option><option>UI/UX Designer</option>
+            </select>
+            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Status filter applied','info')">
+              <option>All Status</option><option>New</option><option>Shortlisted</option><option>Rejected</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Applicant</th><th>Applied For</th><th>Match</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <tbody id="applicants-tbody">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <!-- Tab: Post Job -->
+      <div class="tab-panel" id="tab-post">
+        <div class="card post-job-form">
+          <div class="section-title" style="font-size:18px;margin-bottom:20px">📣 Post a New Job</div>
+          <div class="form-group"><label>Job Title *</label><input type="text" id="pj-title" placeholder="e.g., Senior React Developer"></div>
+          <div class="form-row">
+            <div class="form-group"><label>Department</label><input type="text" id="pj-dept" placeholder="Engineering"></div>
+            <div class="form-group"><label>Job Type *</label><select id="pj-type"><option>Full-time</option><option>Part-time</option><option>Contract</option><option>Internship</option><option>Freelance</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Location *</label><input type="text" id="pj-location" placeholder="Lahore, Pakistan"></div>
+            <div class="form-group"><label>Work Mode</label><select id="pj-mode"><option>On-site</option><option>Remote</option><option>Hybrid</option></select></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label>Min Salary (Rs/month)</label><input type="text" id="pj-sal-min" placeholder="80,000"></div>
+            <div class="form-group"><label>Max Salary (Rs/month)</label><input type="text" id="pj-sal-max" placeholder="150,000"></div>
+          </div>
+          <div class="form-group"><label>Job Category</label>
+            <select id="pj-category">
+              <option value="tech">Technology</option><option value="medical">Medical</option>
+              <option value="teaching">Teaching / Education</option><option value="civil">Civil / Engineering</option>
+              <option value="finance">Finance</option><option value="design">Design</option>
+              <option value="legal">Legal</option><option value="logistics">Logistics</option>
+            </select>
+          </div>
+          <div class="form-group"><label>Experience Required</label>
+            <select id="pj-exp"><option>Fresh / No Experience</option><option>1-2 Years</option><option>3-5 Years</option><option>5+ Years</option><option>Senior Level</option></select>
+          </div>
+          <div class="form-group"><label>Job Description *</label><textarea id="pj-desc" rows="5" placeholder="Describe the role, responsibilities, requirements..."></textarea></div>
+          <div class="form-group"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="React, Node.js, PostgreSQL"></div>
+          <div class="form-group"><label>Application Deadline</label><input type="date" id="pj-deadline"></div>
+          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" id="post-job-btn" onclick="postJob()">📣 Publish Job</button>
+            <button class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
+            <button class="btn" style="color:var(--text-muted);border:1px solid var(--border)" onclick="toast('Preview mode coming soon','info')">👁️ Preview</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div><!-- end app-layout -->
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='dashboard.html'">
+    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-label">Jobs</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='Save_job.html'">
+    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-label">Saved</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='AI_section.html'">
+    <span class="mobile-nav-icon">🤖</span>
+    <span class="mobile-nav-label">AI</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='cv_generator.html'">
+    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-label">CV</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="window.location.href='profile_page.html'">
+    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-label">Profile</span>
+  </button>
+</nav>
+
+<script src="js/config.js"></script>
+<script src="js/script.js"></script>
+<script src="js/guard.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/Employer_dashboard.js"></script>
+
+<script>
+  // FIX: Load dashboard data only AFTER authRoleReady fires (DB role confirmed).
+  // Original code called loadDashboard() on DOMContentLoaded, before the DB
+  // role fetch completed. This caused two problems:
+  //   1. Guard.requireEmployer() saw a stale/wrong role and redirected seekers
+  //      who are actually employers (or vice versa).
+  //   2. refreshEmployerStats() ran with no user context, showing empty data.
+  document.addEventListener('DOMContentLoaded', async function() {
+    await (initCommon && initCommon());
+
+    // 🔒 ROLE GUARD: waits for DB role before enforcing
+    Guard.requireEmployer();
+
+    async function loadDashboard() {
+      var user = AppState && AppState.currentUser;
+      if (!user || user.role !== 'employer') return; // guard will redirect
+      refreshEmployerStats   && await refreshEmployerStats();
+      renderPostedJobsTable  && await renderPostedJobsTable();
+      renderApplicantsTable  && await renderApplicantsTable();
+    }
+
+    // FIX: Wait for authRoleReady (DB role confirmed) before loading data
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail && e.detail.role === 'employer') {
+        await loadDashboard();
+      }
+    }, { once: true });
+
+    // Also try immediately in case auth resolved before this listener
+    if (window._authResolved) {
+      window._authResolved.then(async function(user) {
+        if (user && user.role === 'employer') await loadDashboard();
+      });
+    }
+  });
+</script>
+</body>
+</html>
