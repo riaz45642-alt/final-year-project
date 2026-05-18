@@ -149,7 +149,11 @@
 <script src="../js/auth.js"></script>
 <script>
   document.addEventListener('DOMContentLoaded', async () => {
-    initCommon && initCommon();
+    await (initCommon && initCommon());
+    Guard.requireLogin();
+    await renderProfile();
+    // Re-render once Firebase auth settles (covers page-refresh case)
+    document.addEventListener('fbReady', async function() { await renderProfile(); }, { once: true });
 
     async function renderProfile() {
       // Try AppState first, then session cache

@@ -33,6 +33,7 @@ app.get("/api/setup", async (req, res) => {
         role        VARCHAR(20)  DEFAULT 'seeker',
         avatar      VARCHAR(10),
         title       VARCHAR(255),
+        location    VARCHAR(255),
         bio         TEXT,
         skills      TEXT,
         experience  TEXT,
@@ -109,6 +110,14 @@ app.get("/api/setup", async (req, res) => {
         FOREIGN KEY (user_id) REFERENCES users(uid) ON DELETE CASCADE
       )
     `);
+
+    // Migration: add location column to users if it doesn't exist yet
+    try {
+      await db.query("ALTER TABLE users ADD COLUMN location VARCHAR(255) DEFAULT ''");
+    } catch(e) {
+      // Column already exists — safe to ignore duplicate column error
+      if (!e.message.includes('Duplicate column')) throw e;
+    }
 
     res.json({ success: true, message: "All tables created successfully in TiDB." });
   } catch (err) {
@@ -260,18 +269,18 @@ app.delete("/api/saved/:userId/:jobId", async (req, res) => {
 
 /* ─────────────────────────────────────────────
    APPLICATIONS ROUTES
+   IMPORTANT: specific paths (/check, /employer)
+   must be declared BEFORE /:userId or Express
+   will match /:userId first and never reach them.
 ───────────────────────────────────────────── */
-// 🔧 TiDB: GET applications for a seeker from applications table
-app.get("/api/applications/:userId", async (req, res) => {
+// 🔧 TiDB: GET — check if a user has applied to a specific job
+app.get("/api/applications/check/:userId/:jobId", async (req, res) => {
   try {
     const [rows] = await db.query(
-      "SELECT * FROM applications WHERE user_id = ? ORDER BY applied_at DESC",
-      [req.params.userId]
+      "SELECT id FROM applications WHERE user_id = ? AND job_id = ? LIMIT 1",
+      [req.params.userId, req.params.jobId]
     );
-    res.json(rows.map(r => ({
-      id: r.id, jobId: r.job_id, userId: r.user_id,
-      seekerName: r.seeker_name, appliedAt: r.applied_at, status: r.status
-    })));
+    res.json({ applied: rows.length > 0 });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -296,14 +305,17 @@ app.get("/api/applications/employer/:uid", async (req, res) => {
   }
 });
 
-// 🔧 TiDB: GET — check if a user has applied to a specific job
-app.get("/api/applications/check/:userId/:jobId", async (req, res) => {
+// 🔧 TiDB: GET applications for a seeker from applications table
+app.get("/api/applications/:userId", async (req, res) => {
   try {
     const [rows] = await db.query(
-      "SELECT id FROM applications WHERE user_id = ? AND job_id = ? LIMIT 1",
-      [req.params.userId, req.params.jobId]
+      "SELECT * FROM applications WHERE user_id = ? ORDER BY applied_at DESC",
+      [req.params.userId]
     );
-    res.json({ applied: rows.length > 0 });
+    res.json(rows.map(r => ({
+      id: r.id, jobId: r.job_id, userId: r.user_id,
+      seekerName: r.seeker_name, appliedAt: r.applied_at, status: r.status
+    })));
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -348,7 +360,7 @@ app.get("/api/users/:uid", async (req, res) => {
     const u = rows[0];
     res.json({
       id: u.uid, name: u.name, email: u.email, role: u.role,
-      avatar: u.avatar, title: u.title, bio: u.bio,
+      avatar: u.avatar, title: u.title, location: u.location || '', bio: u.bio,
       skills: u.skills ? JSON.parse(u.skills) : [],
       experience: u.experience ? JSON.parse(u.experience) : [],
     });
@@ -363,15 +375,15 @@ app.post("/api/users", async (req, res) => {
   try {
     const u = req.body;
     await db.query(
-      `INSERT INTO users (uid, name, email, role, avatar, title, bio, skills, experience, joined_at, updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?)
+      `INSERT INTO users (uid, name, email, role, avatar, title, location, bio, skills, experience, joined_at, updated_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
        ON DUPLICATE KEY UPDATE
          name=VALUES(name), email=VALUES(email), role=VALUES(role),
-         avatar=VALUES(avatar), title=VALUES(title), bio=VALUES(bio),
+         avatar=VALUES(avatar), title=VALUES(title), location=VALUES(location), bio=VALUES(bio),
          skills=VALUES(skills), experience=VALUES(experience), updated_at=VALUES(updated_at)`,
       [
         u.id||u.uid, u.name||"", u.email||"", u.role||"seeker",
-        u.avatar||"", u.title||"", u.bio||"",
+        u.avatar||"", u.title||"", u.location||"", u.bio||"",
         JSON.stringify(u.skills||[]), JSON.stringify(u.experience||[]),
         u.joinedAt||Date.now(), Date.now()
       ]

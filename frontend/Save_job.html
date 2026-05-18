@@ -130,6 +130,8 @@
     // 🔒 ROLE GUARD: job seekers only
     Guard.requireSeeker();
     await renderSavedJobs();
+    // Re-render once Firebase settles (covers page-refresh with no session cache yet)
+    document.addEventListener('fbReady', async function() { await renderSavedJobs(); }, { once: true });
   });
 </script>
 </body>

@@ -44,14 +44,27 @@ const _FB_CONFIG = {
     window._fbProfile = (u,d)  => updateProfile(u, d);
 
     /* auth state observer */
-    onAuthStateChanged(auth, fbUser => {
+    onAuthStateChanged(auth, async fbUser => {
       if (fbUser) {
-        // 🔥 Firebase: build app user from Firebase token
-        const appUser = window._toAppUser(fbUser); // reads saved role from localStorage cache
-        // 🔧 TiDB: upsert user profile row in TiDB on every login
+        // Build app user from Firebase token + localStorage role cache
+        const appUser = window._toAppUser(fbUser);
         if (typeof DB !== 'undefined') {
-          DB.setSession(appUser);                   // update localStorage session cache
-          DB.saveProfile(appUser);                  // 🔧 TiDB: POST /api/users — upsert into TiDB users table
+          DB.setSession(appUser);
+          // Fetch full profile from TiDB so role/title/bio are accurate
+          try {
+            const dbProfile = await fetch(
+              (window.TB_API_BASE || 'http://localhost:5000/api') + '/users/' + fbUser.uid
+            ).then(r => r.ok ? r.json() : null);
+            if (dbProfile && dbProfile.role) {
+              appUser.role  = dbProfile.role;
+              appUser.title = dbProfile.title || appUser.title;
+              appUser.bio   = dbProfile.bio   || appUser.bio;
+              // Keep localStorage role cache in sync with DB
+              try { localStorage.setItem('tb_user_role_' + fbUser.uid, dbProfile.role); } catch(e) {}
+              DB.setSession(appUser);
+            }
+          } catch(e) { /* offline — use cached role */ }
+          DB.saveProfile(appUser);
         }
         if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
       } else {
@@ -293,7 +306,11 @@ function handleLogin() {
 
   window._fbSignIn(emailVal, passVal).then(function (cred) {
     var appUser = window._toAppUser(cred.user);
-    if (typeof DB !== 'undefined')       DB.setSession(appUser);
+    if (typeof DB !== 'undefined') {
+      DB.setSession(appUser);
+      // Sync profile to TiDB on every login (keeps role/name fresh)
+      DB.saveProfile(appUser).catch(function(e){ console.warn('[handleLogin] TiDB save failed', e); });
+    }
     if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
     closeAuth();
     if (typeof updateAuthUI === 'function') updateAuthUI();
@@ -345,7 +362,13 @@ function handleSignup() {
     });
   }).then(function (cred) {
     var appUser = Object.assign({}, window._toAppUser(cred.user, role), { name: fullName });
-    if (typeof DB !== 'undefined')       DB.setSession(appUser);
+    // Persist role by UID key (same key _toAppUser reads on next load)
+    try { localStorage.setItem('tb_user_role_' + cred.user.uid, role); } catch(e) {}
+    if (typeof DB !== 'undefined') {
+      DB.setSession(appUser);
+      // Save profile to TiDB so data persists across devices
+      DB.saveProfile(appUser).catch(function(e){ console.warn('[handleSignup] TiDB save failed', e); });
+    }
     if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
     closeAuth();
     if (typeof updateAuthUI === 'function') updateAuthUI();

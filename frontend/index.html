@@ -299,43 +299,51 @@
 <script src="../js/guard.js"></script>
 <script src="../js/auth.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    initCommon();
-    // If logged-in employer lands on job feed, send them to their dashboard
-    Guard && (function() {
+  document.addEventListener('DOMContentLoaded', async () => {
+    await initCommon();
+
+    // Redirect employer to their dashboard — wait for Firebase to settle first
+    function checkEmployerRedirect() {
       var u = (typeof AppState !== 'undefined' && AppState.currentUser)
              || (function(){ try { var s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
       if (u && u.role === 'employer') {
         window.location.href = 'Employer_dashboard.html';
-        return;
+        return true;
       }
-    })();
-    // Render job feed
-    filterAndRender();
+      return false;
+    }
+    if (!checkEmployerRedirect()) {
+      // Also check once Firebase auth resolves (handles page-refresh case)
+      document.addEventListener('fbReady', function() { checkEmployerRedirect(); }, { once: true });
+    }
+
+    // Render job feed (async — hits TiDB)
+    await filterAndRender();
+
     // Live search
-    const mainSearch = document.getElementById('main-search');
+    var mainSearch = document.getElementById('main-search');
     if (mainSearch) {
-      mainSearch.addEventListener('input', e => {
+      mainSearch.addEventListener('input', function(e) {
         AppState.searchQuery = e.target.value;
         filterAndRender();
       });
     }
-    // Sort dropdown
-    const sortDropdown = document.getElementById('sort-select');
+    // Sort dropdown (async — getAllJobs hits TiDB)
+    var sortDropdown = document.getElementById('sort-select');
     if (sortDropdown) {
-      sortDropdown.addEventListener('change', e => {
-        let sortedJobs = getAllJobs();
-        if (AppState.activeCategory !== 'all') sortedJobs = sortedJobs.filter(j => j.category === AppState.activeCategory);
-        if (e.target.value === 'newest')      sortedJobs.sort(() => 0);
-        if (e.target.value === 'salary-high') sortedJobs.sort((a, b) => (b.salaryMax || 0) - (a.salaryMax || 0));
-        if (e.target.value === 'salary-low')  sortedJobs.sort((a, b) => (a.salaryMin || 0) - (b.salaryMin || 0));
-        renderJobFeed(sortedJobs);
+      sortDropdown.addEventListener('change', async function(e) {
+        var sortedJobs = await getAllJobs();
+        if (AppState.activeCategory !== 'all') sortedJobs = sortedJobs.filter(function(j){ return j.category === AppState.activeCategory; });
+        if (e.target.value === 'newest')      sortedJobs.sort(function(){ return 0; });
+        if (e.target.value === 'salary-high') sortedJobs.sort(function(a,b){ return (b.salaryMax||0)-(a.salaryMax||0); });
+        if (e.target.value === 'salary-low')  sortedJobs.sort(function(a,b){ return (a.salaryMin||0)-(b.salaryMin||0); });
+        await renderJobFeed(sortedJobs);
       });
     }
     // Hero search enter key
-    const heroSearchField = document.getElementById('hero-search-input');
+    var heroSearchField = document.getElementById('hero-search-input');
     if (heroSearchField) {
-      heroSearchField.addEventListener('keydown', e => { if (e.key === 'Enter') heroSearch(); });
+      heroSearchField.addEventListener('keydown', function(e) { if (e.key === 'Enter') heroSearch(); });
     }
   });
 </script>

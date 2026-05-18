@@ -209,14 +209,19 @@
 <script src="../js/Employer_dashboard.js"></script>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-    initCommon && initCommon();
+  document.addEventListener('DOMContentLoaded', async function() {
+    await (initCommon && initCommon());
     // 🔒 ROLE GUARD: only employers allowed
     Guard.requireEmployer();
-    // Load dashboard data (guard redirects if wrong role; this runs for valid employers)
-    refreshEmployerStats   && refreshEmployerStats();
-    renderPostedJobsTable  && renderPostedJobsTable();
-    renderApplicantsTable  && renderApplicantsTable();
+    // Load dashboard data
+    async function loadDashboard() {
+      refreshEmployerStats   && await refreshEmployerStats();
+      renderPostedJobsTable  && await renderPostedJobsTable();
+      renderApplicantsTable  && await renderApplicantsTable();
+    }
+    await loadDashboard();
+    // Re-load once Firebase auth resolves (covers page-refresh case)
+    document.addEventListener('fbReady', async function() { await loadDashboard(); }, { once: true });
   });
 </script>
 </body>
