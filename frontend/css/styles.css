@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════════════
+﻿/* ═══════════════════════════════════════════════
    TalentBridge — Smart Job Portal
    styles.css  —  Global / Common Styles
 ═══════════════════════════════════════════════ */
@@ -431,4 +431,54 @@ body {
 @media (max-width: 380px) {
   .mobile-nav-label { font-size: 9px; }
   .mobile-nav-icon { font-size: 16px; }
+}
+/* ── Role Switch Toggle (sidebar) ── */
+.role-toggle-wrap {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.role-toggle-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  font-weight: 600;
+}
+.role-toggle {
+  display: flex;
+  background: var(--bg-subtle, #f3f4f6);
+  border-radius: 20px;
+  padding: 3px;
+  gap: 2px;
+  border: 1px solid var(--border, #e5e7eb);
+  width: 100%;
+}
+.role-toggle-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 16px;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+  background: transparent;
+  color: var(--text-muted, #888);
+  font-family: var(--font-body, inherit);
+  white-space: nowrap;
+}
+.role-toggle-btn.active {
+  background: #4f46e5;
+  color: #fff;
+  box-shadow: 0 1px 6px rgba(79,70,229,.35);
+}
+.role-toggle-btn:not(.active):hover {
+  background: var(--border, #e5e7eb);
+  color: var(--text-primary, #111);
+}
+.role-toggle-btn:disabled {
+  opacity: .6;
+  cursor: not-allowed;
 }

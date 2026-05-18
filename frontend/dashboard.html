@@ -379,5 +379,65 @@
     }
   }
   </script>
+
+  <script>
+    // ── Sidebar Role Toggle ──────────────────────────────────────
+    async function handleRoleToggle(targetRole) {
+      var seekerBtn   = document.getElementById('toggle-seeker');
+      var employerBtn = document.getElementById('toggle-employer');
+      if (!seekerBtn || !employerBtn) return;
+
+      // Already on this role
+      var currentRole = (typeof AppState !== 'undefined' && AppState.currentUser)
+                        ? AppState.currentUser.role : null;
+      if (currentRole === targetRole) return;
+
+      var user = (typeof firebase !== 'undefined') ? firebase.auth().currentUser : null;
+      if (!user) { if (typeof toast === 'function') toast('Please sign in first.', 'warning'); return; }
+
+      // Disable both buttons while switching
+      seekerBtn.disabled = true; employerBtn.disabled = true;
+      seekerBtn.textContent   = targetRole === 'seeker'   ? 'Switching...' : '🔍 Seeker';
+      employerBtn.textContent = targetRole === 'employer' ? 'Switching...' : '🏢 Employer';
+
+      try {
+        var base = (window.TB_API_BASE || '').replace(/\/api\/?$/, '');
+        var res  = await fetch(base + '/api/users/' + user.uid + '/role', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ role: targetRole })
+        });
+        var data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Switch failed');
+
+        if (typeof toast === 'function') toast('Switching to ' + (targetRole === 'employer' ? 'Employer Hub' : 'Job Seeker') + '...', 'success');
+        setTimeout(function () {
+          window.location.href = targetRole === 'employer' ? 'Employer_dashboard.html' : 'dashboard.html';
+        }, 800);
+      } catch (err) {
+        console.error('Role toggle error:', err);
+        if (typeof toast === 'function') toast('Could not switch role: ' + err.message, 'error');
+        // Re-enable buttons
+        seekerBtn.disabled = false; employerBtn.disabled = false;
+        seekerBtn.textContent   = '🔍 Seeker';
+        employerBtn.textContent = '🏢 Employer';
+      }
+    }
+
+    // Set active state on toggle when auth resolves
+    document.addEventListener('authRoleReady', function (e) {
+      var role = e.detail && e.detail.role;
+      var seekerBtn   = document.getElementById('toggle-seeker');
+      var employerBtn = document.getElementById('toggle-employer');
+      if (!seekerBtn || !employerBtn) return;
+      if (role === 'employer') {
+        employerBtn.classList.add('active');
+        seekerBtn.classList.remove('active');
+      } else {
+        seekerBtn.classList.add('active');
+        employerBtn.classList.remove('active');
+      }
+    });
+  </script>
 </body>
 </html>
