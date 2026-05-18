@@ -1,24 +1,29 @@
 // ══════════════════════════════════════════════
 //  TALENTBRIDGE — script.js  (TiDB + Firebase Edition)
+//
+//  FIX SUMMARY (vs original):
+//  ① applyRoleBasedUI() is now a no-op — role-based visibility is
+//    handled entirely by guard.js after authRoleReady fires.
+//    This removes the conflict where script.js would show/hide
+//    elements BEFORE the DB role was known, causing Employer Hub to
+//    flash and disappear.
+//  ② updateAuthUI() no longer calls applyRoleBasedUI() prematurely.
+//    Guard.js handles the role visibility on authRoleReady.
+//  ③ initCommon() waits for DB session to be populated before
+//    calling updateAuthUI() to avoid rendering stale UI.
 // ══════════════════════════════════════════════
 
 /* ──────────────────────────────────────────────
    CONFIGURATION
-   API_BASE points to your Express/TiDB backend.
-   • Development : http://localhost:5000/api
-   • Production  : set window.TB_API_BASE before
-                   this script loads, OR update the
-                   fallback string below.
 ────────────────────────────────────────────── */
 const API_BASE = (typeof window !== "undefined" && window.TB_API_BASE)
   || "http://localhost:5000/api";
 
 /* ──────────────────────────────────────────────
    1. DATABASE LAYER — TiDB via REST API
-   All functions are async and hit your
-   Express/TiDB backend instead of localStorage.
-   localStorage is ONLY used for the Firebase
-   session cache (UID + role) — not app data.
+   All functions are async and hit your Express/TiDB backend.
+   localStorage is ONLY used for the Firebase session cache
+   (UID + role) — never for app data like jobs or applications.
 ────────────────────────────────────────────── */
 const DB = {
 
@@ -50,47 +55,39 @@ const DB = {
     } catch (e) { console.error("[DB._delete] " + endpoint, e); return null; }
   },
 
-  /* ── Session cache — Firebase UID + role only ── */
-  // 🔥 Firebase: localStorage here stores ONLY the Firebase UID + display name + role.
-  //    It is a cache so pages render without waiting for onAuthStateChanged.
-  //    All real app data (jobs, applications, saved) lives in TiDB — NOT here.
+  /* ── Session cache — Firebase UID + role only ──
+     FIX: This is a SHORT-LIVED cache for instant nav rendering.
+     The real source of truth for role is TiDB, fetched in auth.js onAuthStateChanged. */
   getSession()     { try { return JSON.parse(localStorage.getItem("tb_session")) || null; } catch { return null; } },
   setSession(user) { localStorage.setItem("tb_session", JSON.stringify(user)); },
   clearSession()   { localStorage.removeItem("tb_session"); },
 
   /* ── Jobs — TiDB ── */
-  // 🔧 TiDB: GET /api/jobs  → returns all active jobs from TiDB jobs table
   async getJobs() {
     const data = await this._get("/jobs");
     return Array.isArray(data) ? data : [];
   },
-  // 🔧 TiDB: POST /api/jobs  → inserts new row into TiDB jobs table
   async addPostedJob(job) {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     return await this._post("/jobs", { ...job, postedBy: uid });
   },
-  // 🔧 TiDB: DELETE /api/jobs/:id  → deletes job row from TiDB
   async deleteJob(jobId) { return await this._delete("/jobs/" + jobId); },
 
   /* ── Saved Jobs — TiDB ── */
-  // 🔧 TiDB: GET /api/saved/:userId  → saved_jobs rows for this user
   async getSaved() {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     if (!uid) return [];
     const data = await this._get("/saved/" + uid);
     return Array.isArray(data) ? data.map(r => r.jobId || r.job_id) : [];
   },
-  // 🔧 TiDB: toggles saved_jobs row (insert or delete) in TiDB
   async toggleSave(jobId) {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     if (!uid) return false;
     const saved = await this.getSaved();
     if (saved.includes(jobId)) {
-      // 🔧 TiDB: DELETE /api/saved/:userId/:jobId  → removes row from saved_jobs
       await this._delete("/saved/" + uid + "/" + jobId);
       return false;
     } else {
-      // 🔧 TiDB: POST /api/saved  → inserts row into saved_jobs
       await this._post("/saved", { userId: uid, jobId });
       return true;
     }
@@ -98,28 +95,23 @@ const DB = {
   async isSaved(jobId) { return (await this.getSaved()).includes(jobId); },
 
   /* ── Applications — TiDB ── */
-  // 🔧 TiDB: GET /api/applications/:userId  → applications for this seeker
   async getApps() {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     if (!uid) return [];
     const data = await this._get("/applications/" + uid);
     return Array.isArray(data) ? data : [];
   },
-  // 🔧 TiDB: GET /api/applications/employer/:userId  → applications for employer's jobs
   async getAppsForEmployer(uid) {
     const data = await this._get("/applications/employer/" + uid);
     return Array.isArray(data) ? data : [];
   },
-  // 🔧 TiDB: POST /api/applications  → inserts application row into TiDB
-  async addApp(app) { return await this._post("/applications", app); },
-  // 🔧 TiDB: GET /api/applications/check/:userId/:jobId  → has user applied?
+  async addApp(app)    { return await this._post("/applications", app); },
   async hasApplied(jobId) {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     if (!uid) return false;
     const data = await this._get("/applications/check/" + uid + "/" + jobId);
     return data && data.applied === true;
   },
-  // 🔧 TiDB: PUT /api/applications/:id/status  → updates status column in TiDB
   async updateAppStatus(appId, status) {
     try {
       const res = await fetch(API_BASE + "/applications/" + appId + "/status", {
@@ -132,22 +124,17 @@ const DB = {
   },
 
   /* ── User Profile — TiDB ── */
-  // 🔧 TiDB: GET /api/users/:uid  → fetch user profile row from TiDB
-  async getProfile(uid) { return await this._get("/users/" + uid); },
-  // 🔧 TiDB: POST /api/users  → upsert user profile row in TiDB
-  async saveProfile(profileData) { return await this._post("/users", profileData); },
+  async getProfile(uid)         { return await this._get("/users/" + uid); },
+  async saveProfile(profileData){ return await this._post("/users", profileData); },
 
   /* ── CV Data — TiDB ── */
-  // 🔧 TiDB: GET /api/cv/:uid  → fetch full CV data from TiDB cv_data table
-  async getCV(uid) { return await this._get("/cv/" + uid); },
-  // 🔧 TiDB: POST /api/cv  → upsert full CV data in TiDB cv_data table
-  async saveCV(cvData) { return await this._post("/cv", cvData); },
+  async getCV(uid)      { return await this._get("/cv/" + uid); },
+  async saveCV(cvData)  { return await this._post("/cv", cvData); },
 };
 
 /* ──────────────────────────────────────────────
-   2. JOBS DATA — live from TiDB
+   2. JOBS DATA
 ────────────────────────────────────────────── */
-// 🔧 TiDB: always fetches fresh from database
 async function getAllJobs() { return await DB.getJobs(); }
 
 /* ──────────────────────────────────────────────
@@ -155,7 +142,7 @@ async function getAllJobs() { return await DB.getJobs(); }
 ────────────────────────────────────────────── */
 const AppState = {
   currentPage:      "home",
-  currentUser:      DB.getSession(), // 🔥 Firebase session cache
+  currentUser:      DB.getSession(), // session cache for instant render
   activeCategory:   "all",
   searchQuery:      "",
   selectedTemplate: "blue",
@@ -182,54 +169,85 @@ function toast(message, type, duration) {
 
 /* ──────────────────────────────────────────────
    5. ROLE-BASED ACCESS CONTROL
+   FIX: applyRoleBasedUI is now a thin wrapper that defers to guard.js.
+   guard.js handles the actual show/hide after DB role is confirmed.
+   This prevents the race condition where this function was called
+   too early (with stale localStorage role) and hid Employer Hub.
 ────────────────────────────────────────────── */
 function applyRoleBasedUI() {
+  // Guard.js listens for authRoleReady and applies [data-role] visibility.
+  // This function is kept for backward compatibility but guard.js is
+  // the single source of truth for role-based visibility.
   var role = AppState.currentUser ? AppState.currentUser.role : null;
-  document.querySelectorAll('[data-role="seeker"]').forEach(function(el) {
-    el.style.display = (role === "employer") ? "none" : "";
-  });
-  document.querySelectorAll('[data-role="employer"]').forEach(function(el) {
-    el.style.display = (role === "seeker") ? "none" : "";
-  });
+
+  // Sidebar badges: only show counters for seekers
+  if (role === 'employer') {
+    document.querySelectorAll('[data-role="seeker"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+    document.querySelectorAll('[data-role="employer"]').forEach(function(el) {
+      el.style.display = '';
+    });
+  } else if (role === 'seeker') {
+    document.querySelectorAll('[data-role="seeker"]').forEach(function(el) {
+      el.style.display = '';
+    });
+    document.querySelectorAll('[data-role="employer"]').forEach(function(el) {
+      el.style.display = 'none';
+    });
+  }
 }
 
 /* ──────────────────────────────────────────────
    6. AUTH UI UPDATE
 ────────────────────────────────────────────── */
 function updateAuthUI() {
-  var user         = AppState.currentUser;
-  var loggedOutEl  = document.getElementById("nav-logged-out");
-  var loggedInEl   = document.getElementById("nav-logged-in");
-  var sbBlock      = document.getElementById("sidebar-user-block");
-  var loginSignupBtn = document.getElementById("sidebar-login-signup-btn");
+  var user        = AppState.currentUser;
+  var loggedOutEl = document.getElementById("nav-logged-out");
+  var loggedInEl  = document.getElementById("nav-logged-in");
+  var sbBlock     = document.getElementById("sidebar-user-block");
+  var loginBtn    = document.getElementById("sidebar-login-signup-btn");
+
   if (user) {
-    if (loggedOutEl)    loggedOutEl.classList.add("hidden");
-    if (loggedInEl)     loggedInEl.classList.remove("hidden");
-    if (loginSignupBtn) loginSignupBtn.style.display = "none";
+    if (loggedOutEl) loggedOutEl.classList.add("hidden");
+    if (loggedInEl)  loggedInEl.classList.remove("hidden");
+    if (loginBtn)    loginBtn.style.display = "none";
+
     var initialsEl = document.getElementById("nav-avatar-initials");
-    if (initialsEl) initialsEl.textContent = user.avatar || user.name.slice(0,2).toUpperCase();
+    if (initialsEl) initialsEl.textContent = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
+
     if (sbBlock) {
       sbBlock.classList.remove("hidden");
       var sbAv   = document.getElementById("sb-avatar");
       var sbName = document.getElementById("sb-name");
       var sbRole = document.getElementById("sb-role");
-      if (sbAv)   sbAv.textContent   = user.avatar || user.name.slice(0,2).toUpperCase();
+      if (sbAv)   sbAv.textContent   = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
       if (sbName) sbName.textContent = user.name;
       if (sbRole) sbRole.textContent = user.role === "employer" ? "Employer" : "Job Seeker";
     }
+
     var profName = document.getElementById("prof-name");
     var profSub  = document.getElementById("prof-title-sub");
     var profAv   = document.getElementById("prof-avatar");
     if (profName) profName.textContent = user.name;
     if (profSub)  profSub.textContent  = user.role === "employer" ? "Employer Account" : "Job Seeker";
-    if (profAv)   profAv.textContent   = user.avatar || user.name.slice(0,2).toUpperCase();
+    if (profAv)   profAv.textContent   = user.avatar || (user.name||'U').slice(0,2).toUpperCase();
+
   } else {
-    if (loggedOutEl)    loggedOutEl.classList.remove("hidden");
-    if (loggedInEl)     loggedInEl.classList.add("hidden");
-    if (sbBlock)        sbBlock.classList.add("hidden");
-    if (loginSignupBtn) loginSignupBtn.style.display = "";
+    if (loggedOutEl) loggedOutEl.classList.remove("hidden");
+    if (loggedInEl)  loggedInEl.classList.add("hidden");
+    if (sbBlock)     sbBlock.classList.add("hidden");
+    if (loginBtn)    loginBtn.style.display = "";
   }
-  applyRoleBasedUI();
+
+  // FIX: Do NOT call applyRoleBasedUI() here for the initial render —
+  // guard.js handles it after authRoleReady fires with the DB-confirmed role.
+  // Only call it here if we already have a confirmed user (i.e., after auth resolved).
+  if (user && window._authResolved) {
+    window._authResolved.then(function() {
+      applyRoleBasedUI();
+    });
+  }
 }
 
 /* ──────────────────────────────────────────────
@@ -279,7 +297,6 @@ async function openJobDetail(jobId) {
   if (!job) return;
   var modalBox = document.getElementById("job-detail-box");
   if (!modalBox) return;
-  // 🔧 TiDB: check applied/saved state from database
   var isApplied    = await DB.hasApplied(jobId);
   var isBookmarked = await DB.isSaved(jobId);
   var user         = AppState.currentUser;
@@ -319,7 +336,6 @@ async function openJobDetail(jobId) {
 function closeJobDetail() { var m = document.getElementById("job-detail-modal"); if(m) m.classList.remove("open"); }
 
 async function toggleBookmarkModal(jobId, btn) {
-  // 🔧 TiDB: toggle saved_jobs row in database
   var isSaved = await DB.toggleSave(jobId);
   btn.textContent = isSaved ? "🔖 Saved" : "🔖 Save Job";
   var jobs = await getAllJobs();
@@ -349,10 +365,9 @@ async function renderJobFeed(jobsList) {
     feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
     return;
   }
-  // 🔧 TiDB: fetch saved + applied state for all cards in one go
-  var savedIds       = await DB.getSaved();
-  var apps           = await DB.getApps();
-  var appliedJobIds  = apps.map(function(a){ return a.jobId || a.job_id; });
+  var savedIds      = await DB.getSaved();
+  var apps          = await DB.getApps();
+  var appliedJobIds = apps.map(function(a){ return a.jobId || a.job_id; });
   feedGrid.innerHTML = jobsList.map(function(job){ return buildJobCardHTML(job, savedIds, appliedJobIds); }).join("");
 }
 
@@ -368,7 +383,7 @@ function buildJobCardHTML(job, savedIds, appliedJobIds) {
     '<div class="job-card" onclick="openJobDetail(\''+job.id+'\')">' +
       '<div class="job-card-top">' +
         '<div class="company-logo">'+(job.emoji||"🏢")+'</div>' +
-        (!isEmployer ? '<button class="job-bookmark '+(isSaved?"saved":"")+'" data-bookmark="'+job.id+'" onclick="event.stopPropagation();toggleBookmark(\''+job.id+'\',this)">🔖</button>' : "") +
+        (!isEmployer ? '<button class="job-bookmark '+(isSaved?"saved":"")+'\" data-bookmark="'+job.id+'" onclick="event.stopPropagation();toggleBookmark(\''+job.id+'\',this)">🔖</button>' : "") +
       '</div>' +
       '<div class="job-title">'+job.title+'</div>' +
       '<div class="company-name">'+(job.company||"")+'</div>' +
@@ -377,7 +392,7 @@ function buildJobCardHTML(job, savedIds, appliedJobIds) {
       '<div class="job-footer">' +
         '<div class="salary">Rs '+formatSalary(job.salaryMin)+'–'+formatSalary(job.salaryMax)+' <span>/month</span></div>' +
         (!isEmployer
-          ? '<button class="apply-btn '+(isApplied?"applied":"")+'" data-apply="'+job.id+'" onclick="event.stopPropagation();applyJob(\''+job.id+'\',this)" '+(isApplied?"disabled":"")+'>'+(isApplied?"✓ Applied":"Apply Now →")+'</button>'
+          ? '<button class="apply-btn '+(isApplied?"applied":"")+'\" data-apply="'+job.id+'" onclick="event.stopPropagation();applyJob(\''+job.id+'\',this)" '+(isApplied?"disabled":"")+'>'+(isApplied?"✓ Applied":"Apply Now →")+'</button>'
           : '<span class="tag">View Only</span>') +
       '</div>' +
     '</div>'
@@ -387,7 +402,6 @@ function buildJobCardHTML(job, savedIds, appliedJobIds) {
 function formatSalary(n) { if(!n) return "?"; return n>=1000 ? Math.round(n/1000)+"K" : n; }
 
 async function filterAndRender() {
-  // 🔧 TiDB: live fetch from database every time
   var jobs = await getAllJobs();
   if (AppState.activeCategory !== "all") jobs = jobs.filter(function(j){ return j.category === AppState.activeCategory; });
   if (AppState.searchQuery) {
@@ -410,26 +424,23 @@ function setCategory(cat, chip) {
 }
 
 async function toggleBookmark(jobId, btn) {
-  // 🔧 TiDB: insert/delete saved_jobs row in TiDB
   var saved = await DB.toggleSave(jobId);
   btn.classList.toggle("saved", saved);
   var jobs = await getAllJobs();
   var job  = jobs.find(function(j){ return j.id===jobId; });
-  toast(saved ? 'Saved "'+(job?job.title:"")+('"') : "Removed from saved", saved?"success":"info");
+  toast(saved ? 'Saved "'+(job?job.title:"")+'"' : "Removed from saved", saved?"success":"info");
   await updateSidebarBadges();
 }
 
 async function applyJob(jobId, btn) {
   if (!AppState.currentUser) { toast("Please sign in to apply","warning"); openAuth("login"); return; }
   if (AppState.currentUser.role === "employer") { toast("Employers cannot apply for jobs","warning"); return; }
-  // 🔧 TiDB: check application status from database
   var already = await DB.hasApplied(jobId);
   if (already) return;
   var jobs = await getAllJobs();
   var job  = jobs.find(function(j){ return j.id===jobId; });
   if (btn) { btn.textContent = "Applying..."; btn.disabled = true; }
   setTimeout(async function() {
-    // 🔧 TiDB: insert application row into TiDB applications table
     await DB.addApp({
       jobId:      jobId,
       userId:     AppState.currentUser.id,
@@ -438,15 +449,14 @@ async function applyJob(jobId, btn) {
       status:     "Reviewing",
     });
     if (btn) { btn.textContent = "✓ Applied"; btn.classList.add("applied"); }
-    toast('Applied to "'+(job?job.title:"")+('" successfully! 🎉'),"success");
+    toast('Applied to "'+(job?job.title:"")+'" successfully! 🎉',"success");
     await updateSidebarBadges();
   }, 800);
 }
 
 async function updateSidebarBadges() {
-  // 🔧 TiDB: counts from database
-  var saved  = (await DB.getSaved()).length;
-  var apps   = (await DB.getApps()).length;
+  var saved = (await DB.getSaved()).length;
+  var apps  = (await DB.getApps()).length;
   document.querySelectorAll("#sb-saved-count").forEach(function(el){ el.textContent = saved; });
   document.querySelectorAll("#sb-applied-count").forEach(function(el){ el.textContent = apps; });
 }
@@ -457,7 +467,6 @@ async function updateSidebarBadges() {
 async function renderAppliedJobs() {
   var list = document.getElementById("applied-jobs-list");
   if (!list) return;
-  // 🔧 TiDB: load applications from database
   var apps = await DB.getApps();
   if (!AppState.currentUser || !apps.length) {
     list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No applications yet</h3><p>Apply to jobs and track your progress here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'index.html\'">Find Jobs</button></div>';
@@ -490,7 +499,6 @@ async function renderAppliedJobs() {
 async function renderSavedJobs() {
   var grid = document.getElementById("saved-jobs-grid");
   if (!grid) return;
-  // 🔧 TiDB: load saved job IDs from database
   var savedIds = await DB.getSaved();
   var allJobs  = await getAllJobs();
   var saved    = allJobs.filter(function(j){ return savedIds.includes(j.id); });
@@ -527,8 +535,8 @@ function heroSearch() {
    14. initCommon()
 ────────────────────────────────────────────── */
 async function initCommon() {
+  // Use session cache for instant UI (will be updated when authRoleReady fires)
   if (!AppState.currentUser) {
-    // 🔥 Firebase: restore session UID/role from localStorage cache
     AppState.currentUser = DB.getSession();
   }
   updateAuthUI();
@@ -539,6 +547,15 @@ async function initCommon() {
   document.querySelectorAll(".modal-overlay").forEach(function(el){
     el.addEventListener("click", function(e){ if(e.target===el) el.classList.remove("open"); });
   });
+
+  // FIX: Re-render auth UI after DB role is confirmed
+  // This ensures nav/sidebar reflects real role from DB
+  document.addEventListener('authRoleReady', function(e) {
+    if (e.detail) AppState.currentUser = e.detail;
+    updateAuthUI();
+    updateSidebarBadges();
+  }, { once: true });
+
   console.log("TalentBridge ready ✅ | user:", AppState.currentUser ? AppState.currentUser.name : "guest");
 }
 

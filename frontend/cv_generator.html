@@ -202,7 +202,10 @@
     // Delegate all CV init (load from TiDB, render sections, wire events) to cv_generator.js
     await initCVGenerator();
     // Re-init once Firebase settles (covers page-refresh where user isn't in AppState yet)
-    document.addEventListener('fbReady', async function() { await initCVGenerator(); }, { once: true });
+    // FIX: Re-init after DB profile loads (ensures CV fields pre-populate from DB)
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail) await initCVGenerator();
+    }, { once: true });
   });
 </script>
 </body>

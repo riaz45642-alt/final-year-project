@@ -266,8 +266,11 @@
       renderExperienceList();
     }
 
+    // FIX: Run immediately with cached session, then re-run after DB profile loads
     initPage();
-    document.addEventListener('fbReady', () => initPage());
+    document.addEventListener('authRoleReady', function(e) {
+      if (e.detail) initPage();
+    }, { once: true });
   });
 
   /* ──────────────────────────────────────────────

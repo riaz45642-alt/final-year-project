@@ -1,8 +1,17 @@
 /* ──────────────────────────────────────────────
-   AUTH SYSTEM — auth.js  (Firebase Edition)
-   Loads Firebase via dynamic module, exposes all
-   functions as globals so inline onclick handlers
-   and script.js/initCommon() keep working.
+   AUTH SYSTEM — auth.js  (Firebase + TiDB Edition)
+
+   FIX SUMMARY (vs original):
+   ① Role is ALWAYS fetched from TiDB before auth resolves.
+     localStorage role cache is only a fallback, never source of truth.
+   ② window._authResolved promise resolves only AFTER DB role is known.
+     Guard.js waits on this promise — no more race conditions.
+   ③ 'authRoleReady' event fires with the real DB role.
+     login/google-signin redirect ONLY after this event fires.
+   ④ All DB profile fields (title, bio, location, skills, experience)
+     are merged into AppState on every login — profile page always
+     shows persisted data after refresh.
+   ⑤ Role cache is cleared on logout so stale role never persists.
 ────────────────────────────────────────────── */
 
 /* ── Firebase config ── */
@@ -15,6 +24,11 @@ const _FB_CONFIG = {
   appId:             "1:43218428741:web:031a50e8a83e91af35542c",
   measurementId:     "G-3XQHW50SMS"
 };
+
+/* ── FIX ①: Promise that resolves only after DB role is confirmed ── */
+window._authResolved = new Promise(function(resolve) {
+  window._resolveAuth = resolve;
+});
 
 /* ── Bootstrap Firebase via an injected module script ── */
 (function () {
@@ -34,7 +48,6 @@ const _FB_CONFIG = {
     const auth = getAuth(app);
     const gp   = new GoogleAuthProvider();
 
-    /* expose to window so non-module code can call them */
     window._fbAuth    = auth;
     window._fbSignIn  = (e,p)  => signInWithEmailAndPassword(auth, e, p);
     window._fbSignUp  = (e,p)  => createUserWithEmailAndPassword(auth, e, p);
@@ -43,39 +56,68 @@ const _FB_CONFIG = {
     window._fbSignOut = ()     => fbSignOut(auth);
     window._fbProfile = (u,d)  => updateProfile(u, d);
 
-    /* auth state observer */
+    /* ── FIX ②: Auth observer — always await DB fetch before resolving ── */
     onAuthStateChanged(auth, async fbUser => {
       if (fbUser) {
-        // Build app user from Firebase token + localStorage role cache
-        const appUser = window._toAppUser(fbUser);
-        if (typeof DB !== 'undefined') {
-          DB.setSession(appUser);
-          // Fetch full profile from TiDB so role/title/bio are accurate
-          try {
-            const dbProfile = await fetch(
-              (window.TB_API_BASE || 'http://localhost:5000/api') + '/users/' + fbUser.uid
-            ).then(r => r.ok ? r.json() : null);
-            if (dbProfile && dbProfile.role) {
-              appUser.role  = dbProfile.role;
-              appUser.title = dbProfile.title || appUser.title;
-              appUser.bio   = dbProfile.bio   || appUser.bio;
-              // Keep localStorage role cache in sync with DB
-              try { localStorage.setItem('tb_user_role_' + fbUser.uid, dbProfile.role); } catch(e) {}
-              DB.setSession(appUser);
+        // Start with cached/Firebase data
+        var appUser = window._toAppUser(fbUser);
+
+        // FIX ①②: Always fetch full profile from TiDB before resolving auth
+        // This guarantees role-dependent UI sees the correct role
+        var apiBase = window.TB_API_BASE || 'http://localhost:5000/api';
+        try {
+          const dbProfile = await fetch(apiBase + '/users/' + fbUser.uid)
+            .then(r => r.ok ? r.json() : null)
+            .catch(() => null);
+
+          if (dbProfile && dbProfile.role) {
+            // FIX ④: Merge ALL DB profile fields — not just role
+            appUser = Object.assign({}, appUser, {
+              role:       dbProfile.role,
+              title:      dbProfile.title      || '',
+              bio:        dbProfile.bio        || '',
+              location:   dbProfile.location   || '',
+              skills:     dbProfile.skills     || [],
+              experience: dbProfile.experience || [],
+            });
+            // Keep localStorage cache in sync with DB
+            try { localStorage.setItem('tb_user_role_' + fbUser.uid, dbProfile.role); } catch(e) {}
+          } else if (!dbProfile) {
+            // First-ever login — create profile row in DB
+            if (typeof DB !== 'undefined') {
+              DB.saveProfile(appUser).catch(e => console.warn('[auth] initial profile save failed', e));
             }
-          } catch(e) { /* offline — use cached role */ }
-          DB.saveProfile(appUser);
+          }
+        } catch(e) {
+          console.warn('[auth] DB fetch failed — using cached role:', e);
         }
+
+        // Update all state stores
+        if (typeof DB !== 'undefined')       DB.setSession(appUser);
         if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
+
+        // FIX ③: Dispatch with REAL role from DB
+        document.dispatchEvent(new CustomEvent('authRoleReady', { detail: appUser }));
+
       } else {
+        // Logged out
         if (typeof DB !== 'undefined')       DB.clearSession();
         if (typeof AppState !== 'undefined') AppState.currentUser = null;
+        document.dispatchEvent(new CustomEvent('authRoleReady', { detail: null }));
       }
-      if (typeof updateAuthUI === 'function') updateAuthUI();
-    });
 
-    window._fbReady = true;
-    document.dispatchEvent(new Event('fbReady'));
+      // FIX ②: Resolve the global promise once — Guard.requireEmployer() awaits this
+      if (typeof window._resolveAuth === 'function') {
+        window._resolveAuth(typeof AppState !== 'undefined' ? AppState.currentUser : null);
+        window._resolveAuth = null;
+      }
+
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+
+      // Legacy compat
+      window._fbReady = true;
+      document.dispatchEvent(new Event('fbReady'));
+    });
   `;
   document.head.appendChild(s);
 })();
@@ -83,13 +125,12 @@ const _FB_CONFIG = {
 /* ── Helpers ── */
 window._FB_CONFIG = _FB_CONFIG;
 
+/* FIX: _toAppUser only builds a base object.
+   Real profile data is merged in onAuthStateChanged after DB fetch. */
 window._toAppUser = function (fbUser, overrideRole) {
   const name     = fbUser.displayName || fbUser.email || 'User';
   const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || 'U';
 
-  // 🔥 Firebase: role is not stored in Firebase — we cache it in localStorage
-  //    so it survives page refresh without an extra TiDB round-trip.
-  //    Real source of truth is the TiDB users table (role column).
   var savedRole = 'seeker';
   try {
     var stored = localStorage.getItem('tb_user_role_' + fbUser.uid);
@@ -98,16 +139,19 @@ window._toAppUser = function (fbUser, overrideRole) {
 
   var role = overrideRole || savedRole;
 
-  // 🔥 Firebase: persist role in localStorage cache so next page load is instant
-  try { localStorage.setItem('tb_user_role_' + fbUser.uid, role); } catch(e) {}
-
   return {
-    id:       fbUser.uid,
-    name:     name,
-    email:    fbUser.email,
-    role:     role,
-    avatar:   fbUser.photoURL || initials,
-    joinedAt: Date.now()
+    id:         fbUser.uid,
+    name:       name,
+    email:      fbUser.email,
+    role:       role,
+    avatar:     initials,
+    joinedAt:   Date.now(),
+    // These will be overwritten by DB fetch in onAuthStateChanged
+    title:      '',
+    bio:        '',
+    location:   '',
+    skills:     [],
+    experience: [],
   };
 };
 
@@ -130,14 +174,8 @@ function _friendlyError(code) {
 function _setLoading(btn, on, label) {
   if (!btn) return;
   btn.disabled = on;
-  if (on) {
-    btn._orig = btn.textContent;
-    btn.classList.add('btn-loading');
-    btn.textContent = '';
-  } else {
-    btn.classList.remove('btn-loading');
-    btn.textContent = label || btn._orig || 'Submit';
-  }
+  if (on) { btn._orig = btn.textContent; btn.classList.add('btn-loading'); btn.textContent = ''; }
+  else    { btn.classList.remove('btn-loading'); btn.textContent = label || btn._orig || 'Submit'; }
 }
 
 function _showErr(groupId, errId, msg) {
@@ -152,7 +190,7 @@ function _clearErr(groupId) {
 }
 
 /* ─────────────────────────────────────────────
-   MODAL OPEN / CLOSE
+   MODAL
 ───────────────────────────────────────────── */
 var authMode = 'login';
 
@@ -169,14 +207,10 @@ function closeAuth() {
   if (m) m.classList.remove('open');
 }
 
-/* ─────────────────────────────────────────────
-   RENDER MODAL HTML
-───────────────────────────────────────────── */
 function renderAuthModal(mode) {
   var box = document.getElementById('auth-modal-box');
   if (!box) return;
 
-  // Apply URL param defaults on first render
   if (window._defaultAuthMode && !window._urlParamsApplied) {
     mode = window._defaultAuthMode;
     window._urlParamsApplied = true;
@@ -259,13 +293,14 @@ function socialLogin(provider) {
   if (btn) { btn.textContent = 'Connecting...'; btn.disabled = true; }
 
   window._fbGoogle().then(function (result) {
-    var appUser = window._toAppUser(result.user);
-    if (typeof DB !== 'undefined')       DB.setSession(appUser);
-    if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
     closeAuth();
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-    if (typeof toast === 'function') toast('Signed in with Google! Welcome, ' + result.user.displayName.split(' ')[0] + ' \uD83D\uDC4B', 'success');
-    if (appUser.role === 'employer') window.location.href = 'Employer_dashboard.html';
+    if (typeof toast === 'function') toast('Signed in! Welcome, ' + (result.user.displayName || '').split(' ')[0] + ' \uD83D\uDC4B', 'success');
+    // FIX ③: Redirect AFTER authRoleReady (real DB role confirmed)
+    document.addEventListener('authRoleReady', function(e) {
+      var user = e.detail;
+      if (user && user.role === 'employer') window.location.href = 'Employer_dashboard.html';
+      // else stay on current page
+    }, { once: true });
   }).catch(function (e) {
     if (e.code !== 'auth/popup-closed-by-user') {
       if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
@@ -278,44 +313,40 @@ function socialLogin(provider) {
    EMAIL LOGIN
 ───────────────────────────────────────────── */
 function handleLogin() {
-  var emailEl = document.getElementById('login-email');
-  var passEl  = document.getElementById('login-pass');
+  var emailEl  = document.getElementById('login-email');
+  var passEl   = document.getElementById('login-pass');
   var emailVal = emailEl ? emailEl.value.trim() : '';
   var passVal  = passEl  ? passEl.value          : '';
   var valid = true;
 
   if (!emailVal || !/\S+@\S+\.\S+/.test(emailVal)) {
-    _showErr('login-email-grp', 'login-email-err', 'Please enter a valid email');
-    valid = false;
+    _showErr('login-email-grp', 'login-email-err', 'Please enter a valid email'); valid = false;
   } else { _clearErr('login-email-grp'); }
 
   if (!passVal) {
-    _showErr('login-pass-grp', 'login-pass-err', 'Password is required');
-    valid = false;
+    _showErr('login-pass-grp', 'login-pass-err', 'Password is required'); valid = false;
   } else { _clearErr('login-pass-grp'); }
 
   if (!valid) return;
-
-  if (!window._fbSignIn) {
-    if (typeof toast === 'function') toast('Auth not ready, try again.', 'error');
-    return;
-  }
+  if (!window._fbSignIn) { if (typeof toast === 'function') toast('Auth not ready, try again.', 'error'); return; }
 
   var btn = document.getElementById('login-submit-btn');
   _setLoading(btn, true);
 
   window._fbSignIn(emailVal, passVal).then(function (cred) {
-    var appUser = window._toAppUser(cred.user);
-    if (typeof DB !== 'undefined') {
-      DB.setSession(appUser);
-      // Sync profile to TiDB on every login (keeps role/name fresh)
-      DB.saveProfile(appUser).catch(function(e){ console.warn('[handleLogin] TiDB save failed', e); });
-    }
-    if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
     closeAuth();
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-    if (typeof toast === 'function') toast('Welcome back, ' + appUser.name.split(' ')[0] + '! \uD83D\uDC4B', 'success');
-    if (appUser.role === 'employer') window.location.href = 'Employer_dashboard.html';
+    if (typeof toast === 'function') toast('Signing in...', 'info');
+
+    // FIX ③: Wait for authRoleReady (DB role confirmed) before redirecting
+    document.addEventListener('authRoleReady', function(e) {
+      var user = e.detail;
+      if (user) {
+        if (typeof toast === 'function') toast('Welcome back, ' + user.name.split(' ')[0] + '! \uD83D\uDC4B', 'success');
+        if (user.role === 'employer') window.location.href = 'Employer_dashboard.html';
+        // Seekers stay on job feed (index.html)
+      }
+    }, { once: true });
+
   }).catch(function (e) {
     _showErr('login-pass-grp', 'login-pass-err', _friendlyError(e.code));
     if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
@@ -335,51 +366,51 @@ function handleSignup() {
   var valid = true;
 
   if (!email || !/\S+@\S+\.\S+/.test(email)) {
-    _showErr('reg-email-grp', 'reg-email-err', 'Valid email required');
-    valid = false;
+    _showErr('reg-email-grp', 'reg-email-err', 'Valid email required'); valid = false;
   } else { _clearErr('reg-email-grp'); }
 
   if (password.length < 6) {
-    _showErr('reg-pass-grp', 'reg-pass-err', 'Password must be at least 6 characters');
-    valid = false;
+    _showErr('reg-pass-grp', 'reg-pass-err', 'Password must be at least 6 characters'); valid = false;
   } else { _clearErr('reg-pass-grp'); }
 
   if (!valid) return;
-
-  if (!window._fbSignUp) {
-    if (typeof toast === 'function') toast('Auth not ready, try again.', 'error');
-    return;
-  }
+  if (!window._fbSignUp) { if (typeof toast === 'function') toast('Auth not ready, try again.', 'error'); return; }
 
   var btn = document.getElementById('reg-submit-btn');
   _setLoading(btn, true);
 
   var fullName = (firstName + ' ' + lastName).trim() || 'New User';
 
-  window._fbSignUp(email, password).then(function (cred) {
-    return window._fbProfile(cred.user, { displayName: fullName }).then(function () {
-      return cred;
+  window._fbSignUp(email, password)
+    .then(function (cred) {
+      return window._fbProfile(cred.user, { displayName: fullName }).then(function () { return cred; });
+    })
+    .then(function (cred) {
+      // FIX: Set role cache BEFORE onAuthStateChanged fires
+      try { localStorage.setItem('tb_user_role_' + cred.user.uid, role); } catch(e) {}
+
+      var appUser = Object.assign({}, window._toAppUser(cred.user, role), { name: fullName, role: role });
+
+      // FIX: Save to TiDB first with correct role, THEN let onAuthStateChanged proceed
+      var apiBase = window.TB_API_BASE || 'http://localhost:5000/api';
+      return fetch(apiBase + '/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(appUser)
+      }).catch(function(err) {
+        console.warn('[handleSignup] TiDB save failed:', err);
+      }).then(function() {
+        closeAuth();
+        if (typeof toast === 'function') toast('Account created! Welcome, ' + (firstName || 'there') + '! \uD83C\uDF89', 'success');
+        if (role === 'employer') window.location.href = 'Employer_dashboard.html';
+        else                     window.location.href = 'profile_page.html';
+      });
+    })
+    .catch(function (e) {
+      _showErr('reg-email-grp', 'reg-email-err', _friendlyError(e.code));
+      if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
+      _setLoading(btn, false, 'Create Account');
     });
-  }).then(function (cred) {
-    var appUser = Object.assign({}, window._toAppUser(cred.user, role), { name: fullName });
-    // Persist role by UID key (same key _toAppUser reads on next load)
-    try { localStorage.setItem('tb_user_role_' + cred.user.uid, role); } catch(e) {}
-    if (typeof DB !== 'undefined') {
-      DB.setSession(appUser);
-      // Save profile to TiDB so data persists across devices
-      DB.saveProfile(appUser).catch(function(e){ console.warn('[handleSignup] TiDB save failed', e); });
-    }
-    if (typeof AppState !== 'undefined') AppState.currentUser = appUser;
-    closeAuth();
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-    if (typeof toast === 'function') toast('Account created! Welcome, ' + (firstName || 'there') + '! \uD83C\uDF89', 'success');
-    if (role === 'employer') window.location.href = 'Employer_dashboard.html';
-    else                     window.location.href = 'profile_page.html';
-  }).catch(function (e) {
-    _showErr('reg-email-grp', 'reg-email-err', _friendlyError(e.code));
-    if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
-    _setLoading(btn, false, 'Create Account');
-  });
 }
 
 /* ─────────────────────────────────────────────
@@ -394,37 +425,34 @@ function handleForgotPassword() {
     return;
   }
   if (!window._fbReset) { if (typeof toast === 'function') toast('Auth not ready.', 'error'); return; }
-  window._fbReset(emailVal).then(function () {
-    if (typeof toast === 'function') toast('Reset link sent! Check your inbox.', 'success');
-  }).catch(function (e) {
-    if (typeof toast === 'function') toast(_friendlyError(e.code), 'error');
-  });
+  window._fbReset(emailVal)
+    .then(function () { if (typeof toast === 'function') toast('Reset link sent! Check your inbox.', 'success'); })
+    .catch(function (e) { if (typeof toast === 'function') toast(_friendlyError(e.code), 'error'); });
 }
 
 /* ─────────────────────────────────────────────
-   LOGOUT — redirects to landing page
+   LOGOUT
 ───────────────────────────────────────────── */
 function logout() {
   var doLogout = function () {
     if (typeof DB !== 'undefined')       DB.clearSession();
     if (typeof AppState !== 'undefined') AppState.currentUser = null;
+    // FIX ⑤: Clear role cache so stale role doesn't persist for next user
+    try {
+      Object.keys(localStorage).forEach(function(key) {
+        if (key.startsWith('tb_user_role_')) localStorage.removeItem(key);
+      });
+    } catch(e) {}
     if (typeof closeDropdown === 'function') closeDropdown();
     if (typeof toast === 'function') toast('You have been logged out.', 'info');
-    setTimeout(function () {
-      window.location.href = 'landing.html';
-    }, 600);
+    setTimeout(function () { window.location.href = 'landing.html'; }, 600);
   };
-
-  if (window._fbSignOut) {
-    window._fbSignOut().then(doLogout).catch(doLogout);
-  } else {
-    doLogout();
-  }
+  if (window._fbSignOut) window._fbSignOut().then(doLogout).catch(doLogout);
+  else doLogout();
 }
 
 /* ─────────────────────────────────────────────
-   AUTO-SELECT ROLE FROM URL PARAMS
-   e.g. auth.html?role=employer&mode=signup
+   URL PARAMS
 ───────────────────────────────────────────── */
 (function applyUrlParams() {
   var params = new URLSearchParams(window.location.search);
@@ -434,13 +462,12 @@ function logout() {
     window._defaultAuthMode = 'signup';
     window._defaultRole     = role || 'seeker';
   } else if (role) {
-    window._defaultRole = role;
-    // If a role is specified, default to signup
+    window._defaultRole     = role;
     window._defaultAuthMode = 'signup';
   }
 })();
 
-/* ── Expose all globals ── */
+/* ── Expose globals ── */
 window.openAuth             = openAuth;
 window.closeAuth            = closeAuth;
 window.renderAuthModal      = renderAuthModal;

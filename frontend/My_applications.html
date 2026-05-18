@@ -130,7 +130,10 @@
     Guard.requireSeeker();
     await renderAppliedJobs();
     // Re-render once Firebase settles (covers page-refresh with no session cache yet)
-    document.addEventListener('fbReady', async function() { await renderAppliedJobs(); }, { once: true });
+    // FIX: Re-render after DB auth confirmed (real user data available)
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail) await renderAppliedJobs();
+    }, { once: true });
   });
 </script>
 </body>

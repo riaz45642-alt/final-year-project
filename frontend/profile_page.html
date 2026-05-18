@@ -151,9 +151,15 @@
   document.addEventListener('DOMContentLoaded', async () => {
     await (initCommon && initCommon());
     Guard.requireLogin();
+
+    // FIX: Render with cached session immediately for instant display
     await renderProfile();
-    // Re-render once Firebase auth settles (covers page-refresh case)
-    document.addEventListener('fbReady', async function() { await renderProfile(); }, { once: true });
+
+    // FIX: Re-render once DB role + profile data confirmed (replaces fbReady)
+    // authRoleReady fires after TiDB fetch, so profile fields are fully populated
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail) await renderProfile();
+    }, { once: true });
 
     async function renderProfile() {
       // Try AppState first, then session cache
@@ -291,9 +297,7 @@
       if (barEl) setTimeout(() => barEl.style.width = pct + '%', 200);
     }
 
-    // Run immediately, then again after Firebase auth settles
-    await renderProfile();
-    document.addEventListener('fbReady', () => renderProfile());
+    // (authRoleReady listener above handles DB-accurate re-render)
   });
 </script>
 </body>

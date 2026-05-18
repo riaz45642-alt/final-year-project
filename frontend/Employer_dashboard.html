@@ -209,19 +209,39 @@
 <script src="../js/Employer_dashboard.js"></script>
 
 <script>
+  // FIX: Load dashboard data only AFTER authRoleReady fires (DB role confirmed).
+  // Original code called loadDashboard() on DOMContentLoaded, before the DB
+  // role fetch completed. This caused two problems:
+  //   1. Guard.requireEmployer() saw a stale/wrong role and redirected seekers
+  //      who are actually employers (or vice versa).
+  //   2. refreshEmployerStats() ran with no user context, showing empty data.
   document.addEventListener('DOMContentLoaded', async function() {
     await (initCommon && initCommon());
-    // 🔒 ROLE GUARD: only employers allowed
+
+    // 🔒 ROLE GUARD: waits for DB role before enforcing
     Guard.requireEmployer();
-    // Load dashboard data
+
     async function loadDashboard() {
+      var user = AppState && AppState.currentUser;
+      if (!user || user.role !== 'employer') return; // guard will redirect
       refreshEmployerStats   && await refreshEmployerStats();
       renderPostedJobsTable  && await renderPostedJobsTable();
       renderApplicantsTable  && await renderApplicantsTable();
     }
-    await loadDashboard();
-    // Re-load once Firebase auth resolves (covers page-refresh case)
-    document.addEventListener('fbReady', async function() { await loadDashboard(); }, { once: true });
+
+    // FIX: Wait for authRoleReady (DB role confirmed) before loading data
+    document.addEventListener('authRoleReady', async function(e) {
+      if (e.detail && e.detail.role === 'employer') {
+        await loadDashboard();
+      }
+    }, { once: true });
+
+    // Also try immediately in case auth resolved before this listener
+    if (window._authResolved) {
+      window._authResolved.then(async function(user) {
+        if (user && user.role === 'employer') await loadDashboard();
+      });
+    }
   });
 </script>
 </body>
