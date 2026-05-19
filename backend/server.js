@@ -1,22 +1,19 @@
-console.log("Server starting…");
+console.log("Server starting...");
+
 const express = require("express");
 const cors    = require("cors");
 require("dotenv").config();
 
 const app = express();
 
-app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin) return callback(null, true);
-    if (origin.endsWith(".netlify.app")) return callback(null, true);
-    callback(new Error("Not allowed by CORS"));
-  },
-  credentials: true,
-}));
-
+// Open CORS - allow all origins (fine for FYP)
+app.use(cors());
 app.use(express.json());
+
+// Health check
 app.get("/", (req, res) => res.json({ status: "TalentBridge API running ✅" }));
 
+// Routes
 app.use("/api",              require("./routes/setup"));
 app.use("/api/jobs",         require("./routes/jobs"));
 app.use("/api/saved",        require("./routes/savedJobs"));
