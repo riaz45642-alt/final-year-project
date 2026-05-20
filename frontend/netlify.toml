@@ -1,0 +1,84 @@
+# ============================================================
+#  TalentBridge — Netlify Configuration
+#  Static multi-page site (HTML/CSS/JS)
+# ============================================================
+
+[build]
+  # Root of the project as submitted to Netlify
+  # (set this to "frontend" if you deploy the whole repo)
+  publish = "."
+
+  # No build command — pure static files
+  command = ""
+
+# ── SPA / MPA Redirect Rule ──────────────────────────────────
+# Catches direct URL access & browser refreshes and serves the
+# correct HTML page instead of a 404.
+[[redirects]]
+  from   = "/"
+  to     = "/index.html"
+  status = 200
+
+[[redirects]]
+  from   = "/dashboard"
+  to     = "/dashboard.html"
+  status = 200
+
+[[redirects]]
+  from   = "/auth"
+  to     = "/auth.html"
+  status = 200
+
+[[redirects]]
+  from   = "/profile"
+  to     = "/profile_page.html"
+  status = 200
+
+[[redirects]]
+  from   = "/profile-edit"
+  to     = "/Profile_Edit.html"
+  status = 200
+
+[[redirects]]
+  from   = "/employer-dashboard"
+  to     = "/Employer_dashboard.html"
+  status = 200
+
+[[redirects]]
+  from   = "/my-applications"
+  to     = "/My_applications.html"
+  status = 200
+
+[[redirects]]
+  from   = "/saved-jobs"
+  to     = "/Save_job.html"
+  status = 200
+
+[[redirects]]
+  from   = "/cv-generator"
+  to     = "/cv_generator.html"
+  status = 200
+
+# Fallback: any unmatched path → index.html (prevents 404 on refresh)
+[[redirects]]
+  from   = "/*"
+  to     = "/index.html"
+  status = 200
+
+# ── HTTP Headers ─────────────────────────────────────────────
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options        = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy        = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/js/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/css/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"

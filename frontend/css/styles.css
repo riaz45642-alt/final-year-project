@@ -488,26 +488,34 @@ body {
   border-radius: 50%;
   box-shadow: 0 0 6px rgba(79,110,247,0.7);
 }
+/* ── FIXED: sidebar toggle row — no overflow, "Employer" always visible ── */
 .sidebar-switch-inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 6px;
+  gap: 4px;
+  width: 100%;
+  box-sizing: border-box;
+  overflow: hidden;           /* prevent any child from spilling out */
 }
 .switch-pill {
-  flex: 1;
+  flex: 1 1 0;                /* equal flex-basis so both pills share space */
+  min-width: 0;               /* allow shrinking below content width */
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 7px 6px;
+  gap: 4px;
+  padding: 6px 4px;           /* slightly reduced padding for tighter fit */
   border-radius: 9px;
   border: 1px solid rgba(79,110,247,0.25);
   background: rgba(255,255,255,0.04);
   color: var(--text-muted, #8fa8b8);
   font-family: var(--font-body);
-  font-size: 11.5px;
+  font-size: 10.5px;          /* reduced from 11.5px — fixes "Employer" clipping */
   font-weight: 600;
+  white-space: nowrap;        /* keep label on one line */
+  overflow: hidden;
+  text-overflow: ellipsis;
   cursor: pointer;
   transition: all 0.18s;
 }
@@ -522,19 +530,20 @@ body {
   border-color: var(--accent, #4f6ef7);
   box-shadow: 0 2px 8px rgba(79,110,247,0.35);
 }
-.switch-pill i { font-size: 11px; }
+.switch-pill i { font-size: 10px; flex-shrink: 0; }
 .sidebar-toggle-center {
+  flex: 0 0 auto;             /* fixed size — never squish the toggle switch */
   flex-shrink: 0;
 }
 
 /* ─── ROLE TOGGLE SWITCH (reused) ─── */
 .role-toggle-wrap {
   display: flex; align-items: center; gap: 4px;
-  flex-shrink: 0; margin-left: 4px;
+  flex-shrink: 0; margin-left: 3px;
 }
 .role-toggle-label {
-  font-size: 9px; font-weight: 700;
-  color: var(--text-muted); letter-spacing: 0.3px;
+  font-size: 8px; font-weight: 700;
+  color: var(--text-muted); letter-spacing: 0.2px;
   line-height: 1;
 }
 .role-toggle-switch {
@@ -552,7 +561,7 @@ body {
   content: "";
   position: absolute;
   width: 12px; height: 12px;
-  left: 3px; top: 3px;
+  left: 2px; top: 3px;
   background: white; border-radius: 50%;
   transition: transform 0.25s;
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
