@@ -28,10 +28,15 @@ router.get("/:uid", async (req, res) => {
       role:       u.role,
       avatar:     u.avatar,
       title:      u.title,
-      location:   u.location || "",
-      bio:        u.bio,
+      location:   u.location   || "",
+      bio:        u.bio        || "",
+      phone:      u.phone      || "",
+      website:    u.website    || "",
+      linkedin:   u.linkedin   || "",
+      github:     u.github     || "",
       skills:     u.skills     ? JSON.parse(u.skills)     : [],
       experience: u.experience ? JSON.parse(u.experience) : [],
+      education:  u.education  ? JSON.parse(u.education)  : [],
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -44,12 +49,19 @@ router.post("/", async (req, res) => {
     const u = req.body;
     await db.query(
       `INSERT INTO users
-         (uid, name, email, role, avatar, title, location, bio, skills, experience, joined_at, updated_at)
-       VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+         (uid, name, email, role, avatar, title, location, bio,
+          phone, website, linkedin, github,
+          skills, experience, education,
+          joined_at, updated_at)
+       VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
        ON DUPLICATE KEY UPDATE
          name=VALUES(name), email=VALUES(email), role=VALUES(role),
          avatar=VALUES(avatar), title=VALUES(title), location=VALUES(location),
-         bio=VALUES(bio), skills=VALUES(skills), experience=VALUES(experience),
+         bio=VALUES(bio),
+         phone=VALUES(phone), website=VALUES(website),
+         linkedin=VALUES(linkedin), github=VALUES(github),
+         skills=VALUES(skills), experience=VALUES(experience),
+         education=VALUES(education),
          updated_at=VALUES(updated_at)`,
       [
         u.id || u.uid,
@@ -60,8 +72,13 @@ router.post("/", async (req, res) => {
         u.title      || "",
         u.location   || "",
         u.bio        || "",
+        u.phone      || "",
+        u.website    || "",
+        u.linkedin   || "",
+        u.github     || "",
         JSON.stringify(u.skills      || []),
         JSON.stringify(u.experience  || []),
+        JSON.stringify(u.education   || []),
         u.joinedAt   || Date.now(),
         Date.now(),
       ]

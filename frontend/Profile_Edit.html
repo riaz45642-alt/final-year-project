@@ -9,6 +9,169 @@
   <link rel="stylesheet" href="css/auth.css">
   <link rel="stylesheet" href="css/jobs.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+    /* ── Profile Edit Extra Styles ── */
+    .pe-section {
+      background: var(--surface, #fff);
+      border: 1px solid var(--border, rgba(0,0,0,.08));
+      border-radius: var(--radius-xl, 16px);
+      padding: 24px 28px;
+      max-width: 720px;
+      margin: 0 auto 20px;
+    }
+    .pe-section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 1px solid var(--border, rgba(0,0,0,.08));
+    }
+    .pe-section-title {
+      font-family: var(--font-display, 'Clash Display', sans-serif);
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .pe-section-title i { color: var(--accent, #4f6ef7); font-size: 14px; }
+
+    .pe-actions {
+      max-width: 720px;
+      margin: 0 auto;
+      display: flex;
+      gap: 10px;
+      padding-bottom: 48px;
+    }
+
+    /* Form rows */
+    .pe-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+    @media (max-width: 600px) { .pe-form-row { grid-template-columns: 1fr; } }
+
+    .pe-input-group { display: flex; flex-direction: column; gap: 5px; }
+    .pe-input-group label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-secondary, #666);
+      letter-spacing: 0.3px;
+    }
+    .pe-input-group input,
+    .pe-input-group textarea,
+    .pe-input-group select {
+      padding: 10px 14px;
+      border: 1.5px solid var(--border, rgba(0,0,0,.1));
+      border-radius: 10px;
+      font-family: var(--font-body, 'Instrument Sans', sans-serif);
+      font-size: 14px;
+      color: var(--text-primary);
+      background: var(--bg, #f8f9fe);
+      transition: border-color 0.15s;
+      outline: none;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .pe-input-group input:focus,
+    .pe-input-group textarea:focus,
+    .pe-input-group select:focus { border-color: var(--accent, #4f6ef7); background: #fff; }
+    .pe-input-group textarea { resize: vertical; }
+
+    /* Skill / Exp / Edu tags */
+    .pe-tag-row { display: flex; flex-wrap: wrap; gap: 8px; min-height: 40px; align-items: flex-start; }
+    .pe-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--accent-light, #e8edff);
+      color: var(--accent, #4f6ef7);
+      border: 1px solid rgba(79,110,247,.2);
+      border-radius: 20px;
+      padding: 5px 13px;
+      font-size: 13px;
+      font-weight: 500;
+    }
+    .pe-tag .pe-tag-sub { font-size: 10.5px; opacity: .65; }
+    .pe-tag .pe-tag-rm {
+      background: none; border: none; cursor: pointer;
+      color: inherit; font-size: 15px; line-height: 1;
+      padding: 0; margin-left: 2px; opacity: .55;
+      transition: opacity .15s;
+    }
+    .pe-tag .pe-tag-rm:hover { opacity: 1; }
+
+    /* Card items (exp / edu) */
+    .pe-card-item {
+      border: 1px solid var(--border, rgba(0,0,0,.08));
+      border-radius: 12px;
+      padding: 15px 18px;
+      margin-bottom: 10px;
+      background: var(--bg, #f8f9fe);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .pe-card-item-title { font-size: 14.5px; font-weight: 700; color: var(--text-primary); }
+    .pe-card-item-sub   { font-size: 13px; color: var(--accent, #4f6ef7); font-weight: 500; margin-top: 2px; }
+    .pe-card-item-meta  { font-size: 12px; color: var(--text-secondary, #888); margin-top: 4px; }
+    .pe-card-item-desc  { font-size: 12.5px; color: var(--text-secondary, #888); margin-top: 6px; line-height: 1.5; }
+    .pe-card-btns { display: flex; gap: 6px; flex-shrink: 0; }
+
+    .pe-empty { color: var(--text-secondary, #888); font-size: 13px; padding: 10px 0; }
+
+    /* Modal styles */
+    .pe-modal-box {
+      background: var(--surface, #fff);
+      border-radius: var(--radius-xl, 16px);
+      padding: 28px;
+      width: 100%;
+      max-width: 500px;
+      position: relative;
+      max-height: 92vh;
+      overflow-y: auto;
+    }
+    .pe-modal-title {
+      font-family: var(--font-display, 'Clash Display', sans-serif);
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .pe-modal-sub { font-size: 13px; color: var(--text-secondary, #888); margin-bottom: 22px; }
+
+    /* Avatar preview */
+    .pe-avatar-preview {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent, #4f6ef7), #6c4ef7);
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-display, sans-serif);
+      font-size: 26px; font-weight: 700; color: white;
+      border: 3px solid rgba(79,110,247,.25);
+      margin-bottom: 12px;
+    }
+
+    /* Input prefix icon */
+    .pe-input-icon-wrap { position: relative; }
+    .pe-input-icon-wrap i {
+      position: absolute; left: 12px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary, #888); font-size: 13px;
+    }
+    .pe-input-icon-wrap input { padding-left: 34px; }
+
+    .btn-sm { padding: 5px 12px !important; font-size: 12px !important; }
+    .btn-danger {
+      background: #fee2e2 !important; color: #dc2626 !important;
+      border: 1px solid #fca5a5 !important;
+    }
+    .btn-danger:hover { background: #fecaca !important; }
+  </style>
 </head>
 <body>
 
@@ -69,8 +232,8 @@
       <div class="sidebar-user-info">
         <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
         <div class="sidebar-user-details">
-          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
-          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+          <div class="sidebar-user-name" id="sb-name"></div>
+          <div class="sidebar-user-role" id="sb-role"></div>
         </div>
         <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
           <span class="role-toggle-label" id="toggle-label-left">JS</span>
@@ -86,70 +249,175 @@
 
   <!-- ═══ MAIN CONTENT ═══ -->
   <main class="main-content">
-
-    <!-- PROFILE EDIT -->
     <section class="page active" id="page-profile-edit">
+
       <div class="page-header">
-        <div class="page-title">Edit Profile</div>
-        <div class="page-subtitle">Update your personal information and preferences</div>
+        <div class="page-title"><i class="fa-solid fa-pen" style="color:var(--accent);margin-right:8px"></i>Edit Profile</div>
+        <div class="page-subtitle">Update your personal information, skills, education and experience</div>
       </div>
 
-      <!-- ── Basic Info ── -->
-      <div class="card" style="max-width:680px;margin:0 auto 24px">
-        <div class="section-title" style="font-size:16px;font-weight:700;margin-bottom:18px">👤 Basic Information</div>
-        <div class="form-row">
-          <div class="input-group"><label>Full Name</label><input type="text" id="edit-name" placeholder="Ahmed Khan"></div>
-          <div class="input-group"><label>Email</label><input type="email" id="edit-email" placeholder="you@example.com"></div>
-        </div>
-        <div class="form-row">
-          <div class="input-group"><label>Professional Title</label><input type="text" id="edit-title-field" placeholder="e.g. Full Stack Developer"></div>
-          <div class="input-group"><label>Location</label><input type="text" id="edit-location" placeholder="Lahore, Pakistan"></div>
-        </div>
-        <div class="input-group"><label>Bio / Summary</label><textarea id="edit-bio" rows="3" placeholder="Brief professional summary about yourself..." style="resize:vertical"></textarea></div>
-      </div>
-
-      <!-- ── Skills ── -->
-      <div class="card" style="max-width:680px;margin:0 auto 24px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="section-title" style="font-size:16px;font-weight:700;margin:0">🛠️ Skills</div>
-          <button class="btn btn-primary" style="padding:7px 16px;font-size:13px" onclick="openAddSkillModal()">+ Add Skill</button>
-        </div>
-        <div id="skills-list" style="display:flex;flex-wrap:wrap;gap:8px;min-height:36px">
-          <span style="color:var(--text-secondary,#888);font-size:13px;align-self:center" id="skills-empty-msg">No skills added yet</span>
+      <!-- ── Avatar Preview ── -->
+      <div class="pe-section" style="display:flex;align-items:center;gap:20px;padding:20px 28px">
+        <div class="pe-avatar-preview" id="pe-avatar-preview">AK</div>
+        <div>
+          <div style="font-weight:700;font-size:15px" id="pe-avatar-name-label">Your Name</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Avatar is generated from your initials</div>
         </div>
       </div>
 
-      <!-- ── Experience ── -->
-      <div class="card" style="max-width:680px;margin:0 auto 24px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-          <div class="section-title" style="font-size:16px;font-weight:700;margin:0">💼 Work Experience</div>
-          <button class="btn btn-primary" style="padding:7px 16px;font-size:13px" onclick="openAddExpModal()">+ Add Experience</button>
+      <!-- ── 1. Basic Information ── -->
+      <div class="pe-section">
+        <div class="pe-section-header">
+          <div class="pe-section-title"><i class="fa-solid fa-user"></i> Basic Information</div>
+        </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>Full Name *</label>
+            <input type="text" id="edit-name" placeholder="e.g. Ahmed Khan" oninput="updateAvatarPreview()">
+          </div>
+          <div class="pe-input-group">
+            <label>Email Address *</label>
+            <input type="email" id="edit-email" placeholder="you@example.com">
+          </div>
+        </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>Professional Title</label>
+            <input type="text" id="edit-title-field" placeholder="e.g. Full Stack Developer">
+          </div>
+          <div class="pe-input-group">
+            <label>Phone Number</label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-solid fa-phone"></i>
+              <input type="tel" id="edit-phone" placeholder="+92 300 1234567">
+            </div>
+          </div>
+        </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>Location / City</label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-solid fa-location-dot"></i>
+              <input type="text" id="edit-location" placeholder="Lahore, Pakistan">
+            </div>
+          </div>
+          <div class="pe-input-group">
+            <label>Years of Experience</label>
+            <select id="edit-experience-years">
+              <option value="">Select...</option>
+              <option value="Fresher">Fresher (0 years)</option>
+              <option value="1 year">1 year</option>
+              <option value="2 years">2 years</option>
+              <option value="3 years">3 years</option>
+              <option value="4 years">4 years</option>
+              <option value="5 years">5 years</option>
+              <option value="6-8 years">6–8 years</option>
+              <option value="9-12 years">9–12 years</option>
+              <option value="12+ years">12+ years</option>
+            </select>
+          </div>
+        </div>
+        <div class="pe-input-group" style="margin-bottom:0">
+          <label>Professional Summary / Bio</label>
+          <textarea id="edit-bio" rows="4" placeholder="Write a short professional summary about yourself, your experience, and what you're looking for..."></textarea>
+        </div>
+      </div>
+
+      <!-- ── 2. Social & Links ── -->
+      <div class="pe-section">
+        <div class="pe-section-header">
+          <div class="pe-section-title"><i class="fa-solid fa-link"></i> Links & Social Profiles</div>
+        </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>Portfolio / Website</label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-solid fa-globe"></i>
+              <input type="url" id="edit-website" placeholder="https://yourportfolio.com">
+            </div>
+          </div>
+          <div class="pe-input-group">
+            <label>LinkedIn Profile</label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-brands fa-linkedin"></i>
+              <input type="url" id="edit-linkedin" placeholder="https://linkedin.com/in/yourprofile">
+            </div>
+          </div>
+        </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>GitHub Profile</label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-brands fa-github"></i>
+              <input type="url" id="edit-github" placeholder="https://github.com/yourusername">
+            </div>
+          </div>
+          <div class="pe-input-group">
+            <!-- Intentionally blank — grid balance -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ── 3. Skills ── -->
+      <div class="pe-section">
+        <div class="pe-section-header">
+          <div class="pe-section-title"><i class="fa-solid fa-star"></i> Skills</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddSkillModal()">+ Add Skill</button>
+        </div>
+        <div class="pe-tag-row" id="skills-list">
+          <span class="pe-empty" id="skills-empty-msg">No skills added yet — click "+ Add Skill" to get started</span>
+        </div>
+      </div>
+
+      <!-- ── 4. Work Experience ── -->
+      <div class="pe-section">
+        <div class="pe-section-header">
+          <div class="pe-section-title"><i class="fa-solid fa-briefcase"></i> Work Experience</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddExpModal()">+ Add Experience</button>
         </div>
         <div id="experience-list">
-          <div style="color:var(--text-secondary,#888);font-size:13px;text-align:center;padding:16px 0" id="exp-empty-msg">No experience added yet</div>
+          <div class="pe-empty" id="exp-empty-msg">No work experience added yet</div>
+        </div>
+      </div>
+
+      <!-- ── 5. Education ── -->
+      <div class="pe-section">
+        <div class="pe-section-header">
+          <div class="pe-section-title"><i class="fa-solid fa-graduation-cap"></i> Education</div>
+          <button class="btn btn-primary btn-sm" onclick="openAddEduModal()">+ Add Education</button>
+        </div>
+        <div id="education-list">
+          <div class="pe-empty" id="edu-empty-msg">No education added yet</div>
         </div>
       </div>
 
       <!-- ── Save / Cancel ── -->
-      <div style="max-width:680px;margin:0 auto;display:flex;gap:10px;padding-bottom:32px">
-        <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfilePage()">💾 Save All Changes</button>
-        <button class="btn btn-outline" onclick="window.location.href='profile_page.html'">Cancel</button>
+      <div class="pe-actions">
+        <button class="btn btn-primary" id="save-profile-btn" onclick="saveProfilePage()">
+          <i class="fa-solid fa-floppy-disk"></i> Save All Changes
+        </button>
+        <button class="btn btn-outline" onclick="window.location.href='profile_page.html'">
+          <i class="fa-solid fa-xmark"></i> Cancel
+        </button>
       </div>
-    </section>
 
+    </section>
   </main>
 
-  <!-- ══════════ ADD SKILL MODAL ══════════ -->
+  <!-- ════════════════════════════════════
+       MODAL: Add / Edit Skill
+  ════════════════════════════════════ -->
   <div class="modal-overlay" id="add-skill-modal" style="z-index:900" onclick="if(event.target===this)closeAddSkillModal()">
-    <div class="modal-box" style="max-width:420px;padding:28px">
+    <div class="pe-modal-box">
       <button class="modal-close" onclick="closeAddSkillModal()">&#x2715;</button>
-      <div style="font-family:var(--font-display,'sans-serif');font-size:20px;font-weight:700;margin-bottom:6px">Add Skill</div>
-      <div style="font-size:13px;color:var(--text-secondary,#888);margin-bottom:20px">Add a skill to your profile</div>
-      <div class="input-group" style="margin-bottom:14px">
+      <div class="pe-modal-title">Add Skill</div>
+      <div class="pe-modal-sub">Add a professional skill to your profile</div>
+
+      <div class="pe-input-group" style="margin-bottom:14px">
         <label>Skill Name *</label>
         <input type="text" id="skill-name-input" placeholder="e.g. React, Python, Figma..." onkeydown="if(event.key==='Enter')saveSkill()">
       </div>
-      <div class="input-group" style="margin-bottom:20px">
+      <div class="pe-input-group" style="margin-bottom:22px">
         <label>Proficiency Level</label>
         <select id="skill-level-input">
           <option value="Beginner">Beginner</option>
@@ -165,42 +433,48 @@
     </div>
   </div>
 
-  <!-- ══════════ ADD EXPERIENCE MODAL ══════════ -->
+  <!-- ════════════════════════════════════
+       MODAL: Add / Edit Work Experience
+  ════════════════════════════════════ -->
   <div class="modal-overlay" id="add-exp-modal" style="z-index:900" onclick="if(event.target===this)closeAddExpModal()">
-    <div class="modal-box" style="max-width:500px;padding:28px;max-height:90vh;overflow-y:auto">
+    <div class="pe-modal-box">
       <button class="modal-close" onclick="closeAddExpModal()">&#x2715;</button>
-      <div style="font-family:var(--font-display,'sans-serif');font-size:20px;font-weight:700;margin-bottom:6px" id="exp-modal-title">Add Work Experience</div>
-      <div style="font-size:13px;color:var(--text-secondary,#888);margin-bottom:20px">Fill in your job details</div>
+      <div class="pe-modal-title" id="exp-modal-title">Add Work Experience</div>
+      <div class="pe-modal-sub">Fill in the details of your job position</div>
+
       <input type="hidden" id="exp-edit-index" value="-1">
-      <div class="input-group" style="margin-bottom:14px">
-        <label>Job Title *</label>
-        <input type="text" id="exp-title-input" placeholder="e.g. Senior React Developer">
+
+      <div class="pe-form-row" style="margin-bottom:14px">
+        <div class="pe-input-group">
+          <label>Job Title *</label>
+          <input type="text" id="exp-title-input" placeholder="e.g. Senior React Developer">
+        </div>
+        <div class="pe-input-group">
+          <label>Company Name *</label>
+          <input type="text" id="exp-company-input" placeholder="e.g. Systems Limited">
+        </div>
       </div>
-      <div class="input-group" style="margin-bottom:14px">
-        <label>Company Name *</label>
-        <input type="text" id="exp-company-input" placeholder="e.g. Systems Limited">
-      </div>
-      <div class="input-group" style="margin-bottom:14px">
+      <div class="pe-input-group" style="margin-bottom:14px">
         <label>Location</label>
         <input type="text" id="exp-location-input" placeholder="e.g. Lahore, Pakistan / Remote">
       </div>
-      <div class="form-row" style="gap:12px">
-        <div class="input-group" style="margin-bottom:14px">
+      <div class="pe-form-row" style="margin-bottom:6px">
+        <div class="pe-input-group">
           <label>Start Date *</label>
           <input type="month" id="exp-start-input">
         </div>
-        <div class="input-group" style="margin-bottom:14px">
+        <div class="pe-input-group">
           <label>End Date</label>
-          <input type="month" id="exp-end-input" id="exp-end-input">
+          <input type="month" id="exp-end-input">
         </div>
       </div>
-      <div class="input-group" style="margin-bottom:6px;display:flex;align-items:center;gap:8px;flex-direction:row">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
         <input type="checkbox" id="exp-current-checkbox" style="width:auto;margin:0" onchange="toggleCurrentJob()">
-        <label style="margin:0;font-weight:500;cursor:pointer" for="exp-current-checkbox">I currently work here</label>
+        <label for="exp-current-checkbox" style="font-size:13.5px;font-weight:500;cursor:pointer;margin:0">I currently work here</label>
       </div>
-      <div class="input-group" style="margin-bottom:20px;margin-top:14px">
+      <div class="pe-input-group" style="margin-bottom:22px">
         <label>Description</label>
-        <textarea id="exp-desc-input" rows="3" placeholder="Describe your responsibilities and achievements..." style="resize:vertical"></textarea>
+        <textarea id="exp-desc-input" rows="3" placeholder="Describe your key responsibilities and achievements..."></textarea>
       </div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-primary" style="flex:1" onclick="saveExperience()">Save Experience</button>
@@ -208,29 +482,76 @@
       </div>
     </div>
   </div>
+
+  <!-- ════════════════════════════════════
+       MODAL: Add / Edit Education
+  ════════════════════════════════════ -->
+  <div class="modal-overlay" id="add-edu-modal" style="z-index:900" onclick="if(event.target===this)closeAddEduModal()">
+    <div class="pe-modal-box">
+      <button class="modal-close" onclick="closeAddEduModal()">&#x2715;</button>
+      <div class="pe-modal-title" id="edu-modal-title">Add Education</div>
+      <div class="pe-modal-sub">Add your academic qualifications</div>
+
+      <input type="hidden" id="edu-edit-index" value="-1">
+
+      <div class="pe-form-row" style="margin-bottom:14px">
+        <div class="pe-input-group">
+          <label>Degree / Qualification *</label>
+          <input type="text" id="edu-degree-input" placeholder="e.g. Bachelor of Science">
+        </div>
+        <div class="pe-input-group">
+          <label>Field of Study *</label>
+          <input type="text" id="edu-field-input" placeholder="e.g. Computer Science">
+        </div>
+      </div>
+      <div class="pe-input-group" style="margin-bottom:14px">
+        <label>Institution / University *</label>
+        <input type="text" id="edu-institution-input" placeholder="e.g. FAST NUCES, LUMS, COMSATS...">
+      </div>
+      <div class="pe-input-group" style="margin-bottom:14px">
+        <label>Grade / CGPA</label>
+        <input type="text" id="edu-grade-input" placeholder="e.g. 3.8 / 4.0 or A Grade">
+      </div>
+      <div class="pe-form-row" style="margin-bottom:6px">
+        <div class="pe-input-group">
+          <label>Start Year *</label>
+          <input type="number" id="edu-start-input" placeholder="2020" min="1950" max="2035">
+        </div>
+        <div class="pe-input-group">
+          <label>End Year</label>
+          <input type="number" id="edu-end-input" placeholder="2024" min="1950" max="2035">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <input type="checkbox" id="edu-current-checkbox" style="width:auto;margin:0" onchange="toggleCurrentEdu()">
+        <label for="edu-current-checkbox" style="font-size:13.5px;font-weight:500;cursor:pointer;margin:0">I am currently studying here</label>
+      </div>
+      <div class="pe-input-group" style="margin-bottom:22px">
+        <label>Additional Notes</label>
+        <textarea id="edu-desc-input" rows="2" placeholder="e.g. Relevant courses, thesis, honors, achievements..."></textarea>
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-primary" style="flex:1" onclick="saveEducation()">Save Education</button>
+        <button class="btn btn-outline" onclick="closeAddEduModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
 </div><!-- end app-layout -->
 
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-bottom-nav">
   <button class="mobile-bottom-nav-item" onclick="window.location.href='dashboard.html'">
-    <span class="mobile-nav-icon">🏠</span>
-    <span class="mobile-nav-label">Jobs</span>
+    <span class="mobile-nav-icon">🏠</span><span class="mobile-nav-label">Jobs</span>
   </button>
   <button class="mobile-bottom-nav-item" onclick="window.location.href='Save_job.html'">
-    <span class="mobile-nav-icon">🔖</span>
-    <span class="mobile-nav-label">Saved</span>
-  </button>
-  <button class="mobile-bottom-nav-item" onclick="window.location.href='AI_section.html'">
-    <span class="mobile-nav-icon">🤖</span>
-    <span class="mobile-nav-label">AI</span>
+    <span class="mobile-nav-icon">🔖</span><span class="mobile-nav-label">Saved</span>
   </button>
   <button class="mobile-bottom-nav-item" onclick="window.location.href='cv_generator.html'">
-    <span class="mobile-nav-icon">📄</span>
-    <span class="mobile-nav-label">CV</span>
+    <span class="mobile-nav-icon">📄</span><span class="mobile-nav-label">CV</span>
   </button>
   <button class="mobile-bottom-nav-item active" onclick="window.location.href='profile_page.html'">
-    <span class="mobile-nav-icon">👤</span>
-    <span class="mobile-nav-label">Profile</span>
+    <span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span>
   </button>
 </nav>
 
@@ -238,277 +559,390 @@
 <script src="js/script.js"></script>
 <script src="js/guard.js"></script>
 <script src="js/auth.js"></script>
-<script src="js/profile_edit.js"></script>
 <script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    await (initCommon && initCommon());
-    // 🔒 ROLE GUARD: must be logged in to edit profile
-    Guard.requireLogin();
+/* ══════════════════════════════════════════════════════════
+   PROFILE EDIT — Inline Script
+══════════════════════════════════════════════════════════ */
 
-    // Wait for auth to settle, then fetch full profile from TiDB
-    async function initPage() {
-      let user = (typeof AppState !== 'undefined' && AppState.currentUser)
-               || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-      if (!user) {
-        if (typeof toast === 'function') toast('Please sign in to edit your profile', 'warning');
-        if (typeof openAuth === 'function') openAuth('login');
-        return;
-      }
+// In-memory data arrays
+window._peSkills     = [];
+window._peExperience = [];
+window._peEducation  = [];
 
-      // Fetch full profile from TiDB (richer than session cache)
-      try {
-        const dbProfile = await DB.getProfile(user.id);
-        if (dbProfile) {
-          user = Object.assign({}, user, dbProfile);
-          AppState.currentUser = user;
-          DB.setSession(user);
-        }
-      } catch(e) { /* offline — use session cache */ }
+/* ── Avatar preview ── */
+function updateAvatarPreview() {
+  const name = (document.getElementById('edit-name').value || '').trim();
+  const initials = name.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase() || '?';
+  const el = document.getElementById('pe-avatar-preview');
+  const nl = document.getElementById('pe-avatar-name-label');
+  if (el) el.textContent = initials;
+  if (nl) nl.textContent = name || 'Your Name';
+}
 
-      document.getElementById('edit-name').value  = user.name  || '';
-      document.getElementById('edit-email').value = user.email || '';
-      if (document.getElementById('edit-title-field'))  document.getElementById('edit-title-field').value  = user.title    || '';
-      if (document.getElementById('edit-location'))     document.getElementById('edit-location').value     = user.location || '';
-      if (document.getElementById('edit-bio'))          document.getElementById('edit-bio').value           = user.bio      || '';
+/* ══════════════════════════════════════════════
+   PAGE INIT — load user data into form
+══════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', async () => {
+  await (initCommon && initCommon());
+  Guard.requireLogin();
 
-      renderSkillsList();
-      renderExperienceList();
+  async function initPage() {
+    let user = (typeof AppState !== 'undefined' && AppState.currentUser)
+             || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
+    if (!user) {
+      if (typeof toast === 'function') toast('Please sign in to edit your profile', 'warning');
+      if (typeof openAuth === 'function') openAuth('login');
+      return;
     }
 
-    // FIX: Run immediately with cached session, then re-run after DB profile loads
-    initPage();
-    document.addEventListener('authRoleReady', function(e) {
-      if (e.detail) initPage();
-    }, { once: true });
+    // Fetch full profile from TiDB
+    try {
+      const dbProfile = await DB.getProfile(user.id);
+      if (dbProfile) {
+        user = Object.assign({}, user, dbProfile);
+        AppState.currentUser = user;
+        DB.setSession(user);
+      }
+    } catch(e) { /* offline — use session cache */ }
+
+    // ── Populate fields ──
+    _setVal('edit-name',             user.name             || '');
+    _setVal('edit-email',            user.email            || '');
+    _setVal('edit-title-field',      user.title            || '');
+    _setVal('edit-phone',            user.phone            || '');
+    _setVal('edit-location',         user.location         || '');
+    _setVal('edit-experience-years', user.experienceYears  || '');
+    _setVal('edit-bio',              user.bio              || '');
+    _setVal('edit-website',          user.website          || '');
+    _setVal('edit-linkedin',         user.linkedin         || '');
+    _setVal('edit-github',           user.github           || '');
+
+    updateAvatarPreview();
+
+    // ── Load arrays ──
+    const rawSkills = user.skills;
+    if (Array.isArray(rawSkills) && rawSkills.length)
+      window._peSkills = rawSkills.map(s => typeof s === 'string' ? { name: s, level: 'Intermediate' } : s);
+    else if (typeof rawSkills === 'string' && rawSkills.trim())
+      window._peSkills = rawSkills.split(',').map(s => ({ name: s.trim(), level: 'Intermediate' })).filter(s => s.name);
+    else window._peSkills = [];
+
+    window._peExperience = Array.isArray(user.experience) ? [...user.experience] : [];
+    window._peEducation  = Array.isArray(user.education)  ? [...user.education]  : [];
+
+    _renderSkills();
+    _renderExperience();
+    _renderEducation();
+  }
+
+  initPage();
+  document.addEventListener('authRoleReady', function(e) {
+    if (e.detail) initPage();
+  }, { once: true });
+});
+
+function _setVal(id, val) {
+  const el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+/* ══════════════════════════════════════════════
+   SAVE ALL
+══════════════════════════════════════════════ */
+async function saveProfilePage() {
+  const newName  = (document.getElementById('edit-name')?.value  || '').trim();
+  const newEmail = (document.getElementById('edit-email')?.value || '').trim();
+
+  if (!newName)  { toast('Full name is required', 'error');  document.getElementById('edit-name').focus();  return; }
+  if (!newEmail) { toast('Email address is required', 'error'); document.getElementById('edit-email').focus(); return; }
+
+  // Basic email validation
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(newEmail)) {
+    toast('Please enter a valid email address', 'error');
+    document.getElementById('edit-email').focus();
+    return;
+  }
+
+  const saveBtn = document.getElementById('save-profile-btn');
+  saveBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Saving...';
+  saveBtn.disabled = true;
+
+  const user = (AppState && AppState.currentUser) || DB.getSession();
+  if (!user) {
+    toast('Please sign in first', 'warning');
+    saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save All Changes';
+    saveBtn.disabled = false;
+    return;
+  }
+
+  // ── Build updated user object ──
+  const updated = Object.assign({}, user, {
+    name:            newName,
+    email:           newEmail,
+    avatar:          newName.split(' ').map(w => w[0] || '').join('').slice(0, 2).toUpperCase(),
+    title:           (document.getElementById('edit-title-field')?.value      || '').trim(),
+    phone:           (document.getElementById('edit-phone')?.value            || '').trim(),
+    location:        (document.getElementById('edit-location')?.value         || '').trim(),
+    experienceYears: (document.getElementById('edit-experience-years')?.value || '').trim(),
+    bio:             (document.getElementById('edit-bio')?.value              || '').trim(),
+    website:         (document.getElementById('edit-website')?.value          || '').trim(),
+    linkedin:        (document.getElementById('edit-linkedin')?.value         || '').trim(),
+    github:          (document.getElementById('edit-github')?.value           || '').trim(),
+    skills:          window._peSkills,
+    experience:      window._peExperience,
+    education:       window._peEducation,
   });
 
-  /* ──────────────────────────────────────────────
-     SAVE ALL
-  ────────────────────────────────────────────── */
-  async function saveProfilePage() {
-    const newName  = document.getElementById('edit-name').value.trim();
-    const newEmail = document.getElementById('edit-email').value.trim();
-    if (!newName || !newEmail) { toast('Name and email are required', 'error'); return; }
+  // Update local session
+  DB.setSession(updated);
+  if (AppState) AppState.currentUser = updated;
+  if (typeof updateAuthUI === 'function') updateAuthUI();
 
-    const saveBtn = document.getElementById('save-profile-btn');
-    saveBtn.textContent = 'Saving...'; saveBtn.disabled = true;
-
-    const user = AppState.currentUser || DB.getSession();
-    if (!user) { toast('Please sign in first', 'warning'); saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false; return; }
-
-    // Update all fields
-    user.name     = newName;
-    user.email    = newEmail;
-    user.avatar   = newName.split(' ').map(w => w[0] || '').join('').slice(0,2).toUpperCase();
-    user.title    = (document.getElementById('edit-title-field')?.value || '').trim()  || user.title    || '';
-    user.location = (document.getElementById('edit-location')?.value    || '').trim()  || user.location || '';
-    user.bio      = (document.getElementById('edit-bio')?.value         || '').trim()  || user.bio      || '';
-    // Skills & experience come from in-memory arrays managed by the skill/exp editors
-    user.skills     = (window._peSkills     || []);
-    user.experience = (window._peExperience || []);
-
-    // 1. Update localStorage session cache (instant UI update)
-    DB.setSession(user);
-    AppState.currentUser = user;
-    if (typeof updateAuthUI === 'function') updateAuthUI();
-
-    // 🔧 TiDB: 2. Persist full profile to TiDB users table
-    const result = await DB.saveProfile(user);
-    if (!result || !result.success) {
-      toast('Warning: saved locally but could not reach server. Check if backend is running.', 'warning');
-    } else {
-      toast('Profile updated successfully! ✅', 'success');
-    }
-
-    saveBtn.textContent = 'Save Changes'; saveBtn.disabled = false;
-    setTimeout(() => { window.location.href = 'profile_page.html'; }, 900);
+  // Persist to TiDB
+  const result = await DB.saveProfile(updated);
+  if (!result || !result.success) {
+    toast('Saved locally, but could not reach the server. Check your connection.', 'warning');
+  } else {
+    toast('Profile updated successfully! ✅', 'success');
   }
 
-  /* ──────────────────────────────────────────────
-     SKILLS
-  ────────────────────────────────────────────── */
-  window._peSkills = [];
+  saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save All Changes';
+  saveBtn.disabled = false;
+  setTimeout(() => { window.location.href = 'profile_page.html'; }, 900);
+}
 
-  function loadSkillsFromUser() {
-    const user = AppState.currentUser || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-    const raw = user?.skills;
-    if (Array.isArray(raw)) window._peSkills = raw.map(s => typeof s === 'string' ? { name: s, level: 'Intermediate' } : s);
-    else if (typeof raw === 'string' && raw.trim()) window._peSkills = raw.split(',').map(s => ({ name: s.trim(), level: 'Intermediate' })).filter(s => s.name);
-    else window._peSkills = [];
+/* ══════════════════════════════════════════════
+   SKILLS
+══════════════════════════════════════════════ */
+function _renderSkills() {
+  const list  = document.getElementById('skills-list');
+  const empty = document.getElementById('skills-empty-msg');
+  if (!list) return;
+  list.querySelectorAll('.pe-tag').forEach(el => el.remove());
+  if (!window._peSkills.length) { if (empty) empty.style.display = ''; return; }
+  if (empty) empty.style.display = 'none';
+  window._peSkills.forEach((skill, i) => {
+    const tag = document.createElement('span');
+    tag.className = 'pe-tag';
+    tag.innerHTML = `${skill.name} <span class="pe-tag-sub">${skill.level || ''}</span>
+      <button class="pe-tag-rm" onclick="removeSkill(${i})" title="Remove">×</button>`;
+    list.appendChild(tag);
+  });
+}
+
+function openAddSkillModal() {
+  document.getElementById('skill-name-input').value = '';
+  document.getElementById('skill-level-input').value = 'Intermediate';
+  document.getElementById('add-skill-modal').classList.add('open');
+  setTimeout(() => document.getElementById('skill-name-input').focus(), 150);
+}
+function closeAddSkillModal() { document.getElementById('add-skill-modal').classList.remove('open'); }
+
+function saveSkill() {
+  const name  = document.getElementById('skill-name-input').value.trim();
+  const level = document.getElementById('skill-level-input').value;
+  if (!name) { toast('Skill name is required', 'error'); document.getElementById('skill-name-input').focus(); return; }
+  if (window._peSkills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
+    toast('This skill is already in your list', 'warning'); return;
   }
+  window._peSkills.push({ name, level });
+  _renderSkills();
+  closeAddSkillModal();
+  toast(`"${name}" added ✅`, 'success');
+}
 
-  function renderSkillsList() {
-    loadSkillsFromUser();
-    _renderSkills();
+function removeSkill(index) {
+  const removed = window._peSkills.splice(index, 1);
+  _renderSkills();
+  if (removed.length) toast(`"${removed[0].name}" removed`, 'info');
+}
+
+/* ══════════════════════════════════════════════
+   WORK EXPERIENCE
+══════════════════════════════════════════════ */
+function _renderExperience() {
+  const list  = document.getElementById('experience-list');
+  const empty = document.getElementById('exp-empty-msg');
+  if (!list) return;
+  list.querySelectorAll('.pe-card-item').forEach(el => el.remove());
+  if (!window._peExperience.length) { if (empty) empty.style.display = ''; return; }
+  if (empty) empty.style.display = 'none';
+  window._peExperience.forEach((exp, i) => {
+    const endLabel = exp.current ? 'Present' : (exp.endDate || '');
+    const period   = [exp.startDate, endLabel].filter(Boolean).join(' – ');
+    const div = document.createElement('div');
+    div.className = 'pe-card-item';
+    div.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div class="pe-card-item-title">${exp.title || ''}</div>
+        <div class="pe-card-item-sub">${exp.company || ''}</div>
+        <div class="pe-card-item-meta">${[exp.location, period].filter(Boolean).join(' · ')}</div>
+        ${exp.description ? `<div class="pe-card-item-desc">${exp.description}</div>` : ''}
+      </div>
+      <div class="pe-card-btns">
+        <button class="btn btn-outline btn-sm" onclick="editExperience(${i})"><i class="fa-solid fa-pen" style="font-size:11px"></i> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="removeExperience(${i})"><i class="fa-solid fa-trash" style="font-size:11px"></i></button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function openAddExpModal(editIndex) {
+  editIndex = (editIndex === undefined) ? -1 : editIndex;
+  document.getElementById('exp-edit-index').value = editIndex;
+  document.getElementById('exp-modal-title').textContent = editIndex >= 0 ? 'Edit Work Experience' : 'Add Work Experience';
+  const fields = ['exp-title-input','exp-company-input','exp-location-input','exp-start-input','exp-end-input','exp-desc-input'];
+  if (editIndex >= 0) {
+    const exp = window._peExperience[editIndex];
+    document.getElementById('exp-title-input').value    = exp.title       || '';
+    document.getElementById('exp-company-input').value  = exp.company     || '';
+    document.getElementById('exp-location-input').value = exp.location    || '';
+    document.getElementById('exp-start-input').value    = exp.startDate   || '';
+    document.getElementById('exp-end-input').value      = exp.endDate     || '';
+    document.getElementById('exp-desc-input').value     = exp.description || '';
+    document.getElementById('exp-current-checkbox').checked = !!exp.current;
+    document.getElementById('exp-end-input').disabled   = !!exp.current;
+  } else {
+    fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('exp-current-checkbox').checked = false;
+    document.getElementById('exp-end-input').disabled = false;
   }
+  document.getElementById('add-exp-modal').classList.add('open');
+  setTimeout(() => document.getElementById('exp-title-input').focus(), 150);
+}
+function closeAddExpModal()  { document.getElementById('add-exp-modal').classList.remove('open'); }
+function editExperience(i)   { openAddExpModal(i); }
 
-  function _renderSkills() {
-    const list = document.getElementById('skills-list');
-    const empty = document.getElementById('skills-empty-msg');
-    if (!list) return;
-    // Remove existing tags (keep empty msg)
-    list.querySelectorAll('.skill-tag').forEach(el => el.remove());
-    if (window._peSkills.length === 0) {
-      if (empty) empty.style.display = '';
-      return;
-    }
-    if (empty) empty.style.display = 'none';
-    window._peSkills.forEach((skill, i) => {
-      const tag = document.createElement('span');
-      tag.className = 'skill-tag';
-      tag.style.cssText = 'display:inline-flex;align-items:center;gap:6px;background:var(--accent-light,#e8edff);color:var(--accent,#4f6ef7);border:1px solid rgba(79,110,247,.2);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:500';
-      tag.innerHTML = `${skill.name} <span style="font-size:10px;opacity:.7">${skill.level}</span> <button onclick="removeSkill(${i})" style="background:none;border:none;cursor:pointer;color:inherit;font-size:14px;line-height:1;padding:0;margin-left:2px;opacity:.6" title="Remove">×</button>`;
-      list.appendChild(tag);
-    });
+function toggleCurrentJob() {
+  const checked = document.getElementById('exp-current-checkbox').checked;
+  const endEl   = document.getElementById('exp-end-input');
+  if (checked) { endEl.value = ''; endEl.disabled = true; }
+  else          { endEl.disabled = false; }
+}
+
+function saveExperience() {
+  const title   = document.getElementById('exp-title-input').value.trim();
+  const company = document.getElementById('exp-company-input').value.trim();
+  if (!title)   { toast('Job title is required', 'error');   document.getElementById('exp-title-input').focus();   return; }
+  if (!company) { toast('Company name is required', 'error'); document.getElementById('exp-company-input').focus(); return; }
+  const startDate = document.getElementById('exp-start-input').value;
+  if (!startDate) { toast('Start date is required', 'error'); document.getElementById('exp-start-input').focus(); return; }
+
+  const exp = {
+    title, company,
+    location:    document.getElementById('exp-location-input').value.trim(),
+    startDate,
+    endDate:     document.getElementById('exp-end-input').value,
+    current:     document.getElementById('exp-current-checkbox').checked,
+    description: document.getElementById('exp-desc-input').value.trim(),
+  };
+  const idx = parseInt(document.getElementById('exp-edit-index').value);
+  if (idx >= 0) { window._peExperience[idx] = exp; toast('Experience updated ✅', 'success'); }
+  else          { window._peExperience.unshift(exp); toast(`Experience at "${company}" added ✅`, 'success'); }
+  _renderExperience();
+  closeAddExpModal();
+}
+
+function removeExperience(index) {
+  const removed = window._peExperience.splice(index, 1);
+  _renderExperience();
+  if (removed.length) toast(`"${removed[0].title}" removed`, 'info');
+}
+
+/* ══════════════════════════════════════════════
+   EDUCATION
+══════════════════════════════════════════════ */
+function _renderEducation() {
+  const list  = document.getElementById('education-list');
+  const empty = document.getElementById('edu-empty-msg');
+  if (!list) return;
+  list.querySelectorAll('.pe-card-item').forEach(el => el.remove());
+  if (!window._peEducation.length) { if (empty) empty.style.display = ''; return; }
+  if (empty) empty.style.display = 'none';
+  window._peEducation.forEach((edu, i) => {
+    const endLabel = edu.current ? 'Present' : (edu.endYear || '');
+    const period   = [edu.startYear, endLabel].filter(Boolean).join(' – ');
+    const div = document.createElement('div');
+    div.className = 'pe-card-item';
+    div.innerHTML = `
+      <div style="flex:1;min-width:0">
+        <div class="pe-card-item-title">${edu.degree || ''}${edu.field ? ' — ' + edu.field : ''}</div>
+        <div class="pe-card-item-sub">${edu.institution || ''}</div>
+        <div class="pe-card-item-meta">${[period, edu.grade ? 'Grade: ' + edu.grade : ''].filter(Boolean).join(' · ')}</div>
+        ${edu.description ? `<div class="pe-card-item-desc">${edu.description}</div>` : ''}
+      </div>
+      <div class="pe-card-btns">
+        <button class="btn btn-outline btn-sm" onclick="editEducation(${i})"><i class="fa-solid fa-pen" style="font-size:11px"></i> Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="removeEducation(${i})"><i class="fa-solid fa-trash" style="font-size:11px"></i></button>
+      </div>`;
+    list.appendChild(div);
+  });
+}
+
+function openAddEduModal(editIndex) {
+  editIndex = (editIndex === undefined) ? -1 : editIndex;
+  document.getElementById('edu-edit-index').value = editIndex;
+  document.getElementById('edu-modal-title').textContent = editIndex >= 0 ? 'Edit Education' : 'Add Education';
+  if (editIndex >= 0) {
+    const edu = window._peEducation[editIndex];
+    document.getElementById('edu-degree-input').value      = edu.degree      || '';
+    document.getElementById('edu-field-input').value       = edu.field       || '';
+    document.getElementById('edu-institution-input').value = edu.institution || '';
+    document.getElementById('edu-grade-input').value       = edu.grade       || '';
+    document.getElementById('edu-start-input').value       = edu.startYear   || '';
+    document.getElementById('edu-end-input').value         = edu.endYear     || '';
+    document.getElementById('edu-desc-input').value        = edu.description || '';
+    document.getElementById('edu-current-checkbox').checked = !!edu.current;
+    document.getElementById('edu-end-input').disabled       = !!edu.current;
+  } else {
+    ['edu-degree-input','edu-field-input','edu-institution-input','edu-grade-input','edu-start-input','edu-end-input','edu-desc-input']
+      .forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('edu-current-checkbox').checked = false;
+    document.getElementById('edu-end-input').disabled = false;
   }
+  document.getElementById('add-edu-modal').classList.add('open');
+  setTimeout(() => document.getElementById('edu-degree-input').focus(), 150);
+}
+function closeAddEduModal()  { document.getElementById('add-edu-modal').classList.remove('open'); }
+function editEducation(i)    { openAddEduModal(i); }
 
-  function openAddSkillModal() {
-    document.getElementById('skill-name-input').value = '';
-    document.getElementById('skill-level-input').value = 'Intermediate';
-    document.getElementById('add-skill-modal').classList.add('open');
-    setTimeout(() => document.getElementById('skill-name-input').focus(), 150);
-  }
+function toggleCurrentEdu() {
+  const checked = document.getElementById('edu-current-checkbox').checked;
+  const endEl   = document.getElementById('edu-end-input');
+  if (checked) { endEl.value = ''; endEl.disabled = true; }
+  else          { endEl.disabled = false; }
+}
 
-  function closeAddSkillModal() {
-    document.getElementById('add-skill-modal').classList.remove('open');
-  }
+function saveEducation() {
+  const degree      = document.getElementById('edu-degree-input').value.trim();
+  const field       = document.getElementById('edu-field-input').value.trim();
+  const institution = document.getElementById('edu-institution-input').value.trim();
+  const startYear   = document.getElementById('edu-start-input').value.trim();
 
-  function saveSkill() {
-    const name  = document.getElementById('skill-name-input').value.trim();
-    const level = document.getElementById('skill-level-input').value;
-    if (!name) { toast('Skill name is required', 'error'); document.getElementById('skill-name-input').focus(); return; }
-    if (window._peSkills.some(s => s.name.toLowerCase() === name.toLowerCase())) {
-      toast('This skill is already added', 'warning'); return;
-    }
-    window._peSkills.push({ name, level });
-    _renderSkills();
-    closeAddSkillModal();
-    toast(`"${name}" skill added ✅`, 'success');
-  }
+  if (!degree)      { toast('Degree is required', 'error');      document.getElementById('edu-degree-input').focus();      return; }
+  if (!institution) { toast('Institution is required', 'error'); document.getElementById('edu-institution-input').focus(); return; }
+  if (!startYear)   { toast('Start year is required', 'error');  document.getElementById('edu-start-input').focus();       return; }
 
-  function removeSkill(index) {
-    const removed = window._peSkills.splice(index, 1);
-    _renderSkills();
-    if (removed.length) toast(`"${removed[0].name}" removed`, 'info');
-  }
+  const edu = {
+    degree, field, institution,
+    grade:       document.getElementById('edu-grade-input').value.trim(),
+    startYear,
+    endYear:     document.getElementById('edu-end-input').value.trim(),
+    current:     document.getElementById('edu-current-checkbox').checked,
+    description: document.getElementById('edu-desc-input').value.trim(),
+  };
+  const idx = parseInt(document.getElementById('edu-edit-index').value);
+  if (idx >= 0) { window._peEducation[idx] = edu; toast('Education updated ✅', 'success'); }
+  else          { window._peEducation.unshift(edu); toast(`"${degree}" added ✅`, 'success'); }
+  _renderEducation();
+  closeAddEduModal();
+}
 
-  /* ──────────────────────────────────────────────
-     EXPERIENCE
-  ────────────────────────────────────────────── */
-  window._peExperience = [];
-
-  function loadExperienceFromUser() {
-    const user = AppState.currentUser || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
-    window._peExperience = Array.isArray(user?.experience) ? [...user.experience] : [];
-  }
-
-  function renderExperienceList() {
-    loadExperienceFromUser();
-    _renderExperience();
-  }
-
-  function _renderExperience() {
-    const list  = document.getElementById('experience-list');
-    const empty = document.getElementById('exp-empty-msg');
-    if (!list) return;
-    list.querySelectorAll('.exp-item').forEach(el => el.remove());
-    if (window._peExperience.length === 0) {
-      if (empty) empty.style.display = '';
-      return;
-    }
-    if (empty) empty.style.display = 'none';
-    window._peExperience.forEach((exp, i) => {
-      const endLabel = exp.current ? 'Present' : (exp.endDate || '');
-      const div = document.createElement('div');
-      div.className = 'exp-item';
-      div.style.cssText = 'border:1px solid var(--border,rgba(0,0,0,.08));border-radius:12px;padding:16px 18px;margin-bottom:12px;background:var(--surface,#fff)';
-      div.innerHTML = `
-        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap">
-          <div>
-            <div style="font-weight:700;font-size:15px">${exp.title}</div>
-            <div style="font-size:13.5px;color:var(--accent,#4f6ef7);font-weight:500;margin-top:2px">${exp.company}</div>
-            <div style="font-size:12.5px;color:var(--text-secondary,#888);margin-top:4px">
-              ${exp.location ? exp.location + ' · ' : ''}${exp.startDate || ''} — ${endLabel}
-            </div>
-            ${exp.description ? `<div style="font-size:13px;color:var(--text-secondary,#888);margin-top:8px;line-height:1.55">${exp.description}</div>` : ''}
-          </div>
-          <div style="display:flex;gap:6px;flex-shrink:0">
-            <button class="btn btn-outline btn-sm" onclick="editExperience(${i})" style="padding:4px 12px;font-size:12px">Edit</button>
-            <button class="btn btn-danger btn-sm" onclick="removeExperience(${i})" style="padding:4px 12px;font-size:12px">Remove</button>
-          </div>
-        </div>`;
-      list.appendChild(div);
-    });
-  }
-
-  function openAddExpModal(editIndex) {
-    editIndex = (editIndex === undefined) ? -1 : editIndex;
-    document.getElementById('exp-edit-index').value = editIndex;
-    document.getElementById('exp-modal-title').textContent = editIndex >= 0 ? 'Edit Work Experience' : 'Add Work Experience';
-    if (editIndex >= 0) {
-      const exp = window._peExperience[editIndex];
-      document.getElementById('exp-title-input').value    = exp.title       || '';
-      document.getElementById('exp-company-input').value  = exp.company     || '';
-      document.getElementById('exp-location-input').value = exp.location    || '';
-      document.getElementById('exp-start-input').value    = exp.startDate   || '';
-      document.getElementById('exp-end-input').value      = exp.endDate     || '';
-      document.getElementById('exp-desc-input').value     = exp.description || '';
-      document.getElementById('exp-current-checkbox').checked = !!exp.current;
-      document.getElementById('exp-end-input').disabled   = !!exp.current;
-    } else {
-      ['exp-title-input','exp-company-input','exp-location-input','exp-start-input','exp-end-input','exp-desc-input'].forEach(id => { const el = document.getElementById(id); if(el) el.value=''; });
-      document.getElementById('exp-current-checkbox').checked = false;
-      document.getElementById('exp-end-input').disabled = false;
-    }
-    document.getElementById('add-exp-modal').classList.add('open');
-    setTimeout(() => document.getElementById('exp-title-input').focus(), 150);
-  }
-
-  function closeAddExpModal() {
-    document.getElementById('add-exp-modal').classList.remove('open');
-  }
-
-  function toggleCurrentJob() {
-    const checked = document.getElementById('exp-current-checkbox').checked;
-    const endEl   = document.getElementById('exp-end-input');
-    if (checked) { endEl.value = ''; endEl.disabled = true; }
-    else          { endEl.disabled = false; }
-  }
-
-  function saveExperience() {
-    const title   = document.getElementById('exp-title-input').value.trim();
-    const company = document.getElementById('exp-company-input').value.trim();
-    if (!title)   { toast('Job title is required', 'error');   document.getElementById('exp-title-input').focus();   return; }
-    if (!company) { toast('Company name is required', 'error'); document.getElementById('exp-company-input').focus(); return; }
-
-    const exp = {
-      title,
-      company,
-      location:    document.getElementById('exp-location-input').value.trim(),
-      startDate:   document.getElementById('exp-start-input').value,
-      endDate:     document.getElementById('exp-end-input').value,
-      current:     document.getElementById('exp-current-checkbox').checked,
-      description: document.getElementById('exp-desc-input').value.trim(),
-    };
-
-    const idx = parseInt(document.getElementById('exp-edit-index').value);
-    if (idx >= 0) {
-      window._peExperience[idx] = exp;
-      toast('Experience updated ✅', 'success');
-    } else {
-      window._peExperience.unshift(exp);
-      toast(`Experience at "${company}" added ✅`, 'success');
-    }
-    _renderExperience();
-    closeAddExpModal();
-  }
-
-  function editExperience(index)   { openAddExpModal(index); }
-  function removeExperience(index) {
-    const removed = window._peExperience.splice(index, 1);
-    _renderExperience();
-    if (removed.length) toast(`"${removed[0].title}" removed`, 'info');
-  }
+function removeEducation(index) {
+  const removed = window._peEducation.splice(index, 1);
+  _renderEducation();
+  if (removed.length) toast(`"${removed[0].degree}" removed`, 'info');
+}
 </script>
 </body>
 </html>

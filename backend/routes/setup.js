@@ -25,6 +25,11 @@ router.get("/setup", async (req, res) => {
         bio         TEXT,
         skills      TEXT,
         experience  TEXT,
+        education   TEXT,
+        phone       VARCHAR(30),
+        website     VARCHAR(255),
+        linkedin    VARCHAR(255),
+        github      VARCHAR(255),
         joined_at   BIGINT,
         updated_at  BIGINT
       )
@@ -99,14 +104,22 @@ router.get("/setup", async (req, res) => {
       )
     `);
 
-    // Migration: add location column to users if missing
-    try {
-      await db.query("ALTER TABLE users ADD COLUMN location VARCHAR(255) DEFAULT ''");
-    } catch (e) {
-      if (!e.message.includes("Duplicate column")) throw e;
+    // ── Migrations: add new columns if they don't exist ──
+    const migrations = [
+      { col: "location",  sql: "ALTER TABLE users ADD COLUMN location VARCHAR(255) DEFAULT ''" },
+      { col: "education", sql: "ALTER TABLE users ADD COLUMN education TEXT" },
+      { col: "phone",     sql: "ALTER TABLE users ADD COLUMN phone VARCHAR(30)" },
+      { col: "website",   sql: "ALTER TABLE users ADD COLUMN website VARCHAR(255)" },
+      { col: "linkedin",  sql: "ALTER TABLE users ADD COLUMN linkedin VARCHAR(255)" },
+      { col: "github",    sql: "ALTER TABLE users ADD COLUMN github VARCHAR(255)" },
+    ];
+
+    for (const m of migrations) {
+      try { await db.query(m.sql); }
+      catch (e) { if (!e.message.includes("Duplicate column")) throw e; }
     }
 
-    res.json({ success: true, message: "All tables created successfully." });
+    res.json({ success: true, message: "All tables created & migrated successfully." });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
