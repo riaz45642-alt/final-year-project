@@ -254,20 +254,6 @@ function updateAuthUI() {
 /* ──────────────────────────────────────────────
    7. NAVIGATION
 ────────────────────────────────────────────── */
-function showPage(pageId) {
-  document.querySelectorAll(".page").forEach(function(p) { p.classList.remove("active"); });
-  var target = document.getElementById("page-" + pageId);
-  if (target) target.classList.add("active");
-  AppState.currentPage = pageId;
-  document.querySelectorAll(".sidebar-nav-item").forEach(function(i) { i.classList.remove("active"); });
-  var activeItem = document.querySelector('.sidebar-nav-item[data-page="' + pageId + '"]');
-  if (activeItem) activeItem.classList.add("active");
-  if (pageId === "saved")   renderSavedJobs();
-  if (pageId === "applied") renderAppliedJobs();
-  if (pageId === "employer" && typeof refreshEmployerStats === "function") refreshEmployerStats();
-}
-function navTo(pageId) { showPage(pageId); window.scrollTo(0,0); }
-
 function toggleMobileSidebar() {
   var sidebar = document.getElementById("sidebar");
   var overlay = document.getElementById("mobile-sidebar-overlay");
@@ -328,7 +314,6 @@ async function openJobDetail(jobId) {
           '<button class="btn btn-primary" id="modal-apply-btn" onclick="applyJob(\''+job.id+'\', this)" '+(isApplied?"disabled":"")+'>'+( isApplied?"✓ Applied":"Apply Now →")+'</button>' +
           '<button class="btn btn-outline" id="modal-save-btn" onclick="toggleBookmarkModal(\''+job.id+'\',this)">'+(isBookmarked?"🔖 Saved":"🔖 Save Job")+'</button>'
         : "") +
-        '<button class="btn btn-outline" onclick="findSimilarJobs(\''+job.title+'\')">🤖 Find Similar</button>' +
       '</div>' +
     '</div>';
   var modal = document.getElementById("job-detail-modal");
@@ -345,15 +330,6 @@ async function toggleBookmarkModal(jobId, btn) {
   var feedBtn = document.querySelector('[data-bookmark="'+jobId+'"]');
   if (feedBtn) feedBtn.classList.toggle("saved", isSaved);
 }
-function findSimilarJobs(jobTitle) {
-  closeJobDetail();
-  if (typeof showPage === "function") showPage("ai");
-  setTimeout(function() {
-    var chatInput = document.getElementById("chat-input");
-    if (chatInput) { chatInput.value = 'Find me jobs similar to "'+jobTitle+'"'; chatInput.focus(); }
-  }, 100);
-}
-
 /* ──────────────────────────────────────────────
    9. JOB FEED
 ────────────────────────────────────────────── */
@@ -460,54 +436,6 @@ async function updateSidebarBadges() {
   var apps  = (await DB.getApps()).length;
   document.querySelectorAll("#sb-saved-count").forEach(function(el){ el.textContent = saved; });
   document.querySelectorAll("#sb-applied-count").forEach(function(el){ el.textContent = apps; });
-}
-
-/* ──────────────────────────────────────────────
-   10. APPLIED JOBS PAGE
-────────────────────────────────────────────── */
-async function renderAppliedJobs() {
-  var list = document.getElementById("applied-jobs-list");
-  if (!list) return;
-  var apps = await DB.getApps();
-  if (!AppState.currentUser || !apps.length) {
-    list.innerHTML = '<div class="empty-state"><div class="empty-icon">📋</div><h3>No applications yet</h3><p>Apply to jobs and track your progress here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'dashboard.html\'">Find Jobs</button></div>';
-    return;
-  }
-  var jobs = await getAllJobs();
-  var colorMap = { Reviewing:"reviewing", Shortlisted:"active", Interview:"active", Offered:"active", Rejected:"closed" };
-  list.innerHTML = apps.map(function(app){
-    var job    = jobs.find(function(j){ return j.id===(app.jobId||app.job_id); }) || { title:"Unknown Job", company:"Unknown Company", emoji:"🏢" };
-    var status = app.status || "Reviewing";
-    var dt     = new Date(app.appliedAt||app.applied_at).toLocaleDateString("en-PK",{day:"numeric",month:"short",year:"numeric"});
-    return (
-      '<div class="card mb-16" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">' +
-        '<div class="company-logo" style="flex-shrink:0">'+(job.emoji||"🏢")+'</div>' +
-        '<div style="flex:1;min-width:160px">' +
-          '<div class="job-title" style="font-size:14.5px">'+job.title+'</div>' +
-          '<div class="company-name">'+(job.company||"")+'</div>' +
-          '<div class="job-meta" style="margin-top:6px"><span class="job-meta-item">📅 Applied '+dt+'</span></div>' +
-        '</div>' +
-        '<span class="status-badge '+(colorMap[status]||"reviewing")+'">● '+status+'</span>' +
-        '<button class="btn btn-outline btn-sm" onclick="openJobDetail(\''+(app.jobId||app.job_id)+'\')">View Job</button>' +
-      '</div>'
-    );
-  }).join("");
-}
-
-/* ──────────────────────────────────────────────
-   11. SAVED JOBS PAGE
-────────────────────────────────────────────── */
-async function renderSavedJobs() {
-  var grid = document.getElementById("saved-jobs-grid");
-  if (!grid) return;
-  var savedIds = await DB.getSaved();
-  var allJobs  = await getAllJobs();
-  var saved    = allJobs.filter(function(j){ return savedIds.includes(j.id); });
-  if (!saved.length) {
-    grid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔖</div><h3>No saved jobs yet</h3><p>Browse jobs and click the bookmark icon to save them here</p><button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href=\'dashboard.html\'">Browse Jobs</button></div>';
-    return;
-  }
-  grid.innerHTML = saved.map(function(job){ return buildJobCardHTML(job, savedIds, []); }).join("");
 }
 
 /* ──────────────────────────────────────────────
