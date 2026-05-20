@@ -46,7 +46,7 @@ app.use((err, _req, res, _next) => {
 });
 
 // ── Start ─────────────────────────────────────────────────────────────────────
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () =>
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, '0.0.0.0', () =>
   console.log(`✅ TalentBridge API running on port ${PORT}  [${process.env.NODE_ENV || "development"}]`)
 );
