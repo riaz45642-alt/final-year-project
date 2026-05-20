@@ -594,6 +594,10 @@ document.addEventListener("DOMContentLoaded", async function() {
 
 /* ──────────────────────────────────────────────
    ROLE TOGGLE — switch between Job Seeker & Employer
+   FIX: Use PATCH /users/:uid/role (dedicated atomic endpoint).
+        Redirect ONLY after DB confirms the update — eliminates
+        the race condition where auth.js fetched the old role
+        from DB on the next page load and Guard bounced the user back.
 ────────────────────────────────────────────── */
 var _roleToggleActive = false;
 
@@ -603,19 +607,22 @@ function handleRoleToggle(isEmployer) {
 
   _roleToggleActive = true;
   var newRole = isEmployer ? 'employer' : 'seeker';
+  var targetPage = isEmployer ? 'Employer_dashboard.html' : 'dashboard.html';
 
-  // Lock checkbox immediately — prevent any snap back
+  // Lock checkbox immediately — prevent any snap back while request is in-flight
   var cb = document.getElementById('role-toggle-checkbox');
   if (cb) { cb.checked = isEmployer; cb.disabled = true; }
 
-  // Update AppState immediately
+  // Update AppState immediately so UI responds right away
   user.role = newRole;
   AppState.currentUser = user;
 
-  // Update ALL storage keys auth.js uses
+  // Update ALL storage keys auth.js reads on the next page load.
+  // This ensures _toAppUser() returns the correct role even before
+  // the DB fetch completes on the destination page.
   var uid = user.uid || user.id;
   try {
-    // Key 1: tb_user_role_{uid} — what auth.js reads on next load
+    // Key 1: tb_user_role_{uid} — primary key _toAppUser() reads
     if (uid) localStorage.setItem('tb_user_role_' + uid, newRole);
     // Key 2: talentbridge_user
     var s1 = JSON.parse(localStorage.getItem('talentbridge_user') || '{}');
@@ -633,27 +640,40 @@ function handleRoleToggle(isEmployer) {
   var sbRole = document.getElementById('sb-role');
   if (sbRole) sbRole.textContent = isEmployer ? 'Employer' : 'Job Seeker';
 
-  // Save new role to DB using existing POST /api/users endpoint
+  // FIX: Use the dedicated PATCH /users/:uid/role endpoint.
+  // Previously used POST /users (full profile upsert) which is slower
+  // and was redirecting via .finally() before the DB write completed —
+  // causing auth.js on the next page to fetch the old role and Guard
+  // to redirect the user back (the "loop" bug).
+  // Now: redirect only happens INSIDE .then() (DB confirmed) or .catch()
+  // (network error — localStorage already has the new role so it still works).
   var apiBase = (typeof window.TB_API_BASE !== 'undefined') ? window.TB_API_BASE : '';
-  var payload = Object.assign({}, user, { uid: uid, id: uid, role: newRole });
 
-  fetch(apiBase + '/users', {
-    method: 'POST',
+  fetch(apiBase + '/users/' + uid + '/role', {
+    method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  }).then(function(res) { return res.json(); })
-  .then(function(data) {
-    console.log('[toggle] DB role updated to', newRole, data);
-  }).catch(function(err) {
-    console.warn('[toggle] DB update failed, redirecting anyway:', err);
-  }).finally(function() {
-    setTimeout(function() {
-      window.location.href = isEmployer ? 'Employer_dashboard.html' : 'dashboard.html';
-    }, 300);
+    body: JSON.stringify({ role: newRole })
+  })
+  .then(function(res) {
+    if (!res.ok) throw new Error('Server returned ' + res.status);
+    return res.json();
+  })
+  .then(function() {
+    // DB confirmed the role — safe to navigate now
+    console.log('[toggle] DB role updated to', newRole, '— navigating to', targetPage);
+    window.location.href = targetPage;
+  })
+  .catch(function(err) {
+    // Network/server error — localStorage already has the new role so
+    // _toAppUser() will return the correct role on the next page.
+    // Redirect anyway; the next DB fetch will reconcile if needed.
+    console.warn('[toggle] DB update failed, navigating anyway:', err);
+    window.location.href = targetPage;
   });
 }
 
 function syncRoleToggle() {
+  // Skip if a toggle is already in progress — don't reset the checkbox
   if (_roleToggleActive) return;
   var user = AppState.currentUser;
   var cb = document.getElementById('role-toggle-checkbox');
