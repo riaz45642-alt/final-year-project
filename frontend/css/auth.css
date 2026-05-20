@@ -1,68 +1,146 @@
 /* ═══════════════════════════════════════════════
    TalentBridge — auth.css
-   Login / Signup modal styles
+   Login / Signup modal styles (Light + Dark Ready)
 ═══════════════════════════════════════════════ */
 
 .auth-logo { text-align: center; margin-bottom: 24px; }
+
 .logo {
-  font-family: var(--font-display); font-size: 24px; font-weight: 700; color: var(--accent);
+  font-family: var(--font-display); 
+  font-size: 26px; 
+  font-weight: 700; 
+  color: var(--accent);
   display: inline-block;
+  letter-spacing: -0.02em;
 }
-.logo span { color: var(--text-primary); }
+.logo span { color: var(--text); }
+
+/* Titles */
 .auth-title {
   font-family: var(--font-display);
-  font-size: 22px; font-weight: 700;
-  text-align: center; margin-bottom: 4px;
+  font-size: 22px; 
+  font-weight: 700;
+  text-align: center; 
+  margin-bottom: 4px;
 }
-.auth-subtitle { text-align: center; color: var(--text-secondary); font-size: 13.5px; margin-bottom: 24px; }
 
+.auth-subtitle { 
+  text-align: center; 
+  color: var(--muted); 
+  font-size: 13.5px; 
+  margin-bottom: 28px; 
+  line-height: 1.4;
+}
+
+/* Social Buttons */
 .social-btn {
-  width: 100%; padding: 10px 14px;
-  border-radius: 10px; border: 1px solid var(--border-mid);
-  background: transparent;
-  font-family: var(--font-body); font-size: 13.5px; font-weight: 500;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  gap: 9px; color: var(--text-primary); transition: background-color 0.15s;
+  width: 100%; 
+  padding: 11px 14px;
+  border-radius: 10px; 
+  border: 1px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-body); 
+  font-size: 13.5px; 
+  font-weight: 500;
+  cursor: pointer; 
+  display: flex; 
+  align-items: center; 
+  justify-content: center;
+  gap: 9px; 
+  color: var(--text); 
+  transition: all 0.2s ease;
   margin-bottom: 10px;
 }
-.social-btn:hover { background: var(--bg); }
 
+.social-btn:hover { 
+  background: var(--bg); 
+  border-color: var(--border-strong, var(--border));
+}
+
+/* Divider */
 .divider {
-  text-align: center; color: var(--text-muted);
-  font-size: 12.5px; margin: 14px 0;
+  text-align: center; 
+  color: var(--muted);
+  font-size: 12.5px; 
+  margin: 18px 0;
   position: relative;
 }
-.divider::before { content:''; position:absolute; top:50%; left:0; right:0; height:1px; background:var(--border-mid); }
-.divider span { background: white; padding: 0 12px; position: relative; }
+.divider::before { 
+  content:''; 
+  position:absolute; 
+  top:50%; 
+  left:0; 
+  right:0; 
+  height:1px; 
+  background: var(--border); 
+}
+.divider span { 
+  background: var(--surface); 
+  padding: 0 14px; 
+  position: relative; 
+}
 
-.auth-link { color: var(--accent); cursor: pointer; font-weight: 600; }
-.auth-link:hover { text-decoration: underline; }
-.form-toggle-row { text-align: center; margin-top: 16px; font-size: 13px; color: var(--text-secondary); }
+/* Links */
+.auth-link { 
+  color: var(--accent); 
+  cursor: pointer; 
+  font-weight: 600; 
+}
+.auth-link:hover { 
+  text-decoration: underline; 
+}
 
-.input-group { margin-bottom: 13px; }
+/* Form */
+.input-group { margin-bottom: 14px; }
+
 .input-group label {
-  display: block; font-size: 12.5px; font-weight: 600;
-  color: var(--text-secondary); margin-bottom: 5px;
+  display: block; 
+  font-size: 12.5px; 
+  font-weight: 600;
+  color: var(--muted); 
+  margin-bottom: 6px;
 }
-.input-group input, .input-group select {
-  width: 100%; padding: 9px 12px;
-  border-radius: 9px; border: 1px solid var(--border-mid);
+
+.input-group input, 
+.input-group select {
+  width: 100%; 
+  padding: 10px 13px;
+  border-radius: 9px; 
+  border: 1.5px solid var(--border);
   background: var(--surface);
-  font-family: var(--font-body); font-size: 13.5px;
-  color: var(--text-primary); outline: none;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: var(--font-body); 
+  font-size: 14px;
+  color: var(--text); 
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.input-group input:focus, .input-group select:focus {
+
+.input-group input:focus, 
+.input-group select:focus {
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(79,110,247,0.1);
+  box-shadow: 0 0 0 3px rgba(79, 110, 247, 0.12);
 }
+
 .input-group .error-msg {
-  font-size: 11.5px; color: var(--danger);
-  margin-top: 4px; display: none;
+  font-size: 11.5px; 
+  color: var(--danger, #ef4444);
+  margin-top: 5px; 
+  display: none;
 }
-.input-group.has-error input { border-color: var(--danger); }
-.input-group.has-error .error-msg { display: block; }
-.input-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+.input-group.has-error input,
+.input-group.has-error select { 
+  border-color: var(--danger, #ef4444); 
+}
+.input-group.has-error .error-msg { 
+  display: block; 
+}
+
+.input-row { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 12px; 
+}
 
 @media (max-width: 600px) {
   .input-row { grid-template-columns: 1fr; }

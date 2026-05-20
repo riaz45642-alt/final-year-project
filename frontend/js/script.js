@@ -226,6 +226,8 @@ function updateAuthUI() {
       if (sbRole) sbRole.textContent = user.role === "employer" ? "Employer" : "Job Seeker";
       syncRoleToggle();
     }
+    var switchCard = document.getElementById("sidebar-switch-card");
+    if (switchCard) switchCard.classList.remove("hidden");
 
     var profName = document.getElementById("prof-name");
     var profSub  = document.getElementById("prof-title-sub");
@@ -567,6 +569,7 @@ function handleRoleToggle(isEmployer) {
   // Update sidebar label
   var sbRole = document.getElementById('sb-role');
   if (sbRole) sbRole.textContent = isEmployer ? 'Employer' : 'Job Seeker';
+  syncSwitchPills(isEmployer);
 
   // FIX: Use the dedicated PATCH /users/:uid/role endpoint.
   // Previously used POST /users (full profile upsert) which is slower
@@ -600,11 +603,19 @@ function handleRoleToggle(isEmployer) {
   });
 }
 
+function syncSwitchPills(isEmployer) {
+  var pillJs = document.getElementById("switch-pill-js");
+  var pillEm = document.getElementById("switch-pill-em");
+  if (pillJs) pillJs.classList.toggle("active-pill", !isEmployer);
+  if (pillEm) pillEm.classList.toggle("active-pill", isEmployer);
+}
+
 function syncRoleToggle() {
   // Skip if a toggle is already in progress — don't reset the checkbox
   if (_roleToggleActive) return;
   var user = AppState.currentUser;
   var cb = document.getElementById('role-toggle-checkbox');
   if (!cb || !user) return;
-  cb.checked = (user.role === 'employer');
+  cb.checked = (user.role === "employer");
+  syncSwitchPills(user.role === "employer");
 }

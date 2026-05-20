@@ -65,6 +65,25 @@
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
 
+    <!-- ═══ SWITCH VIEW CARD ═══ -->
+    <div class="sidebar-switch-card hidden" id="sidebar-switch-card">
+      <div class="sidebar-switch-label">Switch View</div>
+      <div class="sidebar-switch-inner">
+        <button class="switch-pill" id="switch-pill-js" onclick="if(document.getElementById('role-toggle-checkbox').checked){document.getElementById('role-toggle-checkbox').checked=false;handleRoleToggle(false);}">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Job Seeker</span>
+        </button>
+        <label class="role-toggle-switch sidebar-toggle-center">
+          <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
+          <span class="role-toggle-slider"></span>
+        </label>
+        <button class="switch-pill" id="switch-pill-em" onclick="if(!document.getElementById('role-toggle-checkbox').checked){document.getElementById('role-toggle-checkbox').checked=true;handleRoleToggle(true);}">
+          <i class="fa-solid fa-briefcase"></i>
+          <span>Employer</span>
+        </button>
+      </div>
+    </div>
+
     <div class="sidebar-section-label">Account</div>
     <button class="sidebar-nav-item" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
     <button class="sidebar-nav-item" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
@@ -76,14 +95,6 @@
         <div class="sidebar-user-details">
           <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
           <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
-        </div>
-        <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
-          <span class="role-toggle-label" id="toggle-label-left">JS</span>
-          <label class="role-toggle-switch">
-            <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
-            <span class="role-toggle-slider"></span>
-          </label>
-          <span class="role-toggle-label" id="toggle-label-right">EM</span>
         </div>
       </div>
     </div>
