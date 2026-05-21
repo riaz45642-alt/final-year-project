@@ -260,92 +260,84 @@ function getCVData() {
 
 // s = scale multiplier: 1 for preview, 2 for PDF
 function buildEducationHTML(education, accent, s) {
-  s = s||1;
-  if (!education.length) return '<p style="color:#9ca3af;font-size:'+(11*s)+'px">No education added.</p>';
+  if (!education.length) return '<p style="font-family:Arial,sans-serif;color:#9ca3af;font-size:13px">No education added.</p>';
   return education.map(function(edu) {
     var line1 = [edu.degree, edu.institution].filter(Boolean).join(' — ');
     var line2 = [edu.year, edu.grade ? 'CGPA: '+edu.grade : ''].filter(Boolean).join(' · ');
-    return '<div style="margin-bottom:'+(14*s)+'px">' +
-      (line1 ? '<div style="font-size:'+(13*s)+'px;font-weight:600;color:#1a1a2e;line-height:1.4">' + esc(line1) + '</div>' : '') +
-      (line2 ? '<div style="font-size:'+(12*s)+'px;color:#6b7280;margin-top:'+(3*s)+'px">' + esc(line2) + '</div>' : '') +
+    return '<div style="margin-bottom:12px">' +
+      (line1 ? '<div style="font-family:Georgia,serif;font-size:15px;font-weight:600;color:#1a1a2e;line-height:1.4">' + esc(line1) + '</div>' : '') +
+      (line2 ? '<div style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;margin-top:3px">' + esc(line2) + '</div>' : '') +
     '</div>';
   }).join('');
 }
 
 function buildExperienceHTML(experience, s) {
-  s = s||1;
-  if (!experience.length) return '<p style="color:#9ca3af;font-size:'+(11*s)+'px">No experience added.</p>';
+  if (!experience.length) return '<p style="font-family:Arial,sans-serif;color:#9ca3af;font-size:13px">No experience added.</p>';
   return experience.map(function(exp) {
-    return '<div style="margin-bottom:'+(16*s)+'px">' +
-      (exp.title ? '<div style="font-size:'+(13*s)+'px;font-weight:600;color:#1a1a2e;line-height:1.4">' + esc(exp.title) + '</div>' : '') +
-      ((exp.company||exp.duration) ? '<div style="font-size:'+(12*s)+'px;color:#6b7280;margin-top:'+(3*s)+'px">' + esc([exp.company,exp.duration].filter(Boolean).join(' · ')) + '</div>' : '') +
-      (exp.desc ? '<div style="font-size:'+(12*s)+'px;color:#6b7280;margin-top:'+(5*s)+'px;line-height:1.6">' + esc(exp.desc) + '</div>' : '') +
+    return '<div style="margin-bottom:14px">' +
+      (exp.title ? '<div style="font-family:Georgia,serif;font-size:15px;font-weight:600;color:#1a1a2e;line-height:1.4">' + esc(exp.title) + '</div>' : '') +
+      ((exp.company||exp.duration) ? '<div style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;margin-top:3px">' + esc([exp.company,exp.duration].filter(Boolean).join(' · ')) + '</div>' : '') +
+      (exp.desc ? '<div style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;margin-top:5px;line-height:1.65">' + esc(exp.desc) + '</div>' : '') +
     '</div>';
   }).join('');
 }
 
 function buildSkillsHTML(skills, bg, color, s) {
-  s = s||1;
-  if (!skills.length) return '<span style="color:#9ca3af;font-size:'+(11*s)+'px">No skills added.</span>';
+  if (!skills.length) return '<span style="font-family:Arial,sans-serif;color:#9ca3af;font-size:13px">No skills added.</span>';
   return skills.map(function(sk) {
-    return '<span style="display:inline-block;padding:'+(4*s)+'px '+(10*s)+'px;border-radius:'+(20*s)+'px;font-size:'+(11*s)+'px;font-weight:600;background:'+bg+';color:'+color+';margin:'+(3*s)+'px">' + esc(sk) + '</span>';
+    return '<span style="display:inline-block;padding:5px 12px;border-radius:20px;font-family:Arial,sans-serif;font-size:12px;font-weight:600;background:'+bg+';color:'+color+';margin:3px">' + esc(sk) + '</span>';
   }).join('');
 }
 
 function sectionHead(label, accent, borderColor, s) {
-  s = s||1;
-  return '<div style="font-size:'+(11*s)+'px;font-weight:700;text-transform:uppercase;letter-spacing:'+(1*s)+'px;color:'+accent+';border-bottom:2px solid '+borderColor+';padding-bottom:'+(5*s)+'px;margin:'+(20*s)+'px 0 '+(12*s)+'px">' + label + '</div>';
+  return '<div style="font-family:Georgia,serif;font-size:15px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:'+accent+';border-bottom:2px solid '+borderColor+';padding-bottom:6px;margin:18px 0 10px">' + label + '</div>';
 }
 
-// ── TEMPLATE 1: CLASSIC (standard top header, single column) ──
 function buildClassicHTML(d, s) {
-  s = s||1;
   return (
-    '<div style="font-family:\'Instrument Sans\',sans-serif;background:#fff;width:100%">' +
-      '<div style="background:#1a1a2e;padding:'+(28*s)+'px '+(36*s)+'px;color:#fff">' +
-        '<div style="font-family:\'Clash Display\',sans-serif;font-size:'+(30*s)+'px;font-weight:700;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
-        '<div style="font-size:'+(14*s)+'px;opacity:0.85;margin-top:'+(5*s)+'px">' + esc(d.title) + '</div>' +
-        '<div style="display:flex;gap:'+(16*s)+'px;flex-wrap:wrap;font-size:'+(12*s)+'px;opacity:0.75;margin-top:'+(12*s)+'px">' +
+    '<div style="font-family:Arial,sans-serif;background:#fff;width:100%">' +
+      '<div style="background:#1a1a2e;padding:26px 36px;color:#fff">' +
+        '<div style="font-family:Georgia,serif;font-size:38px;font-weight:700;line-height:1.2;color:#fff">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
+        '<div style="font-family:Arial,sans-serif;font-size:14px;opacity:0.85;margin-top:5px">' + esc(d.title) + '</div>' +
+        '<div style="display:flex;gap:16px;flex-wrap:wrap;font-family:Arial,sans-serif;font-size:12px;opacity:0.75;margin-top:10px">' +
           (d.email?'<span>✉ '+esc(d.email)+'</span>':'') +
           (d.phone?'<span>📞 '+esc(d.phone)+'</span>':'') +
           (d.loc?'<span>📍 '+esc(d.loc)+'</span>':'') +
           (d.linkedin?'<span>🔗 '+esc(d.linkedin)+'</span>':'') +
         '</div>' +
       '</div>' +
-      '<div style="padding:'+(28*s)+'px '+(36*s)+'px">' +
-        (d.summary ? sectionHead('Profile Summary','#1a1a2e','#e5e7eb',s) + '<p style="font-size:'+(13*s)+'px;color:#4b5563;line-height:1.7;margin:0">' + esc(d.summary) + '</p>' : '') +
-        sectionHead('Education','#1a1a2e','#e5e7eb',s) + buildEducationHTML(d.education,'#1a1a2e',s) +
-        sectionHead('Work Experience','#1a1a2e','#e5e7eb',s) + buildExperienceHTML(d.experience,s) +
-        sectionHead('Skills','#1a1a2e','#e5e7eb',s) + '<div style="display:flex;flex-wrap:wrap;gap:'+(5*s)+'px">' + buildSkillsHTML(d.skills,'#f0f0f0','#333',s) + '</div>' +
+      '<div style="padding:22px 36px 28px">' +
+        (d.summary ? sectionHead('Profile Summary','#1a1a2e','#e5e7eb') + '<p style="font-family:Georgia,serif;font-size:15px;color:#4b5563;line-height:1.7;margin:0">' + esc(d.summary) + '</p>' : '') +
+        sectionHead('Education','#1a1a2e','#e5e7eb') + buildEducationHTML(d.education,'#1a1a2e') +
+        sectionHead('Work Experience','#1a1a2e','#e5e7eb') + buildExperienceHTML(d.experience) +
+        sectionHead('Skills','#1a1a2e','#e5e7eb') + '<div style="display:flex;flex-wrap:wrap;gap:5px">' + buildSkillsHTML(d.skills,'#f0f0f0','#333') + '</div>' +
       '</div>' +
     '</div>'
   );
 }
 
-// ── TEMPLATE 2: SIDEBAR (two-column, colored left sidebar) ──
+// ── TEMPLATE 2: SIDEBAR (two-column with left sidebar) ──
 function buildSidebarHTML(d, s) {
-  s = s||1;
-  var sideW = Math.round(220*s);
   return (
-    '<div style="font-family:\'Instrument Sans\',sans-serif;background:#fff;width:100%;display:flex;min-height:'+(600*s)+'px">' +
-      '<div style="width:'+sideW+'px;background:#4f6ef7;color:#fff;padding:'+(28*s)+'px '+(22*s)+'px;flex-shrink:0">' +
-        '<div style="font-family:\'Clash Display\',sans-serif;font-size:'+(22*s)+'px;font-weight:700;line-height:1.25;margin-bottom:'+(5*s)+'px">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
-        '<div style="font-size:'+(13*s)+'px;opacity:0.85;margin-bottom:'+(20*s)+'px;line-height:1.4">' + esc(d.title) + '</div>' +
-        '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:'+(14*s)+'px;margin-bottom:'+(14*s)+'px">' +
-          '<div style="font-size:'+(10*s)+'px;font-weight:700;text-transform:uppercase;letter-spacing:'+(1*s)+'px;opacity:0.7;margin-bottom:'+(8*s)+'px">Contact</div>' +
-          (d.email?'<div style="font-size:'+(12*s)+'px;margin-bottom:'+(6*s)+'px;opacity:0.9;word-break:break-all">✉ '+esc(d.email)+'</div>':'') +
-          (d.phone?'<div style="font-size:'+(12*s)+'px;margin-bottom:'+(6*s)+'px;opacity:0.9">📞 '+esc(d.phone)+'</div>':'') +
-          (d.loc?'<div style="font-size:'+(12*s)+'px;margin-bottom:'+(6*s)+'px;opacity:0.9">📍 '+esc(d.loc)+'</div>':'') +
+    '<div style="font-family:Arial,sans-serif;background:#fff;width:100%;display:flex;min-height:600px">' +
+      '<div style="width:220px;background:#4f6ef7;color:#fff;padding:28px 20px;flex-shrink:0">' +
+        '<div style="font-family:Georgia,serif;font-size:26px;font-weight:700;line-height:1.25;margin-bottom:5px">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
+        '<div style="font-family:Arial,sans-serif;font-size:13px;opacity:0.85;margin-bottom:18px;line-height:1.4">' + esc(d.title) + '</div>' +
+        '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:14px;margin-bottom:14px">' +
+          '<div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;opacity:0.7;margin-bottom:8px">Contact</div>' +
+          (d.email?'<div style="font-family:Arial,sans-serif;font-size:12px;margin-bottom:6px;opacity:0.9;word-break:break-all">✉ '+esc(d.email)+'</div>':'') +
+          (d.phone?'<div style="font-family:Arial,sans-serif;font-size:12px;margin-bottom:6px;opacity:0.9">📞 '+esc(d.phone)+'</div>':'') +
+          (d.loc?'<div style="font-family:Arial,sans-serif;font-size:12px;margin-bottom:6px;opacity:0.9">📍 '+esc(d.loc)+'</div>':'') +
         '</div>' +
-        (d.skills.length ? '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:'+(14*s)+'px">' +
-          '<div style="font-size:'+(10*s)+'px;font-weight:700;text-transform:uppercase;letter-spacing:'+(1*s)+'px;opacity:0.7;margin-bottom:'+(10*s)+'px">Skills</div>' +
-          d.skills.map(function(sk){ return '<div style="background:rgba(255,255,255,0.2);border-radius:'+(12*s)+'px;padding:'+(4*s)+'px '+(10*s)+'px;font-size:'+(12*s)+'px;margin-bottom:'+(5*s)+'px;display:inline-block">' + esc(sk) + '</div> '; }).join('') +
+        (d.skills.length ? '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:14px">' +
+          '<div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;opacity:0.7;margin-bottom:10px">Skills</div>' +
+          d.skills.map(function(sk){ return '<div style="background:rgba(255,255,255,0.2);border-radius:12px;padding:4px 10px;font-family:Arial,sans-serif;font-size:12px;margin-bottom:5px;display:inline-block">' + esc(sk) + '</div> '; }).join('') +
         '</div>' : '') +
       '</div>' +
-      '<div style="flex:1;padding:'+(28*s)+'px '+(28*s)+'px">' +
-        (d.summary ? '<div style="font-size:'+(13*s)+'px;color:#4b5563;line-height:1.7;margin-bottom:'+(18*s)+'px;padding-bottom:'+(14*s)+'px;border-bottom:1px solid #e5e7eb">' + esc(d.summary) + '</div>' : '') +
-        sectionHead('Education','#4f6ef7','#e8edff',s) + buildEducationHTML(d.education,'#4f6ef7',s) +
-        sectionHead('Work Experience','#4f6ef7','#e8edff',s) + buildExperienceHTML(d.experience,s) +
+      '<div style="flex:1;padding:28px 28px">' +
+        (d.summary ? '<div style="font-family:Georgia,serif;font-size:15px;color:#4b5563;line-height:1.7;margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid #e5e7eb">' + esc(d.summary) + '</div>' : '') +
+        sectionHead('Education','#4f6ef7','#e8edff') + buildEducationHTML(d.education,'#4f6ef7') +
+        sectionHead('Work Experience','#4f6ef7','#e8edff') + buildExperienceHTML(d.experience) +
       '</div>' +
     '</div>'
   );
@@ -353,16 +345,15 @@ function buildSidebarHTML(d, s) {
 
 // ── TEMPLATE 3: MODERN (gradient header, two-column body) ──
 function buildModernHTML(d, s) {
-  s = s||1;
   return (
-    '<div style="font-family:\'Instrument Sans\',sans-serif;background:#fff;width:100%">' +
-      '<div style="background:linear-gradient(135deg,#0d9e75,#06766a);padding:'+(32*s)+'px '+(36*s)+'px;color:#fff">' +
-        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:'+(10*s)+'px">' +
+    '<div style="font-family:Arial,sans-serif;background:#fff;width:100%">' +
+      '<div style="background:linear-gradient(135deg,#0d9e75,#06766a);padding:28px 36px;color:#fff">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px">' +
           '<div>' +
-            '<div style="font-family:\'Clash Display\',sans-serif;font-size:'+(32*s)+'px;font-weight:700;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
-            '<div style="font-size:'+(15*s)+'px;opacity:0.85;margin-top:'+(5*s)+'px;font-weight:500">' + esc(d.title) + '</div>' +
+            '<div style="font-family:Georgia,serif;font-size:38px;font-weight:700;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
+            '<div style="font-family:Arial,sans-serif;font-size:14px;opacity:0.85;margin-top:5px;font-weight:500">' + esc(d.title) + '</div>' +
           '</div>' +
-          '<div style="text-align:right;font-size:'+(12*s)+'px;opacity:0.9;line-height:2">' +
+          '<div style="text-align:right;font-family:Arial,sans-serif;font-size:12px;opacity:0.9;line-height:2">' +
             (d.email?'<div>'+esc(d.email)+'</div>':'') +
             (d.phone?'<div>'+esc(d.phone)+'</div>':'') +
             (d.loc?'<div>'+esc(d.loc)+'</div>':'') +
@@ -370,14 +361,14 @@ function buildModernHTML(d, s) {
         '</div>' +
       '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">' +
-        '<div style="padding:'+(24*s)+'px '+(24*s)+'px '+(24*s)+'px '+(32*s)+'px;border-right:1px solid #e5e7eb">' +
-          sectionHead('Profile','#0d9e75','#e1f5ee',s) +
-          (d.summary ? '<p style="font-size:'+(13*s)+'px;color:#4b5563;line-height:1.7;margin:0">' + esc(d.summary) + '</p>' : '') +
-          sectionHead('Education','#0d9e75','#e1f5ee',s) + buildEducationHTML(d.education,'#0d9e75',s) +
+        '<div style="padding:22px 22px 22px 32px;border-right:1px solid #e5e7eb">' +
+          sectionHead('Profile','#0d9e75','#e1f5ee') +
+          (d.summary ? '<p style="font-family:Georgia,serif;font-size:15px;color:#4b5563;line-height:1.7;margin:0">' + esc(d.summary) + '</p>' : '') +
+          sectionHead('Education','#0d9e75','#e1f5ee') + buildEducationHTML(d.education,'#0d9e75') +
         '</div>' +
-        '<div style="padding:'+(24*s)+'px '+(32*s)+'px '+(24*s)+'px '+(24*s)+'px">' +
-          sectionHead('Experience','#0d9e75','#e1f5ee',s) + buildExperienceHTML(d.experience,s) +
-          sectionHead('Skills','#0d9e75','#e1f5ee',s) + '<div style="display:flex;flex-wrap:wrap;gap:'+(5*s)+'px">' + buildSkillsHTML(d.skills,'#e1f5ee','#0d9e75',s) + '</div>' +
+        '<div style="padding:22px 32px 22px 22px">' +
+          sectionHead('Experience','#0d9e75','#e1f5ee') + buildExperienceHTML(d.experience) +
+          sectionHead('Skills','#0d9e75','#e1f5ee') + '<div style="display:flex;flex-wrap:wrap;gap:5px">' + buildSkillsHTML(d.skills,'#e1f5ee','#0d9e75') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>'
@@ -386,90 +377,87 @@ function buildModernHTML(d, s) {
 
 // ── TEMPLATE 4: COMPACT (timeline dots, left accent bar) ──
 function buildCompactHTML(d, s) {
-  s = s||1;
   function timelineItem(title, sub, desc) {
-    return '<div style="display:flex;gap:'+(12*s)+'px;margin-bottom:'+(14*s)+'px">' +
+    return '<div style="display:flex;gap:12px;margin-bottom:14px">' +
       '<div style="display:flex;flex-direction:column;align-items:center">' +
-        '<div style="width:'+(9*s)+'px;height:'+(9*s)+'px;border-radius:50%;background:#6c4ef7;margin-top:'+(4*s)+'px;flex-shrink:0"></div>' +
-        '<div style="width:1px;flex:1;background:#ede8ff;margin-top:'+(3*s)+'px"></div>' +
+        '<div style="width:9px;height:9px;border-radius:50%;background:#6c4ef7;margin-top:4px;flex-shrink:0"></div>' +
+        '<div style="width:1px;flex:1;background:#ede8ff;margin-top:3px"></div>' +
       '</div>' +
       '<div>' +
-        (title?'<div style="font-size:'+(13*s)+'px;font-weight:600;color:#1a1a2e;line-height:1.4">'+esc(title)+'</div>':'') +
-        (sub?'<div style="font-size:'+(12*s)+'px;color:#6b7280;margin-top:'+(3*s)+'px">'+esc(sub)+'</div>':'') +
-        (desc?'<div style="font-size:'+(12*s)+'px;color:#6b7280;margin-top:'+(5*s)+'px;line-height:1.6">'+esc(desc)+'</div>':'') +
+        (title?'<div style="font-family:Georgia,serif;font-size:15px;font-weight:600;color:#1a1a2e;line-height:1.4">'+esc(title)+'</div>':'') +
+        (sub?'<div style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;margin-top:3px">'+esc(sub)+'</div>':'') +
+        (desc?'<div style="font-family:Arial,sans-serif;font-size:13px;color:#6b7280;margin-top:5px;line-height:1.65">'+esc(desc)+'</div>':'') +
       '</div>' +
     '</div>';
   }
   return (
-    '<div style="font-family:\'Instrument Sans\',sans-serif;background:#fff;width:100%">' +
-      '<div style="background:#6c4ef7;padding:'+(26*s)+'px '+(32*s)+'px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:'+(12*s)+'px">' +
+    '<div style="font-family:Arial,sans-serif;background:#fff;width:100%">' +
+      '<div style="background:#6c4ef7;padding:24px 32px;color:#fff;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px">' +
         '<div>' +
-          '<div style="font-family:\'Clash Display\',sans-serif;font-size:'+(28*s)+'px;font-weight:700;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
-          '<div style="font-size:'+(13*s)+'px;opacity:0.85;margin-top:'+(4*s)+'px">' + esc(d.title) + '</div>' +
+          '<div style="font-family:Georgia,serif;font-size:34px;font-weight:700;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
+          '<div style="font-family:Arial,sans-serif;font-size:13px;opacity:0.85;margin-top:4px">' + esc(d.title) + '</div>' +
         '</div>' +
-        '<div style="font-size:'+(12*s)+'px;opacity:0.85;text-align:right;line-height:2">' +
+        '<div style="font-family:Arial,sans-serif;font-size:12px;opacity:0.85;text-align:right;line-height:2">' +
           (d.email?esc(d.email)+'<br>':'') + (d.phone?esc(d.phone)+'<br>':'') + (d.loc?esc(d.loc):'') +
         '</div>' +
       '</div>' +
       '<div style="display:flex">' +
-        '<div style="width:'+(5*s)+'px;background:#ede8ff;flex-shrink:0"></div>' +
-        '<div style="padding:'+(24*s)+'px '+(28*s)+'px;flex:1">' +
-          (d.summary ? '<div style="font-size:'+(13*s)+'px;color:#4b5563;line-height:1.7;background:#faf9ff;border-left:'+(3*s)+'px solid #6c4ef7;padding:'+(10*s)+'px '+(14*s)+'px;margin-bottom:'+(20*s)+'px">' + esc(d.summary) + '</div>' : '') +
-          sectionHead('Education','#6c4ef7','#ede8ff',s) +
+        '<div style="width:5px;background:#ede8ff;flex-shrink:0"></div>' +
+        '<div style="padding:22px 28px;flex:1">' +
+          (d.summary ? '<div style="font-family:Georgia,serif;font-size:15px;color:#4b5563;line-height:1.7;background:#faf9ff;border-left:3px solid #6c4ef7;padding:10px 14px;margin-bottom:18px">' + esc(d.summary) + '</div>' : '') +
+          sectionHead('Education','#6c4ef7','#ede8ff') +
           (d.education.length ? d.education.map(function(edu){
             return timelineItem(
               [edu.degree,edu.institution].filter(Boolean).join(' — '),
               [edu.year, edu.grade?'CGPA: '+edu.grade:''].filter(Boolean).join(' · '),
               null
             );
-          }).join('') : '<p style="color:#9ca3af;font-size:'+(12*s)+'px">No education added.</p>') +
-          sectionHead('Experience','#6c4ef7','#ede8ff',s) +
+          }).join('') : '<p style="font-family:Arial,sans-serif;color:#9ca3af;font-size:13px">No education added.</p>') +
+          sectionHead('Experience','#6c4ef7','#ede8ff') +
           (d.experience.length ? d.experience.map(function(exp){
             return timelineItem(exp.title, [exp.company,exp.duration].filter(Boolean).join(' · '), exp.desc);
-          }).join('') : '<p style="color:#9ca3af;font-size:'+(12*s)+'px">No experience added.</p>') +
-          sectionHead('Skills','#6c4ef7','#ede8ff',s) +
-          '<div style="display:flex;flex-wrap:wrap;gap:'+(5*s)+'px">' + buildSkillsHTML(d.skills,'#ede8ff','#6c4ef7',s) + '</div>' +
+          }).join('') : '<p style="font-family:Arial,sans-serif;color:#9ca3af;font-size:13px">No experience added.</p>') +
+          sectionHead('Skills','#6c4ef7','#ede8ff') +
+          '<div style="display:flex;flex-wrap:wrap;gap:5px">' + buildSkillsHTML(d.skills,'#ede8ff','#6c4ef7') + '</div>' +
         '</div>' +
       '</div>' +
     '</div>'
   );
 }
 
-// ── TEMPLATE 5: MINIMAL (white, thin lines, uppercase section labels) ──
+// ── TEMPLATE 5: MINIMAL (clean white with thin borders) ──
 function buildMinimalHTML(d, s) {
-  s = s||1;
   function minSection(label) {
-    return '<div style="font-size:'+(10*s)+'px;font-weight:700;text-transform:uppercase;letter-spacing:'+(2*s)+'px;color:#9ca3af;border-bottom:1px solid #f3f4f6;padding-bottom:'+(6*s)+'px;margin:'+(22*s)+'px 0 '+(12*s)+'px">' + label + '</div>';
+    return '<div style="font-family:Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:#9ca3af;border-bottom:1px solid #f3f4f6;padding-bottom:6px;margin:20px 0 12px">' + label + '</div>';
   }
   return (
-    '<div style="font-family:\'Instrument Sans\',sans-serif;background:#fff;width:100%;padding:'+(40*s)+'px '+(44*s)+'px">' +
-      '<div style="border-bottom:2px solid #111827;padding-bottom:'+(20*s)+'px;margin-bottom:'+(4*s)+'px">' +
-        '<div style="font-family:\'Clash Display\',sans-serif;font-size:'+(32*s)+'px;font-weight:700;color:#111827;letter-spacing:-0.5px;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
-        '<div style="font-size:'+(14*s)+'px;color:#6b7280;margin-top:'+(5*s)+'px">' + esc(d.title) + '</div>' +
-        '<div style="display:flex;gap:'+(20*s)+'px;flex-wrap:wrap;font-size:'+(12*s)+'px;color:#9ca3af;margin-top:'+(12*s)+'px">' +
+    '<div style="font-family:Arial,sans-serif;background:#fff;width:100%;padding:36px 44px">' +
+      '<div style="border-bottom:2px solid #1e3a5f;padding-bottom:18px;margin-bottom:4px">' +
+        '<div style="font-family:Georgia,serif;font-size:38px;font-weight:700;color:#1e3a5f;letter-spacing:-0.5px;line-height:1.2">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
+        '<div style="font-family:Arial,sans-serif;font-size:14px;color:#6b7280;margin-top:5px">' + esc(d.title) + '</div>' +
+        '<div style="display:flex;gap:20px;flex-wrap:wrap;font-family:Arial,sans-serif;font-size:12px;color:#9ca3af;margin-top:10px">' +
           (d.email?'<span>'+esc(d.email)+'</span>':'') +
           (d.phone?'<span>'+esc(d.phone)+'</span>':'') +
           (d.loc?'<span>'+esc(d.loc)+'</span>':'') +
         '</div>' +
       '</div>' +
-      (d.summary ? minSection('Profile') + '<p style="font-size:'+(13*s)+'px;color:#4b5563;line-height:1.75;margin:0">' + esc(d.summary) + '</p>' : '') +
-      minSection('Education') + buildEducationHTML(d.education,'#111827',s) +
-      minSection('Experience') + buildExperienceHTML(d.experience,s) +
-      minSection('Skills') + '<div style="display:flex;flex-wrap:wrap;gap:'+(5*s)+'px">' + buildSkillsHTML(d.skills,'#f3f4f6','#374151',s) + '</div>' +
+      (d.summary ? minSection('Profile') + '<p style="font-family:Georgia,serif;font-size:15px;color:#4b5563;line-height:1.75;margin:0">' + esc(d.summary) + '</p>' : '') +
+      minSection('Education') + buildEducationHTML(d.education,'#111827') +
+      minSection('Experience') + buildExperienceHTML(d.experience) +
+      minSection('Skills') + '<div style="display:flex;flex-wrap:wrap;gap:5px">' + buildSkillsHTML(d.skills,'#f3f4f6','#374151') + '</div>' +
     '</div>'
   );
 }
 
 /* ── 9. UPDATE PREVIEW ── */
 function buildTemplateHTML(d, s) {
-  s = s||1;
   switch(selectedTemplate) {
-    case 'classic':  return buildClassicHTML(d,s);
-    case 'sidebar':  return buildSidebarHTML(d,s);
-    case 'modern':   return buildModernHTML(d,s);
-    case 'compact':  return buildCompactHTML(d,s);
-    case 'minimal':  return buildMinimalHTML(d,s);
-    default:         return buildClassicHTML(d,s);
+    case 'classic':  return buildClassicHTML(d);
+    case 'sidebar':  return buildSidebarHTML(d);
+    case 'modern':   return buildModernHTML(d);
+    case 'compact':  return buildCompactHTML(d);
+    case 'minimal':  return buildMinimalHTML(d);
+    default:         return buildClassicHTML(d);
   }
 }
 
@@ -502,7 +490,8 @@ async function downloadCV() {
     'background:#ffffff',
     'overflow:visible',
     'z-index:-999',
-    'font-size:16px',  // reset base font
+    'font-family:Georgia,Arial,sans-serif',
+    'font-size:16px',
   ].join(';');
 
   // Build HTML with s=1 (normal sizes, but at 794px width = proper A4 scale)
