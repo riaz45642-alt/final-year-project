@@ -107,7 +107,23 @@
     <div class="sidebar-section-label">Tools</div>
     <button class="sidebar-nav-item" onclick="window.location.href='cv_generator.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-file"></i></span>CV Generator</button>
 
-    <div class="sidebar-section-label">Account</div>
+        <!-- ═══ SWITCH VIEW CARD ═══ -->
+    <div class="sidebar-switch-card hidden" id="sidebar-switch-card">
+      <div class="sidebar-switch-label">Switch View</div>
+      <div class="sidebar-switch-inner">
+        <button class="switch-pill" id="switch-pill-js" onclick="handleRoleToggle(false)">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          <span>Job Seeker</span>
+        </button>
+        <input type="checkbox" id="role-toggle-checkbox" style="display:none" onchange="handleRoleToggle(this.checked)">
+        <button class="switch-pill" id="switch-pill-em" onclick="handleRoleToggle(true)">
+          <i class="fa-solid fa-briefcase"></i>
+          <span>Employer</span>
+        </button>
+      </div>
+    </div>
+
+<div class="sidebar-section-label">Account</div>
     <button class="sidebar-nav-item active" onclick="window.location.href='profile_page.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-user"></i></span>My Profile</button>
     <button class="sidebar-nav-item" data-role="employer" onclick="window.location.href='Employer_dashboard.html';closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-address-card"></i></span>Employer Hub</button>
     <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
@@ -121,6 +137,9 @@
         </div>
 
       </div>
+          <button class="sidebar-signout-btn" onclick="logout();closeMobileSidebar()">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
     </div>
   </aside>
 
