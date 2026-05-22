@@ -119,14 +119,7 @@
           <div class="sidebar-user-name" id="sb-name"></div>
           <div class="sidebar-user-role" id="sb-role"></div>
         </div>
-        <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
-          <span class="role-toggle-label" id="toggle-label-left">JS</span>
-          <label class="role-toggle-switch">
-            <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
-            <span class="role-toggle-slider"></span>
-          </label>
-          <span class="role-toggle-label" id="toggle-label-right">EM</span>
-        </div>
+
       </div>
     </div>
   </aside>
@@ -239,6 +232,31 @@
 
   </main>
 </div><!-- end app-layout -->
+
+
+<!-- Mobile Bottom Nav -->
+<nav class="mobile-bottom-nav">
+  <button class="mobile-bottom-nav-item " onclick="window.location.href='dashboard.html'">
+    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-label">Jobs</span>
+  </button>
+  <button class="mobile-bottom-nav-item " onclick="window.location.href='Save_job.html'">
+    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-label">Saved</span>
+  </button>
+  <button class="mobile-bottom-nav-item " onclick="window.location.href='cv_generator.html'">
+    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-label">CV</span>
+  </button>
+  <button class="mobile-bottom-nav-item active" onclick="window.location.href='profile_page.html'">
+    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-label">Profile</span>
+  </button>
+  <button class="mobile-bottom-nav-item" onclick="if(typeof logout==='function')logout();else{localStorage.clear();window.location.href='index.html';}">
+    <span class="mobile-nav-icon">🚪</span>
+    <span class="mobile-nav-label">Sign Out</span>
+  </button>
+</nav>
 
 <script src="js/config.js"></script>
 <script src="js/script.js"></script>

@@ -373,6 +373,8 @@ body {
   color: var(--text-muted); transition: color 0.15s;
 }
 .mobile-bottom-nav-item.active { color: var(--accent); }
+.mobile-bottom-nav-item:last-child { color: #e74c3c; }
+.mobile-bottom-nav-item:last-child:hover { color: #c0392b; }
 .mobile-nav-icon { font-size: 18px; line-height: 1; }
 .mobile-nav-label { font-size: 10px; font-weight: 500; font-family: var(--font-body); }
 
