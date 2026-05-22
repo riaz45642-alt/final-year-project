@@ -38,13 +38,9 @@
       <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
     </div>
     <div id="nav-logged-in" class="nav-user-menu hidden">
-      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="window.location.href='profile_page.html'" title="My Profile">
         <span id="nav-avatar-initials">AK</span>
       </div>
-      <button class="nav-signout-btn" onclick="logout()" title="Sign Out">
-        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-      </button>
-      <div class="user-dropdown" id="user-dropdown" style="display:none"></div>
     </div>
   </div>
 </nav>
@@ -69,15 +65,12 @@
     <div class="sidebar-switch-card hidden" id="sidebar-switch-card">
       <div class="sidebar-switch-label">Switch View</div>
       <div class="sidebar-switch-inner">
-        <button class="switch-pill" id="switch-pill-js" onclick="if(document.getElementById('role-toggle-checkbox').checked){document.getElementById('role-toggle-checkbox').checked=false;handleRoleToggle(false);}">
+        <button class="switch-pill" id="switch-pill-js" onclick="handleRoleToggle(false)">
           <i class="fa-solid fa-magnifying-glass"></i>
           <span>Job Seeker</span>
         </button>
-        <label class="role-toggle-switch sidebar-toggle-center">
-          <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
-          <span class="role-toggle-slider"></span>
-        </label>
-        <button class="switch-pill" id="switch-pill-em" onclick="if(!document.getElementById('role-toggle-checkbox').checked){document.getElementById('role-toggle-checkbox').checked=true;handleRoleToggle(true);}">
+        <input type="checkbox" id="role-toggle-checkbox" style="display:none" onchange="handleRoleToggle(this.checked)">
+        <button class="switch-pill" id="switch-pill-em" onclick="handleRoleToggle(true)">
           <i class="fa-solid fa-briefcase"></i>
           <span>Employer</span>
         </button>
@@ -97,6 +90,9 @@
           <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
         </div>
       </div>
+      <button class="sidebar-signout-btn" onclick="logout();closeMobileSidebar()">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
     </div>
   </aside>
 

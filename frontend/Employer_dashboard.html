@@ -33,13 +33,9 @@
       <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
     </div>
     <div id="nav-logged-in" class="nav-user-menu hidden">
-      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="window.location.href='profile_page.html'" title="My Profile">
         <span id="nav-avatar-initials">AK</span>
       </div>
-      <button class="nav-signout-btn" onclick="logout()" title="Sign Out">
-        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-      </button>
-      <div class="user-dropdown" id="user-dropdown" style="display:none"></div>
     </div>
   </div>
 </nav>
@@ -70,17 +66,12 @@
         <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
         <div class="sidebar-user-details">
           <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
-          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
-        </div>
-        <div class="role-toggle-wrap" title="Switch to Employer / Job Seeker">
-          <span class="role-toggle-label" id="toggle-label-left">JS</span>
-          <label class="role-toggle-switch">
-            <input type="checkbox" id="role-toggle-checkbox" onchange="handleRoleToggle(this.checked)">
-            <span class="role-toggle-slider"></span>
-          </label>
-          <span class="role-toggle-label" id="toggle-label-right">EM</span>
+          <div class="sidebar-user-role" id="sb-role">Employer</div>
         </div>
       </div>
+      <button class="sidebar-signout-btn" onclick="logout();closeMobileSidebar()">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
     </div>
   </aside>
 

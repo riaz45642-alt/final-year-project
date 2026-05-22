@@ -36,13 +36,9 @@
       <button class="nav-link-btn primary" onclick="openAuth('signup')">Sign Up Free</button>
     </div>
     <div id="nav-logged-in" class="nav-user-menu hidden">
-      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="openDropdown()">
+      <div class="user-avatar-btn" id="nav-avatar-btn" onclick="window.location.href='profile_page.html'" title="My Profile">
         <span id="nav-avatar-initials">AK</span>
       </div>
-      <button class="nav-signout-btn" onclick="logout()" title="Sign Out">
-        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
-      </button>
-      <div class="user-dropdown" id="user-dropdown" style="display:none"></div>
     </div>
   </div>
 </nav>

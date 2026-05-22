@@ -433,21 +433,6 @@ body {
   .mobile-nav-icon { font-size: 16px; }
 }
 /* ─── NAV SIGN OUT BUTTON ─── */
-.nav-signout-btn {
-  display: flex; align-items: center; gap: 6px;
-  padding: 7px 14px; border-radius: 8px;
-  border: 1px solid var(--danger, #e74c3c);
-  background: transparent;
-  color: var(--danger, #e74c3c);
-  font-family: var(--font-body); font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all 0.15s;
-  white-space: nowrap;
-}
-.nav-signout-btn:hover {
-  background: var(--danger, #e74c3c);
-  color: #fff;
-}
-
 /* ─── SIDEBAR SWITCH VIEW CARD ─── */
 .sidebar-user-details { flex: 1; min-width: 0; }
 
@@ -531,10 +516,7 @@ body {
   box-shadow: 0 2px 8px rgba(79,110,247,0.35);
 }
 .switch-pill i { font-size: 10px; flex-shrink: 0; }
-.sidebar-toggle-center {
-  flex: 0 0 auto;             /* fixed size — never squish the toggle switch */
-  flex-shrink: 0;
-}
+/* sidebar-toggle-center removed — toggle icon no longer shown */
 
 /* ─── ROLE TOGGLE SWITCH (reused) ─── */
 .role-toggle-wrap {

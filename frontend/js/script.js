@@ -274,8 +274,8 @@ function closeMobileSidebar() {
   if (overlay) overlay.classList.remove("visible");
   if (ham)     ham.classList.remove("open");
 }
-function openDropdown()  { var d = document.getElementById("user-dropdown"); if(d) d.classList.toggle("open"); }
-function closeDropdown() { var d = document.getElementById("user-dropdown"); if(d) d.classList.remove("open"); }
+function openDropdown()  { /* dropdown removed — profile icon now navigates directly */ }
+function closeDropdown() { /* dropdown removed */ }
 
 /* ──────────────────────────────────────────────
    8. JOB DETAIL MODAL
