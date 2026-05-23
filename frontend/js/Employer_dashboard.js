@@ -39,12 +39,10 @@ async function refreshEmployerStats() {
   if (getEl("emp-stat-jobs"))  getEl("emp-stat-jobs").textContent  = myJobs.length;
   if (getEl("emp-stat-apps"))  getEl("emp-stat-apps").textContent  = myApplicants.length;
   if (getEl("emp-stat-short")) getEl("emp-stat-short").textContent = shortlisted;
-  if (getEl("emp-stat-hired")) getEl("emp-stat-hired").textContent = interviewing;
 
   if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? "▲ " + myJobs.length + " active"       : "No jobs yet";
   if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? "▲ " + myApplicants.length + " total"   : "No applicants yet";
   if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? "▲ " + shortlisted + " shortlisted"     : "None shortlisted";
-  if (getEl("emp-stat-hired-change")) getEl("emp-stat-hired-change").textContent = interviewing        ? "▲ " + interviewing + " interviewing"   : "None interviewing";
 
   await refreshNotifBadge();
 }

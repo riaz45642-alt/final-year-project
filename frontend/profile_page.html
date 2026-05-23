@@ -296,10 +296,34 @@ document.addEventListener('DOMContentLoaded', async () => {
      MAIN RENDER
   ══════════════════════════════════ */
   async function renderProfile() {
+    // Check if viewing another user's profile via ?uid= param
+    const urlParams = new URLSearchParams(window.location.search);
+    const viewUid   = urlParams.get('uid');
+
     let user = (typeof AppState !== 'undefined' && AppState.currentUser)
              || (() => { try { const s = localStorage.getItem('tb_session'); return s ? JSON.parse(s) : null; } catch(e){} return null; })();
     if (!user) return;
 
+    // If ?uid= is set AND it's a different user → load that profile instead
+    if (viewUid && viewUid !== user.id) {
+      try {
+        const dbProfile = await DB.getProfile(viewUid);
+        if (dbProfile) {
+          // Show read-only profile — hide edit button
+          const editBtn = document.querySelector('.edit-profile-btn');
+          if (editBtn) editBtn.style.display = 'none';
+          renderHero(dbProfile);
+          renderAbout(dbProfile);
+          renderSkills(dbProfile);
+          renderExperience(dbProfile);
+          renderEducation(dbProfile);
+          renderCompleteness(dbProfile);
+          return;
+        }
+      } catch(e) { /* fallback to own profile */ }
+    }
+
+    // Default: load own profile
     try {
       const dbProfile = await DB.getProfile(user.id);
       if (dbProfile) {

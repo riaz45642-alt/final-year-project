@@ -309,8 +309,19 @@ tbody td { padding: 13px 14px; }
 .hero-search-input {
   flex: 1; background: transparent; border: none; outline: none;
   font-family: var(--font-body); font-size: 14px; color: white;
+  -webkit-text-fill-color: white;
 }
 .hero-search-input::placeholder { color: rgba(255,255,255,0.5); }
+.hero-search-input:focus { background: transparent !important; color: white; -webkit-text-fill-color: white; }
+.hero-search-input:-webkit-autofill,
+.hero-search-input:-webkit-autofill:focus,
+.hero-search-input:-webkit-autofill:hover {
+  -webkit-box-shadow: 0 0 0px 1000px transparent inset !important;
+  box-shadow: 0 0 0px 1000px transparent inset !important;
+  -webkit-text-fill-color: white !important;
+  background-color: transparent !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
 .hero-search-btn {
   padding: 8px 18px; border-radius: 8px; background: var(--accent);
   color: white; border: none; font-family: var(--font-body);
