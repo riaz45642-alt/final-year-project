@@ -4,7 +4,22 @@
    - Contact fields on job posting
    - Per-job applicants management
    - Real-time notification system
+   - Status limited to: Shortlisted | Interviewing | Rejected
+   - Automatic applicant notifications on status change
 ────────────────────────────────────────────── */
+
+/* ── Allowed applicant statuses (employer can set) ── */
+var APPLICANT_STATUSES = ["Shortlisted", "Interviewing", "Rejected"];
+
+/* ── Status badge colors ── */
+function getStatusStyle(status) {
+  switch (status) {
+    case "Shortlisted":  return "background:#d1fae5;color:#065f46";
+    case "Interviewing": return "background:#dbeafe;color:#1e40af";
+    case "Rejected":     return "background:#fee2e2;color:#991b1b";
+    default:             return "background:var(--accent-light,#e0e7ff);color:var(--accent,#4f46e5)";
+  }
+}
 
 /* ── Stats ── */
 async function refreshEmployerStats() {
@@ -19,18 +34,18 @@ async function refreshEmployerStats() {
   var myApplicants = res2.ok ? await res2.json() : [];
 
   var shortlisted = myApplicants.filter(function(a){ return a.status === "Shortlisted"; }).length;
-  var hired       = myApplicants.filter(function(a){ return a.status === "Offered"; }).length;
+  var interviewing = myApplicants.filter(function(a){ return a.status === "Interviewing"; }).length;
 
   function getEl(id) { return document.getElementById(id); }
   if (getEl("emp-stat-jobs"))  getEl("emp-stat-jobs").textContent  = myJobs.length;
   if (getEl("emp-stat-apps"))  getEl("emp-stat-apps").textContent  = myApplicants.length;
   if (getEl("emp-stat-short")) getEl("emp-stat-short").textContent = shortlisted;
-  if (getEl("emp-stat-hired")) getEl("emp-stat-hired").textContent = hired;
+  if (getEl("emp-stat-hired")) getEl("emp-stat-hired").textContent = interviewing;
 
-  if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? "▲ " + myJobs.length + " active"       : "No jobs yet";
-  if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? "▲ " + myApplicants.length + " total"   : "No applicants yet";
-  if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? "▲ " + shortlisted + " shortlisted"     : "None shortlisted";
-  if (getEl("emp-stat-hired-change")) getEl("emp-stat-hired-change").textContent = hired               ? "▲ " + hired + " offered"               : "None offered yet";
+  if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? "▲ " + myJobs.length + " active"        : "No jobs yet";
+  if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? "▲ " + myApplicants.length + " total"    : "No applicants yet";
+  if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? "▲ " + shortlisted + " shortlisted"      : "None shortlisted";
+  if (getEl("emp-stat-hired-change")) getEl("emp-stat-hired-change").textContent = interviewing        ? "▲ " + interviewing + " interviewing"     : "None interviewing";
 
   // Refresh notification badge
   await refreshNotifBadge();
@@ -50,7 +65,6 @@ async function postJob() {
   var category      = getVal("pj-category");
   var description   = getVal("pj-desc");
   var skills        = getVal("pj-skills");
-  // NEW contact fields
   var contactEmail  = getVal("pj-contact-email");
   var contactPhone  = getVal("pj-contact-phone");
   var jobLocation   = getVal("pj-job-location");
@@ -60,7 +74,6 @@ async function postJob() {
   if (!description) { toast("Job description is required", "error"); document.getElementById("pj-desc")?.focus(); return; }
   if (!AppState.currentUser) { toast("Please sign in as an employer", "warning"); openAuth("login"); return; }
 
-  // Basic email validation if provided
   if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
     toast("Please enter a valid contact email", "error");
     document.getElementById("pj-contact-email")?.focus();
@@ -87,7 +100,6 @@ async function postJob() {
     urgent:       false,
     postedBy:     AppState.currentUser.id,
     company:      AppState.currentUser.company || AppState.currentUser.name || "",
-    // NEW contact fields
     contactEmail: contactEmail,
     contactPhone: contactPhone,
     jobLocation:  jobLocation || location,
@@ -118,7 +130,7 @@ function saveDraft() {
   toast('Draft "' + draftTitle + '" saved', "info");
 }
 
-/* ── Posted Jobs Table (Enhanced with View Applicants button) ── */
+/* ── Posted Jobs Table ── */
 async function renderPostedJobsTable() {
   var tableBody = document.getElementById("posted-jobs-tbody");
   if (!tableBody) return;
@@ -152,7 +164,7 @@ async function renderPostedJobsTable() {
       '<td>' + escapeHtml(job.dept || job.category || "—") + '</td>' +
       '<td>' + escapeHtml(job.location || "—") + '</td>' +
       '<td>' +
-        '<button class="btn btn-outline btn-sm" style="font-size:12px" onclick="openJobApplicants(\'' + job.id + '\',\'' + escapeHtml(job.title).replace(/'/g,"\\'" ) + '\')">' +
+        '<button class="btn btn-outline btn-sm" style="font-size:12px" onclick="openJobApplicants(\'' + job.id + '\',\'' + escapeHtml(job.title).replace(/'/g,"\\'") + '\')">' +
           '<strong style="color:var(--accent)">' + applicantCount + '</strong> applicant' + (applicantCount !== 1 ? 's' : '') +
         '</button>' +
       '</td>' +
@@ -179,9 +191,29 @@ async function deleteJob(jobId) {
   toast("Job removed", "info");
 }
 
+/* ── Build status dropdown HTML ── */
+function buildStatusDropdown(currentStatus, appId, inline) {
+  var style = inline
+    ? 'border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer'
+    : 'border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer';
+
+  // If current status is "Reviewing" (initial), show it as a disabled placeholder
+  var extraOpt = (currentStatus === "Reviewing")
+    ? '<option value="" disabled selected style="color:#aaa">— Set status —</option>'
+    : '';
+
+  var optHtml = APPLICANT_STATUSES.map(function(s) {
+    return '<option value="' + s + '"' + (s === currentStatus ? ' selected' : '') + '>' + s + '</option>';
+  }).join('');
+
+  return '<select style="' + style + '" onchange="changeApplicantStatus(this,\'' + appId + '\')">' +
+    extraOpt + optHtml +
+  '</select>';
+}
+
 /* ── Open per-job applicants modal ── */
 async function openJobApplicants(jobId, jobTitle) {
-  var modal = document.getElementById("job-applicants-modal");
+  var modal   = document.getElementById("job-applicants-modal");
   var titleEl = document.getElementById("job-applicants-modal-title");
   var body    = document.getElementById("job-applicants-modal-body");
   if (!modal) return;
@@ -199,23 +231,23 @@ async function openJobApplicants(jobId, jobTitle) {
       return;
     }
 
-    var opts = ["Reviewing","Shortlisted","Interview","Offered","Rejected"];
     body.innerHTML = applicants.map(function(app) {
       var name     = app.seekerName || "Applicant";
       var initials = name.split(" ").map(function(w){ return w[0]||""; }).join("").slice(0,2).toUpperCase() || "??";
       var date     = app.appliedAt ? new Date(app.appliedAt).toLocaleDateString("en-PK",{month:"short",day:"numeric",year:"numeric"}) : "—";
-      var optHtml  = opts.map(function(s){ return '<option value="'+s+'"'+(s===app.status?" selected":"")+'>'+s+'</option>'; }).join("");
+      var statusStyle = getStatusStyle(app.status);
       return (
-        '<div style="border:1px solid var(--border-mid,#eee);border-radius:10px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px">' +
+        '<div style="border:1px solid var(--border-mid,#eee);border-radius:10px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:10px">' +
           '<div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light,#e0e7ff);color:var(--accent,#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">' + escapeHtml(initials) + '</div>' +
           '<div style="flex:1;min-width:140px">' +
             '<div style="font-weight:600;font-size:14px">' + escapeHtml(name) + '</div>' +
             (app.seekerTitle ? '<div style="font-size:12px;color:var(--text-secondary)">' + escapeHtml(app.seekerTitle) + '</div>' : '') +
-            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="mailto:'+escapeHtml(app.seekerEmail)+'" style="color:var(--accent)">'+escapeHtml(app.seekerEmail)+'</a></div>' : '') +
+            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="mailto:' + escapeHtml(app.seekerEmail) + '" style="color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</a></div>' : '') +
             (app.seekerPhone ? '<div style="font-size:12px">📞 ' + escapeHtml(app.seekerPhone) + '</div>' : '') +
           '</div>' +
           '<div style="font-size:12px;color:var(--text-secondary);min-width:80px">Applied: ' + date + '</div>' +
-          '<select style="border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,\'' + app.id + '\')">' + optHtml + '</select>' +
+          '<span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;' + statusStyle + '">' + escapeHtml(app.status || "Reviewing") + '</span>' +
+          buildStatusDropdown(app.status, app.id, true) +
         '</div>'
       );
     }).join("");
@@ -251,42 +283,73 @@ async function renderApplicantsTable() {
     var initials = name.split(" ").map(function(w){ return w[0]||""; }).join("").slice(0,2).toUpperCase() || "??";
     var date     = app.appliedAt ? new Date(app.appliedAt).toLocaleDateString("en-PK",{month:"short",day:"numeric"}) : "—";
     var status   = app.status || "Reviewing";
-    var opts     = ["Reviewing","Shortlisted","Interview","Offered","Rejected"];
-    var optHtml  = opts.map(function(s){ return '<option value="'+s+'"'+(s===status?" selected":"")+'>'+s+'</option>'; }).join("");
+    var statusStyle = getStatusStyle(status);
 
     var tr = document.createElement("tr");
     tr.innerHTML =
       '<td>' +
         '<div class="applicant-name">' +
-          '<div class="applicant-av">'+escapeHtml(initials)+'</div>' +
-          '<div><div style="font-weight:600">'+escapeHtml(name)+'</div>' +
-          '<div style="font-size:11.5px;color:var(--text-secondary,#888)">'+(app.seekerTitle ? escapeHtml(app.seekerTitle) : "")+'</div>' +
-          (app.seekerEmail ? '<div style="font-size:11px;color:var(--accent)">'+escapeHtml(app.seekerEmail)+'</div>' : '') +
+          '<div class="applicant-av">' + escapeHtml(initials) + '</div>' +
+          '<div><div style="font-weight:600">' + escapeHtml(name) + '</div>' +
+          '<div style="font-size:11.5px;color:var(--text-secondary,#888)">' + (app.seekerTitle ? escapeHtml(app.seekerTitle) : '') + '</div>' +
+          (app.seekerEmail ? '<div style="font-size:11px;color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</div>' : '') +
           '</div>' +
         '</div>' +
       '</td>' +
-      '<td>'+(app.jobTitle ? escapeHtml(app.jobTitle) : "—")+'</td>' +
-      '<td><span class="status-badge" style="background:var(--accent-light,#e0e7ff);color:var(--accent)">' + escapeHtml(status) + '</span></td>' +
-      '<td>'+date+'</td>' +
+      '<td>' + (app.jobTitle ? escapeHtml(app.jobTitle) : "—") + '</td>' +
+      '<td><span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;' + statusStyle + '">' + escapeHtml(status) + '</span></td>' +
+      '<td>' + date + '</td>' +
+      '<td>' + buildStatusDropdown(status, app.id, false) + '</td>' +
       '<td>' +
-        '<select style="border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer"' +
-          ' onchange="changeApplicantStatus(this,\''+app.id+'\')">' +
-          optHtml +
-        '</select>' +
-      '</td>' +
-      '<td>' +
-        (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="mailto:'+escapeHtml(app.seekerEmail)+'" style="text-decoration:none">Email</a>' : '<span style="color:var(--text-secondary);font-size:12px">—</span>') +
+        (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="mailto:' + escapeHtml(app.seekerEmail) + '" style="text-decoration:none">Email</a>' : '<span style="color:var(--text-secondary);font-size:12px">—</span>') +
       '</td>';
     tbody.appendChild(tr);
   });
 }
 
-/* ── Change Applicant Status ── */
+/* ── Change Applicant Status — updates DB + sends notification to applicant ── */
 async function changeApplicantStatus(selectEl, appId) {
   var newStatus = selectEl.value;
-  await DB.updateAppStatus(appId, newStatus);
-  toast("Status updated → " + newStatus, "info");
-  await refreshEmployerStats();
+  if (!newStatus || !APPLICANT_STATUSES.includes(newStatus)) return;
+
+  selectEl.disabled = true;
+
+  var result = await DB.updateAppStatus(appId, newStatus);
+  selectEl.disabled = false;
+
+  if (result && result.success) {
+    // Update nearby status badge if present (in modal view)
+    var container = selectEl.closest ? selectEl.closest("div[style*='border:1px']") : null;
+    if (container) {
+      var badge = container.querySelector("span[style*='border-radius:12px']");
+      if (badge) {
+        badge.textContent = newStatus;
+        badge.style.cssText = "padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;" + getStatusStyle(newStatus);
+      }
+    }
+    // Update status column in table row
+    var row = selectEl.closest ? selectEl.closest("tr") : null;
+    if (row) {
+      var badgeCell = row.querySelector("span[style*='border-radius:12px']");
+      if (badgeCell) {
+        badgeCell.textContent = newStatus;
+        badgeCell.style.cssText = "padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;" + getStatusStyle(newStatus);
+      }
+    }
+
+    var statusMessages = {
+      "Shortlisted":  "✅ Applicant shortlisted — notification sent!",
+      "Interviewing": "📅 Interview stage set — applicant notified to contact you!",
+      "Rejected":     "❌ Application rejected — applicant notified."
+    };
+    toast(statusMessages[newStatus] || "Status updated → " + newStatus, newStatus === "Rejected" ? "warning" : "success");
+    await refreshEmployerStats();
+  } else {
+    toast("Failed to update status. Please try again.", "error");
+    // Revert dropdown
+    selectEl.value = selectEl.dataset.prev || "";
+  }
+  selectEl.dataset.prev = newStatus;
 }
 
 /* ── Notifications ── */
@@ -307,15 +370,15 @@ async function loadNotifications() {
 
     listEl.innerHTML = notifs.map(function(n) {
       var date = n.createdAt ? new Date(n.createdAt).toLocaleString("en-PK",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-      var typeIcon = n.type === "application" ? "👤" : n.type === "success" ? "✅" : "🔔";
+      var typeIcon = n.type === "application" ? "👤" : n.type === "success" ? "✅" : n.type === "info" ? "📋" : "🔔";
       return (
-        '<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;border:1px solid var(--border-mid,#eee);background:'+(n.isRead?"transparent":"var(--bg-hover,#f9f9ff)")+';cursor:pointer" onclick="markNotifRead(\''+n.id+'\')" id="notif-'+n.id+'">' +
-          '<div style="font-size:22px;flex-shrink:0">'+typeIcon+'</div>' +
+        '<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;border:1px solid var(--border-mid,#eee);background:' + (n.isRead ? "transparent" : "var(--bg-hover,#f9f9ff)") + ';cursor:pointer;margin-bottom:8px" onclick="markNotifRead(\'' + n.id + '\')" id="notif-' + n.id + '">' +
+          '<div style="font-size:22px;flex-shrink:0">' + typeIcon + '</div>' +
           '<div style="flex:1">' +
-            '<div style="font-weight:'+(n.isRead?"500":"700")+';font-size:13.5px">'+escapeHtml(n.title)+'</div>' +
-            '<div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px">'+escapeHtml(n.message)+'</div>' +
-            (n.jobTitle ? '<div style="font-size:11.5px;margin-top:4px;color:var(--accent)">Job: '+escapeHtml(n.jobTitle)+'</div>' : '') +
-            '<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">'+date+'</div>' +
+            '<div style="font-weight:' + (n.isRead ? "500" : "700") + ';font-size:13.5px">' + escapeHtml(n.title) + '</div>' +
+            '<div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px">' + escapeHtml(n.message) + '</div>' +
+            (n.jobTitle ? '<div style="font-size:11.5px;margin-top:4px;color:var(--accent)">Job: ' + escapeHtml(n.jobTitle) + '</div>' : '') +
+            '<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">' + date + '</div>' +
           '</div>' +
           (!n.isRead ? '<div style="width:8px;height:8px;border-radius:50%;background:#4f46e5;margin-top:4px;flex-shrink:0"></div>' : '') +
         '</div>'

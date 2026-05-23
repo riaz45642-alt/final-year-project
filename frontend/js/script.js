@@ -386,6 +386,13 @@ async function renderJobFeed(jobsList) {
   var jobCount = document.getElementById("job-count");
   if (!feedGrid) return;
   if (jobCount) jobCount.textContent = jobsList.length;
+  // Update the hero "Active Jobs" stat with total active jobs count
+  var heroStatEls = document.querySelectorAll(".hero-stat-number");
+  heroStatEls.forEach(function(el) {
+    if (el.nextElementSibling && el.nextElementSibling.textContent.toLowerCase().includes("active")) {
+      el.textContent = jobsList.length;
+    }
+  });
   if (!jobsList.length) {
     feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
     return;
@@ -427,7 +434,15 @@ function buildJobCardHTML(job, savedIds, appliedJobIds) {
 function formatSalary(n) { if(!n) return "?"; return n>=1000 ? Math.round(n/1000)+"K" : n; }
 
 async function filterAndRender() {
-  var jobs = await getAllJobs();
+  var allActiveJobs = await getAllJobs();
+  // Update hero "Active Jobs" stat with TOTAL active jobs count (not filtered)
+  var heroStatEls = document.querySelectorAll(".hero-stat-number");
+  heroStatEls.forEach(function(el) {
+    if (el.nextElementSibling && el.nextElementSibling.textContent.toLowerCase().includes("active")) {
+      el.textContent = allActiveJobs.length;
+    }
+  });
+  var jobs = allActiveJobs.slice();
   if (AppState.activeCategory !== "all") jobs = jobs.filter(function(j){ return j.category === AppState.activeCategory; });
   if (AppState.searchQuery) {
     var q = AppState.searchQuery.toLowerCase();
