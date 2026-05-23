@@ -237,7 +237,7 @@ async function openJobApplicants(jobId, jobTitle) {
           '<div style="flex:1;min-width:140px">' +
             '<div style="font-weight:600;font-size:14px">' + escapeHtml(name) + '</div>' +
             (app.seekerTitle ? '<div style="font-size:12px;color:var(--text-secondary)">' + escapeHtml(app.seekerTitle) + '</div>' : '') +
-            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="mailto:' + escapeHtml(app.seekerEmail) + '" style="color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</a></div>' : '') +
+            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(app.seekerEmail) + '" target="_blank" style="color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</a></div>' : '') +
             (app.seekerPhone ? '<div style="font-size:12px">📞 ' + escapeHtml(app.seekerPhone) + '</div>' : '') +
           '</div>' +
           '<div style="font-size:12px;color:var(--text-secondary);min-width:80px">Applied: ' + date + '</div>' +
@@ -314,7 +314,7 @@ function _renderApplicantRows(apps) {
       '<td>' + date + '</td>' +
       '<td>' + buildStatusDropdown(status, app.id, false) + '</td>' +
       '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
-        (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="mailto:' + escapeHtml(app.seekerEmail) + '" style="text-decoration:none">Email</a>' : '') +
+        (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(app.seekerEmail) + '" target="_blank" style="text-decoration:none">Email</a>' : '') +
         '<a href="profile_page.html?uid=' + escapeHtml(app.userId) + '" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;font-size:12px">👤 Profile</a>' +
       '</td>';
     tbody.appendChild(tr);
