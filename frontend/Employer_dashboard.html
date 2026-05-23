@@ -113,7 +113,7 @@
       <!-- Tabs -->
       <div class="tab-row">
         <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
-        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps')">👥 Applicants</button>
+        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps');renderApplicantsTable('All Status')">👥 Applicants</button>
         <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
         <button class="tab-btn" id="tab-notif-btn" onclick="switchTab('tab-notif');loadNotifications()" style="position:relative">
           🔔 Notifications
@@ -136,17 +136,21 @@
       <div class="tab-panel" id="tab-apps">
         <div class="card">
           <div class="search-row" style="margin-bottom:16px">
-            <div class="search-input-wrap"><span class="search-icon">🔍</span><input class="search-input" placeholder="Search applicants..." oninput="toast('Searching applicants...','info')"></div>
-            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Filter applied','info')">
-              <option>All Jobs</option><option>Senior Frontend Dev</option><option>UI/UX Designer</option>
-            </select>
-            <select style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="toast('Status filter applied','info')">
-              <option>All Status</option><option>New</option><option>Shortlisted</option><option>Rejected</option>
+            <div class="search-input-wrap">
+              <span class="search-icon">🔍</span>
+              <input class="search-input" id="applicant-search-input" placeholder="Search by name, title, email or job…" oninput="onApplicantSearchInput(this)">
+            </div>
+            <select id="applicant-status-filter" style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="onStatusFilterChange(this)">
+              <option value="All Status">All Status</option>
+              <option value="Reviewing">Reviewing</option>
+              <option value="Shortlisted">Shortlisted</option>
+              <option value="Interviewing">Interviewing</option>
+              <option value="Rejected">Rejected</option>
             </select>
           </div>
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Applicant</th><th>Applied For</th><th>Match</th><th>Date</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Applicant</th><th>Applied For</th><th>Status</th><th>Date</th><th>Update Status</th><th>Actions</th></tr></thead>
               <tbody id="applicants-tbody">
               </tbody>
             </table>
@@ -270,7 +274,7 @@
       if (!user || user.role !== 'employer') return; // guard will redirect
       refreshEmployerStats   && await refreshEmployerStats();
       renderPostedJobsTable  && await renderPostedJobsTable();
-      renderApplicantsTable  && await renderApplicantsTable();
+      renderApplicantsTable  && await renderApplicantsTable("All Status");
     }
 
     // FIX: Wait for authRoleReady (DB role confirmed) before loading data
