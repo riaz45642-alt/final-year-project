@@ -115,13 +115,17 @@
         <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
         <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps')">👥 Applicants</button>
         <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
+        <button class="tab-btn" id="tab-notif-btn" onclick="switchTab('tab-notif');loadNotifications()" style="position:relative">
+          🔔 Notifications
+          <span id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;background:#ef4444;color:#fff;border-radius:50%;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 2px">0</span>
+        </button>
       </div>
       <!-- Tab: My Jobs -->
       <div class="tab-panel active" id="tab-jobs">
         <div class="card">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Job Title</th><th>Department</th><th>Posted</th><th>Applicants</th><th>Status</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Job Title</th><th>Department</th><th>Location</th><th>Applicants</th><th>Status</th><th>Actions</th></tr></thead>
               <tbody id="posted-jobs-tbody">
               </tbody>
             </table>
@@ -180,13 +184,61 @@
           <div class="form-group"><label>Job Description *</label><textarea id="pj-desc" rows="5" placeholder="Describe the role, responsibilities, requirements..."></textarea></div>
           <div class="form-group"><label>Required Skills (comma separated)</label><input type="text" id="pj-skills" placeholder="React, Node.js, PostgreSQL"></div>
           <div class="form-group"><label>Application Deadline</label><input type="date" id="pj-deadline"></div>
-          <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+
+          <!-- ══ CONTACT INFORMATION SECTION (NEW) ══ -->
+          <div style="margin:20px 0 8px;padding:16px 0 0;border-top:1px solid var(--border-mid,#eee)">
+            <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:var(--text-primary)">📞 Contact Information for Candidates</div>
+            <div style="font-size:12.5px;color:var(--text-secondary,#888);margin-bottom:14px">This will be displayed on the job listing so candidates can reach you directly.</div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Contact Email Address</label>
+                <input type="email" id="pj-contact-email" placeholder="hiring@yourcompany.com">
+                <span style="font-size:11px;color:var(--text-secondary,#888)">Visible to all job seekers</span>
+              </div>
+              <div class="form-group">
+                <label>Contact Phone Number</label>
+                <input type="tel" id="pj-contact-phone" placeholder="+92 300 1234567">
+                <span style="font-size:11px;color:var(--text-secondary,#888)">Visible to all job seekers</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Job / Office Location <span style="font-size:11px;font-weight:400;color:var(--text-secondary)">(full address or area)</span></label>
+              <input type="text" id="pj-job-location" placeholder="e.g., Plot 5, Block C, Gulberg III, Lahore">
+              <span style="font-size:11px;color:var(--text-secondary,#888)">Helps candidates know where to go for on-site interviews</span>
+            </div>
+          </div>
+          <!-- ══ END CONTACT SECTION ══ -->
+
+          <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
             <button class="btn btn-primary" id="post-job-btn" onclick="postJob()">📣 Publish Job</button>
             <button class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
             <button class="btn" style="color:var(--text-muted);border:1px solid var(--border)" onclick="toast('Preview mode coming soon','info')">👁️ Preview</button>
           </div>
         </div>
       </div>
+
+      <!-- Tab: Notifications (NEW) -->
+      <div class="tab-panel" id="tab-notif">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+            <div style="font-size:16px;font-weight:600">🔔 Notifications</div>
+            <button class="btn btn-outline btn-sm" onclick="markAllNotifRead()">Mark all as read</button>
+          </div>
+          <div id="notif-list" style="display:flex;flex-direction:column;gap:10px">
+            <div style="text-align:center;color:var(--text-secondary,#888);padding:32px">Loading notifications…</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Per-Job Applicants Modal (NEW) -->
+      <div id="job-applicants-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.45);overflow-y:auto">
+        <div style="margin:40px auto;max-width:760px;background:var(--bg-card,#fff);border-radius:16px;padding:28px;position:relative">
+          <button onclick="closeJobApplicantsModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">✕</button>
+          <div id="job-applicants-modal-title" style="font-size:18px;font-weight:700;margin-bottom:20px">Applicants</div>
+          <div id="job-applicants-modal-body"></div>
+        </div>
+      </div>
+
     </section>
 
   </main>

@@ -556,3 +556,97 @@ body {
 .role-toggle-switch input:checked + .role-toggle-slider::before {
   transform: translateX(16px);
 }
+
+/* ══════════════════════════════════════════════════
+   ENHANCED STYLES — Contact Info, Notifications,
+   Applicants Modal (Added for Change 1 & 2)
+══════════════════════════════════════════════════ */
+
+/* Contact info box in job detail modal */
+.contact-info-box {
+  margin: 16px 0 0;
+  padding: 14px 16px;
+  border-radius: 10px;
+  background: var(--bg-hover, #f8f9ff);
+  border: 1px solid var(--border-mid, #e5e7eb);
+}
+.contact-info-box .contact-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin-bottom: 6px;
+}
+.contact-info-box a {
+  color: var(--accent, #4f46e5);
+  text-decoration: none;
+  font-weight: 500;
+}
+.contact-info-box a:hover {
+  text-decoration: underline;
+}
+
+/* Post job form — contact section label */
+.form-group span[style*="font-size:11px"] {
+  display: block;
+  margin-top: 3px;
+  color: var(--text-secondary, #6b7280);
+}
+
+/* Notification badge on tab button */
+#tab-notif-btn {
+  position: relative;
+}
+#notif-badge {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: #ef4444;
+  color: #fff;
+  border-radius: 50%;
+  font-size: 10px;
+  min-width: 16px;
+  height: 16px;
+  line-height: 16px;
+  text-align: center;
+  padding: 0 2px;
+}
+
+/* Per-job applicants modal */
+#job-applicants-modal .btn-sm {
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+/* Applicant card in modal */
+.applicant-modal-card {
+  border: 1px solid var(--border-mid, #eee);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  transition: background 0.15s;
+}
+.applicant-modal-card:hover {
+  background: var(--bg-hover, #f9f9ff);
+}
+
+/* Notification list items */
+#notif-list > div {
+  transition: background 0.2s;
+}
+#notif-list > div:hover {
+  background: var(--bg-hover, #f9f9ff) !important;
+}
+
+/* Status badge variants */
+.status-badge.active {
+  background: #dcfce7;
+  color: #16a34a;
+  padding: 3px 9px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+}

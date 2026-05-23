@@ -130,6 +130,21 @@ const DB = {
   /* ── CV Data — TiDB ── */
   async getCV(uid)      { return await this._get("/cv/" + uid); },
   async saveCV(cvData)  { return await this._post("/cv", cvData); },
+
+  /* ── Notifications — TiDB ── */
+  async getNotifications(uid)    { return await this._get("/notifications/" + uid); },
+  async markNotifRead(notifId)   {
+    try {
+      const res = await fetch(API_BASE + "/notifications/" + notifId + "/read", { method: "PUT" });
+      return await res.json();
+    } catch (e) { console.error("[DB.markNotifRead]", e); return null; }
+  },
+  async markAllNotifsRead(uid)   {
+    try {
+      const res = await fetch(API_BASE + "/notifications/" + uid + "/read-all", { method: "PUT" });
+      return await res.json();
+    } catch (e) { console.error("[DB.markAllNotifsRead]", e); return null; }
+  },
 };
 
 /* ──────────────────────────────────────────────
@@ -291,6 +306,35 @@ async function openJobDetail(jobId) {
   var user         = AppState.currentUser;
   var isEmployer   = user && user.role === "employer";
   var tags = (job.tags||[]).map(function(t){ return '<span class="tag">'+t+'</span>'; }).join("");
+
+  // Contact section (NEW)
+  var hasContact = job.contactEmail || job.contactPhone || job.jobLocation;
+  var contactSection = "";
+  if (hasContact) {
+    contactSection =
+      '<div style="margin:18px 0 0;padding:14px 16px;border-radius:10px;background:var(--bg-hover,#f8f9ff);border:1px solid var(--border-mid,#e5e7eb)">' +
+        '<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-primary)">📞 Contact Information</div>' +
+        (job.contactEmail
+          ? '<div style="font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px">' +
+              '<span style="color:var(--text-secondary)">📧 Email:</span>' +
+              '<a href="mailto:'+job.contactEmail+'" style="color:var(--accent);text-decoration:none;font-weight:500">'+job.contactEmail+'</a>' +
+            '</div>'
+          : '') +
+        (job.contactPhone
+          ? '<div style="font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px">' +
+              '<span style="color:var(--text-secondary)">📞 Phone:</span>' +
+              '<a href="tel:'+job.contactPhone+'" style="color:var(--accent);text-decoration:none;font-weight:500">'+job.contactPhone+'</a>' +
+            '</div>'
+          : '') +
+        (job.jobLocation
+          ? '<div style="font-size:13px;display:flex;align-items:flex-start;gap:8px">' +
+              '<span style="color:var(--text-secondary);flex-shrink:0">📍 Address:</span>' +
+              '<span style="font-weight:500">'+job.jobLocation+'</span>' +
+            '</div>'
+          : '') +
+      '</div>';
+  }
+
   modalBox.innerHTML =
     '<button class="modal-close" onclick="closeJobDetail()">✕</button>' +
     '<div class="job-detail-content">' +
@@ -311,9 +355,10 @@ async function openJobDetail(jobId) {
       '</div>' +
       '<div class="job-tags">' + tags + (job.remote?'<span class="tag green">Remote OK</span>':"") + (job.urgent?'<span class="tag orange">Urgent</span>':"") + '</div>' +
       '<div style="margin:16px 0;font-size:14px;color:var(--text-secondary);line-height:1.7">' + (job.desc||"<em>No description provided.</em>") + '</div>' +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap">' +
+      contactSection +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
         (!isEmployer ?
-          '<button class="btn btn-primary" id="modal-apply-btn" onclick="applyJob(\''+job.id+'\', this)" '+(isApplied?"disabled":"")+'>'+( isApplied?"✓ Applied":"Apply Now →")+'</button>' +
+          '<button class="btn btn-primary" id="modal-apply-btn" onclick="applyJob(\''+job.id+'\', this)" '+(isApplied?"disabled":"")+'>'+(isApplied?"✓ Applied":"Apply Now →")+'</button>' +
           '<button class="btn btn-outline" id="modal-save-btn" onclick="toggleBookmarkModal(\''+job.id+'\',this)">'+(isBookmarked?"🔖 Saved":"🔖 Save Job")+'</button>'
         : "") +
       '</div>' +
@@ -322,6 +367,7 @@ async function openJobDetail(jobId) {
   if (modal) modal.classList.add("open");
 }
 function closeJobDetail() { var m = document.getElementById("job-detail-modal"); if(m) m.classList.remove("open"); }
+
 
 async function toggleBookmarkModal(jobId, btn) {
   var isSaved = await DB.toggleSave(jobId);
@@ -415,22 +461,34 @@ async function applyJob(jobId, btn) {
   if (!AppState.currentUser) { toast("Please sign in to apply","warning"); openAuth("login"); return; }
   if (AppState.currentUser.role === "employer") { toast("Employers cannot apply for jobs","warning"); return; }
   var already = await DB.hasApplied(jobId);
-  if (already) return;
+  if (already) { toast("You've already applied to this job","info"); return; }
   var jobs = await getAllJobs();
   var job  = jobs.find(function(j){ return j.id===jobId; });
   if (btn) { btn.textContent = "Applying..."; btn.disabled = true; }
-  setTimeout(async function() {
-    await DB.addApp({
-      jobId:      jobId,
-      userId:     AppState.currentUser.id,
-      seekerName: AppState.currentUser.name,
-      appliedAt:  Date.now(),
-      status:     "Reviewing",
-    });
-    if (btn) { btn.textContent = "✓ Applied"; btn.classList.add("applied"); }
-    toast('Applied to "'+(job?job.title:"")+'" successfully! 🎉',"success");
-    await updateSidebarBadges();
-  }, 800);
+
+  var user = AppState.currentUser;
+  var appData = {
+    jobId:       jobId,
+    userId:      user.id,
+    seekerName:  user.name  || "",
+    seekerTitle: user.title || "",
+    seekerEmail: user.email || "",
+    seekerPhone: user.phone || "",
+    appliedAt:   Date.now(),
+    status:      "Reviewing",
+  };
+
+  var result = await DB.addApp(appData);
+
+  if (result && result.alreadyApplied) {
+    if (btn) { btn.textContent = "✓ Applied"; btn.classList.add("applied"); btn.disabled = true; }
+    toast("Already applied to this job","info");
+    return;
+  }
+
+  if (btn) { btn.textContent = "✓ Applied"; btn.classList.add("applied"); }
+  toast('Applied to "'+(job?job.title:"")+'" successfully! 🎉',"success");
+  await updateSidebarBadges();
 }
 
 async function updateSidebarBadges() {

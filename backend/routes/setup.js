@@ -38,24 +38,27 @@ router.get("/setup", async (req, res) => {
     // Jobs — listings posted by employers
     await db.query(`
       CREATE TABLE IF NOT EXISTS jobs (
-        id          VARCHAR(64)  PRIMARY KEY,
-        emoji       VARCHAR(10),
-        title       VARCHAR(255) NOT NULL,
-        company     VARCHAR(255),
-        location    VARCHAR(255),
-        type        VARCHAR(50),
-        dept        VARCHAR(100),
-        mode        VARCHAR(50),
-        category    VARCHAR(50),
-        salary_min  INT,
-        salary_max  INT,
-        description TEXT,
-        tags        TEXT,
-        remote      TINYINT(1) DEFAULT 0,
-        urgent      TINYINT(1) DEFAULT 0,
-        posted_by   VARCHAR(128),
-        posted_at   BIGINT,
-        active      TINYINT(1) DEFAULT 1
+        id              VARCHAR(64)  PRIMARY KEY,
+        emoji           VARCHAR(10),
+        title           VARCHAR(255) NOT NULL,
+        company         VARCHAR(255),
+        location        VARCHAR(255),
+        type            VARCHAR(50),
+        dept            VARCHAR(100),
+        mode            VARCHAR(50),
+        category        VARCHAR(50),
+        salary_min      INT,
+        salary_max      INT,
+        description     TEXT,
+        tags            TEXT,
+        remote          TINYINT(1) DEFAULT 0,
+        urgent          TINYINT(1) DEFAULT 0,
+        contact_email   VARCHAR(255) DEFAULT '',
+        contact_phone   VARCHAR(30)  DEFAULT '',
+        job_location    VARCHAR(255) DEFAULT '',
+        posted_by       VARCHAR(128),
+        posted_at       BIGINT,
+        active          TINYINT(1) DEFAULT 1
       )
     `);
 
@@ -73,14 +76,34 @@ router.get("/setup", async (req, res) => {
     // Applications — job applications submitted by seekers
     await db.query(`
       CREATE TABLE IF NOT EXISTS applications (
-        id           BIGINT AUTO_INCREMENT PRIMARY KEY,
-        job_id       VARCHAR(64)  NOT NULL,
-        user_id      VARCHAR(128) NOT NULL,
-        seeker_name  VARCHAR(255),
-        seeker_title VARCHAR(255),
-        applied_at   BIGINT,
-        status       VARCHAR(50)  DEFAULT 'Reviewing',
+        id            BIGINT AUTO_INCREMENT PRIMARY KEY,
+        job_id        VARCHAR(64)  NOT NULL,
+        user_id       VARCHAR(128) NOT NULL,
+        seeker_name   VARCHAR(255),
+        seeker_title  VARCHAR(255),
+        seeker_email  VARCHAR(255) DEFAULT '',
+        seeker_phone  VARCHAR(30)  DEFAULT '',
+        cover_letter  TEXT,
+        applied_at    BIGINT,
+        status        VARCHAR(50)  DEFAULT 'Reviewing',
         UNIQUE KEY unique_application (user_id, job_id)
+      )
+    `);
+
+    // Notifications — employer & seeker notifications
+    await db.query(`
+      CREATE TABLE IF NOT EXISTS notifications (
+        id          BIGINT AUTO_INCREMENT PRIMARY KEY,
+        user_id     VARCHAR(128) NOT NULL,
+        type        VARCHAR(50)  DEFAULT 'info',
+        title       VARCHAR(255),
+        message     TEXT,
+        job_id      VARCHAR(64),
+        job_title   VARCHAR(255),
+        is_read     TINYINT(1)  DEFAULT 0,
+        created_at  BIGINT,
+        INDEX idx_user_id (user_id),
+        INDEX idx_is_read (is_read)
       )
     `);
 
@@ -106,12 +129,20 @@ router.get("/setup", async (req, res) => {
 
     // ── Migrations: add new columns if they don't exist ──
     const migrations = [
-      { col: "location",  sql: "ALTER TABLE users ADD COLUMN location VARCHAR(255) DEFAULT ''" },
-      { col: "education", sql: "ALTER TABLE users ADD COLUMN education TEXT" },
-      { col: "phone",     sql: "ALTER TABLE users ADD COLUMN phone VARCHAR(30)" },
-      { col: "website",   sql: "ALTER TABLE users ADD COLUMN website VARCHAR(255)" },
-      { col: "linkedin",  sql: "ALTER TABLE users ADD COLUMN linkedin VARCHAR(255)" },
-      { col: "github",    sql: "ALTER TABLE users ADD COLUMN github VARCHAR(255)" },
+      { sql: "ALTER TABLE users ADD COLUMN location VARCHAR(255) DEFAULT ''" },
+      { sql: "ALTER TABLE users ADD COLUMN education TEXT" },
+      { sql: "ALTER TABLE users ADD COLUMN phone VARCHAR(30)" },
+      { sql: "ALTER TABLE users ADD COLUMN website VARCHAR(255)" },
+      { sql: "ALTER TABLE users ADD COLUMN linkedin VARCHAR(255)" },
+      { sql: "ALTER TABLE users ADD COLUMN github VARCHAR(255)" },
+      // Job contact fields
+      { sql: "ALTER TABLE jobs ADD COLUMN contact_email VARCHAR(255) DEFAULT ''" },
+      { sql: "ALTER TABLE jobs ADD COLUMN contact_phone VARCHAR(30) DEFAULT ''" },
+      { sql: "ALTER TABLE jobs ADD COLUMN job_location VARCHAR(255) DEFAULT ''" },
+      // Application extended fields
+      { sql: "ALTER TABLE applications ADD COLUMN seeker_email VARCHAR(255) DEFAULT ''" },
+      { sql: "ALTER TABLE applications ADD COLUMN seeker_phone VARCHAR(30) DEFAULT ''" },
+      { sql: "ALTER TABLE applications ADD COLUMN cover_letter TEXT" },
     ];
 
     for (const m of migrations) {

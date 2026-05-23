@@ -1,21 +1,20 @@
 /* ──────────────────────────────────────────────
    EMPLOYER DASHBOARD — Employer_dashboard.js
-   TiDB Edition: all data fetched from API,
-   no localStorage for job/application data.
+   Enhanced with:
+   - Contact fields on job posting
+   - Per-job applicants management
+   - Real-time notification system
 ────────────────────────────────────────────── */
 
 /* ── Stats ── */
-// 🔧 TiDB: fetch employer's jobs and applicants from TiDB via API
 async function refreshEmployerStats() {
   var user   = AppState.currentUser;
   var userId = user ? user.id : null;
   if (!userId) return;
 
-  // 🔧 TiDB: GET /api/jobs/employer/:uid  → employer's active jobs
   var res1 = await fetch(API_BASE + "/jobs/employer/" + userId);
   var myJobs = res1.ok ? await res1.json() : [];
 
-  // 🔧 TiDB: GET /api/applications/employer/:uid  → applicants for employer's jobs
   var res2 = await fetch(API_BASE + "/applications/employer/" + userId);
   var myApplicants = res2.ok ? await res2.json() : [];
 
@@ -28,57 +27,78 @@ async function refreshEmployerStats() {
   if (getEl("emp-stat-short")) getEl("emp-stat-short").textContent = shortlisted;
   if (getEl("emp-stat-hired")) getEl("emp-stat-hired").textContent = hired;
 
-  if (getEl("emp-stat-jobs-change"))   getEl("emp-stat-jobs-change").textContent   = myJobs.length       ? "▲ " + myJobs.length + " active"         : "No jobs yet";
-  if (getEl("emp-stat-apps-change"))   getEl("emp-stat-apps-change").textContent   = myApplicants.length ? "▲ " + myApplicants.length + " total"     : "No applicants yet";
-  if (getEl("emp-stat-short-change"))  getEl("emp-stat-short-change").textContent  = shortlisted         ? "▲ " + shortlisted + " shortlisted"       : "None shortlisted";
-  if (getEl("emp-stat-hired-change"))  getEl("emp-stat-hired-change").textContent  = hired               ? "▲ " + hired + " offered"                 : "None offered yet";
+  if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? "▲ " + myJobs.length + " active"       : "No jobs yet";
+  if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? "▲ " + myApplicants.length + " total"   : "No applicants yet";
+  if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? "▲ " + shortlisted + " shortlisted"     : "None shortlisted";
+  if (getEl("emp-stat-hired-change")) getEl("emp-stat-hired-change").textContent = hired               ? "▲ " + hired + " offered"               : "None offered yet";
+
+  // Refresh notification badge
+  await refreshNotifBadge();
 }
 
-/* ── Post Job ── */
+/* ── Post Job (Enhanced with contact fields) ── */
 async function postJob() {
   function getVal(id) { return (document.getElementById(id) ? document.getElementById(id).value : "").trim(); }
-  var jobTitle    = getVal("pj-title");
-  var department  = getVal("pj-dept");
-  var jobType     = getVal("pj-type");
-  var location    = getVal("pj-location");
-  var workMode    = getVal("pj-mode");
-  var salaryMin   = getVal("pj-sal-min");
-  var salaryMax   = getVal("pj-sal-max");
-  var category    = getVal("pj-category");
-  var description = getVal("pj-desc");
-  var skills      = getVal("pj-skills");
 
-  if (!jobTitle)    { toast("Job title is required","error"); document.getElementById("pj-title")?.focus(); return; }
-  if (!description) { toast("Job description is required","error"); document.getElementById("pj-desc")?.focus(); return; }
-  if (!AppState.currentUser) { toast("Please sign in as an employer","warning"); openAuth("login"); return; }
+  var jobTitle      = getVal("pj-title");
+  var department    = getVal("pj-dept");
+  var jobType       = getVal("pj-type");
+  var location      = getVal("pj-location");
+  var workMode      = getVal("pj-mode");
+  var salaryMin     = getVal("pj-sal-min");
+  var salaryMax     = getVal("pj-sal-max");
+  var category      = getVal("pj-category");
+  var description   = getVal("pj-desc");
+  var skills        = getVal("pj-skills");
+  // NEW contact fields
+  var contactEmail  = getVal("pj-contact-email");
+  var contactPhone  = getVal("pj-contact-phone");
+  var jobLocation   = getVal("pj-job-location");
+
+  if (!jobTitle)    { toast("Job title is required", "error"); document.getElementById("pj-title")?.focus(); return; }
+  if (!location)    { toast("Location is required", "error"); document.getElementById("pj-location")?.focus(); return; }
+  if (!description) { toast("Job description is required", "error"); document.getElementById("pj-desc")?.focus(); return; }
+  if (!AppState.currentUser) { toast("Please sign in as an employer", "warning"); openAuth("login"); return; }
+
+  // Basic email validation if provided
+  if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail)) {
+    toast("Please enter a valid contact email", "error");
+    document.getElementById("pj-contact-email")?.focus();
+    return;
+  }
 
   var publishBtn = document.getElementById("post-job-btn");
   if (publishBtn) { publishBtn.textContent = "Publishing..."; publishBtn.disabled = true; }
 
   var newJob = {
-    id:        "job_" + Date.now(),
-    emoji:     "🏢",
-    title:     jobTitle,
-    dept:      department,
-    type:      jobType || "Full-Time",
-    location:  location,
-    mode:      workMode,
-    salaryMin: parseInt(salaryMin) || 80000,
-    salaryMax: parseInt(salaryMax) || 120000,
-    category:  category,
-    desc:      description,
-    tags:      skills.split(",").map(function(s){ return s.trim(); }).filter(Boolean),
-    remote:    workMode === "Remote",
-    urgent:    false,
-    postedBy:  AppState.currentUser.id,
+    id:           "job_" + Date.now(),
+    emoji:        "🏢",
+    title:        jobTitle,
+    dept:         department,
+    type:         jobType || "Full-Time",
+    location:     location,
+    mode:         workMode,
+    salaryMin:    parseInt(salaryMin) || 80000,
+    salaryMax:    parseInt(salaryMax) || 120000,
+    category:     category,
+    desc:         description,
+    tags:         skills.split(",").map(function(s){ return s.trim(); }).filter(Boolean),
+    remote:       workMode === "Remote",
+    urgent:       false,
+    postedBy:     AppState.currentUser.id,
+    company:      AppState.currentUser.company || AppState.currentUser.name || "",
+    // NEW contact fields
+    contactEmail: contactEmail,
+    contactPhone: contactPhone,
+    jobLocation:  jobLocation || location,
   };
 
-  // 🔧 TiDB: POST /api/jobs  → inserts job into TiDB jobs table
   var result = await DB.addPostedJob(newJob);
 
   if (result && result.success) {
     toast('"' + jobTitle + '" published successfully! 🎉', "success");
-    ["pj-title","pj-dept","pj-location","pj-sal-min","pj-sal-max","pj-desc","pj-skills"].forEach(function(fid){
+    ["pj-title","pj-dept","pj-location","pj-sal-min","pj-sal-max","pj-desc","pj-skills",
+     "pj-contact-email","pj-contact-phone","pj-job-location"].forEach(function(fid){
       var el = document.getElementById(fid);
       if (el) el.value = "";
     });
@@ -98,19 +118,16 @@ function saveDraft() {
   toast('Draft "' + draftTitle + '" saved', "info");
 }
 
-/* ── Posted Jobs Table ── */
-// 🔧 TiDB: fetch employer's jobs from TiDB and render the table
+/* ── Posted Jobs Table (Enhanced with View Applicants button) ── */
 async function renderPostedJobsTable() {
   var tableBody = document.getElementById("posted-jobs-tbody");
   if (!tableBody) return;
   var user = AppState.currentUser;
   if (!user) return;
 
-  // 🔧 TiDB: GET /api/jobs/employer/:uid
   var res = await fetch(API_BASE + "/jobs/employer/" + user.id);
   var postedJobs = res.ok ? await res.json() : [];
 
-  // 🔧 TiDB: GET /api/applications/employer/:uid  → needed for applicant counts
   var res2 = await fetch(API_BASE + "/applications/employer/" + user.id);
   var allApps = res2.ok ? await res2.json() : [];
 
@@ -129,19 +146,32 @@ async function renderPostedJobsTable() {
     var tr = document.createElement("tr");
     tr.className = "dynamic-row";
     tr.innerHTML =
-      '<td><strong>' + job.title + '</strong></td>' +
-      '<td>' + (job.dept || job.category || "—") + '</td>' +
-      '<td>Active</td>' +
-      '<td><strong style="color:var(--accent)">' + applicantCount + '</strong></td>' +
+      '<td><strong>' + escapeHtml(job.title) + '</strong>' +
+        (job.contactEmail ? '<div style="font-size:11px;color:var(--text-secondary,#888);margin-top:2px">📧 ' + escapeHtml(job.contactEmail) + '</div>' : '') +
+      '</td>' +
+      '<td>' + escapeHtml(job.dept || job.category || "—") + '</td>' +
+      '<td>' + escapeHtml(job.location || "—") + '</td>' +
+      '<td>' +
+        '<button class="btn btn-outline btn-sm" style="font-size:12px" onclick="openJobApplicants(\'' + job.id + '\',\'' + escapeHtml(job.title).replace(/'/g,"\\'" ) + '\')">' +
+          '<strong style="color:var(--accent)">' + applicantCount + '</strong> applicant' + (applicantCount !== 1 ? 's' : '') +
+        '</button>' +
+      '</td>' +
       '<td><span class="status-badge active">● Active</span></td>' +
-      '<td><button class="btn btn-danger btn-sm" onclick="deleteJob(\'' + job.id + '\')">Delete</button></td>';
+      '<td style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<button class="btn btn-danger btn-sm" onclick="deleteJob(\'' + job.id + '\')">Delete</button>' +
+      '</td>';
     tableBody.insertBefore(tr, tableBody.firstChild);
   });
 }
 
+function escapeHtml(str) {
+  if (!str) return "";
+  return String(str).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+}
+
 /* ── Delete Job ── */
-// 🔧 TiDB: DELETE /api/jobs/:id  → soft-deletes job row in TiDB
 async function deleteJob(jobId) {
+  if (!confirm("Delete this job? This cannot be undone.")) return;
   await DB.deleteJob(jobId);
   await renderPostedJobsTable();
   await refreshEmployerStats();
@@ -149,15 +179,63 @@ async function deleteJob(jobId) {
   toast("Job removed", "info");
 }
 
-/* ── Applicants Table ── */
-// 🔧 TiDB: fetch applicants from TiDB for employer's jobs
+/* ── Open per-job applicants modal ── */
+async function openJobApplicants(jobId, jobTitle) {
+  var modal = document.getElementById("job-applicants-modal");
+  var titleEl = document.getElementById("job-applicants-modal-title");
+  var body    = document.getElementById("job-applicants-modal-body");
+  if (!modal) return;
+
+  if (titleEl) titleEl.textContent = "Applicants for: " + jobTitle;
+  if (body) body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary)">Loading…</div>';
+  modal.style.display = "block";
+
+  try {
+    var res = await fetch(API_BASE + "/applications/job/" + jobId);
+    var applicants = res.ok ? await res.json() : [];
+
+    if (!applicants.length) {
+      body.innerHTML = '<div style="text-align:center;padding:32px;color:var(--text-secondary)">No applicants yet for this job.</div>';
+      return;
+    }
+
+    var opts = ["Reviewing","Shortlisted","Interview","Offered","Rejected"];
+    body.innerHTML = applicants.map(function(app) {
+      var name     = app.seekerName || "Applicant";
+      var initials = name.split(" ").map(function(w){ return w[0]||""; }).join("").slice(0,2).toUpperCase() || "??";
+      var date     = app.appliedAt ? new Date(app.appliedAt).toLocaleDateString("en-PK",{month:"short",day:"numeric",year:"numeric"}) : "—";
+      var optHtml  = opts.map(function(s){ return '<option value="'+s+'"'+(s===app.status?" selected":"")+'>'+s+'</option>'; }).join("");
+      return (
+        '<div style="border:1px solid var(--border-mid,#eee);border-radius:10px;padding:14px 16px;display:flex;flex-wrap:wrap;align-items:center;gap:12px">' +
+          '<div style="width:40px;height:40px;border-radius:50%;background:var(--accent-light,#e0e7ff);color:var(--accent,#4f46e5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">' + escapeHtml(initials) + '</div>' +
+          '<div style="flex:1;min-width:140px">' +
+            '<div style="font-weight:600;font-size:14px">' + escapeHtml(name) + '</div>' +
+            (app.seekerTitle ? '<div style="font-size:12px;color:var(--text-secondary)">' + escapeHtml(app.seekerTitle) + '</div>' : '') +
+            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="mailto:'+escapeHtml(app.seekerEmail)+'" style="color:var(--accent)">'+escapeHtml(app.seekerEmail)+'</a></div>' : '') +
+            (app.seekerPhone ? '<div style="font-size:12px">📞 ' + escapeHtml(app.seekerPhone) + '</div>' : '') +
+          '</div>' +
+          '<div style="font-size:12px;color:var(--text-secondary);min-width:80px">Applied: ' + date + '</div>' +
+          '<select style="border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:5px 8px;font-size:12px;outline:none;cursor:pointer" onchange="changeApplicantStatus(this,\'' + app.id + '\')">' + optHtml + '</select>' +
+        '</div>'
+      );
+    }).join("");
+  } catch (err) {
+    body.innerHTML = '<div style="text-align:center;padding:32px;color:#ef4444">Failed to load applicants.</div>';
+  }
+}
+
+function closeJobApplicantsModal() {
+  var modal = document.getElementById("job-applicants-modal");
+  if (modal) modal.style.display = "none";
+}
+
+/* ── Applicants Table (Global — all jobs) ── */
 async function renderApplicantsTable() {
   var tbody = document.getElementById("applicants-tbody");
   if (!tbody) return;
   var user = AppState.currentUser;
   if (!user) return;
 
-  // 🔧 TiDB: GET /api/applications/employer/:uid
   var res = await fetch(API_BASE + "/applications/employer/" + user.id);
   var allApps = res.ok ? await res.json() : [];
 
@@ -180,13 +258,15 @@ async function renderApplicantsTable() {
     tr.innerHTML =
       '<td>' +
         '<div class="applicant-name">' +
-          '<div class="applicant-av">'+initials+'</div>' +
-          '<div><div style="font-weight:600">'+name+'</div>' +
-          '<div style="font-size:11.5px;color:var(--text-secondary,#888)">'+(app.seekerTitle||"")+'</div></div>' +
+          '<div class="applicant-av">'+escapeHtml(initials)+'</div>' +
+          '<div><div style="font-weight:600">'+escapeHtml(name)+'</div>' +
+          '<div style="font-size:11.5px;color:var(--text-secondary,#888)">'+(app.seekerTitle ? escapeHtml(app.seekerTitle) : "")+'</div>' +
+          (app.seekerEmail ? '<div style="font-size:11px;color:var(--accent)">'+escapeHtml(app.seekerEmail)+'</div>' : '') +
+          '</div>' +
         '</div>' +
       '</td>' +
-      '<td>'+(app.jobTitle||"—")+'</td>' +
-      '<td>—</td>' +
+      '<td>'+(app.jobTitle ? escapeHtml(app.jobTitle) : "—")+'</td>' +
+      '<td><span class="status-badge" style="background:var(--accent-light,#e0e7ff);color:var(--accent)">' + escapeHtml(status) + '</span></td>' +
       '<td>'+date+'</td>' +
       '<td>' +
         '<select style="border:1px solid var(--border-mid,#ddd);border-radius:6px;padding:3px 8px;font-size:12px;outline:none;cursor:pointer"' +
@@ -194,16 +274,109 @@ async function renderApplicantsTable() {
           optHtml +
         '</select>' +
       '</td>' +
-      '<td><button class="btn btn-outline btn-sm" onclick="toast(\'CV preview coming soon\',\'info\')">View CV</button></td>';
+      '<td>' +
+        (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="mailto:'+escapeHtml(app.seekerEmail)+'" style="text-decoration:none">Email</a>' : '<span style="color:var(--text-secondary);font-size:12px">—</span>') +
+      '</td>';
     tbody.appendChild(tr);
   });
 }
 
 /* ── Change Applicant Status ── */
-// 🔧 TiDB: PUT /api/applications/:id/status  → updates status in TiDB
 async function changeApplicantStatus(selectEl, appId) {
   var newStatus = selectEl.value;
   await DB.updateAppStatus(appId, newStatus);
   toast("Status updated → " + newStatus, "info");
   await refreshEmployerStats();
 }
+
+/* ── Notifications ── */
+async function loadNotifications() {
+  var user = AppState.currentUser;
+  if (!user) return;
+  var listEl = document.getElementById("notif-list");
+  if (!listEl) return;
+
+  try {
+    var res = await fetch(API_BASE + "/notifications/" + user.id);
+    var notifs = res.ok ? await res.json() : [];
+
+    if (!notifs.length) {
+      listEl.innerHTML = '<div style="text-align:center;color:var(--text-secondary,#888);padding:32px">No notifications yet.</div>';
+      return;
+    }
+
+    listEl.innerHTML = notifs.map(function(n) {
+      var date = n.createdAt ? new Date(n.createdAt).toLocaleString("en-PK",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
+      var typeIcon = n.type === "application" ? "👤" : n.type === "success" ? "✅" : "🔔";
+      return (
+        '<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;border:1px solid var(--border-mid,#eee);background:'+(n.isRead?"transparent":"var(--bg-hover,#f9f9ff)")+';cursor:pointer" onclick="markNotifRead(\''+n.id+'\')" id="notif-'+n.id+'">' +
+          '<div style="font-size:22px;flex-shrink:0">'+typeIcon+'</div>' +
+          '<div style="flex:1">' +
+            '<div style="font-weight:'+(n.isRead?"500":"700")+';font-size:13.5px">'+escapeHtml(n.title)+'</div>' +
+            '<div style="font-size:12.5px;color:var(--text-secondary);margin-top:3px">'+escapeHtml(n.message)+'</div>' +
+            (n.jobTitle ? '<div style="font-size:11.5px;margin-top:4px;color:var(--accent)">Job: '+escapeHtml(n.jobTitle)+'</div>' : '') +
+            '<div style="font-size:11px;color:var(--text-secondary);margin-top:4px">'+date+'</div>' +
+          '</div>' +
+          (!n.isRead ? '<div style="width:8px;height:8px;border-radius:50%;background:#4f46e5;margin-top:4px;flex-shrink:0"></div>' : '') +
+        '</div>'
+      );
+    }).join("");
+
+    await refreshNotifBadge();
+  } catch (err) {
+    if (listEl) listEl.innerHTML = '<div style="text-align:center;color:#ef4444;padding:32px">Failed to load notifications.</div>';
+  }
+}
+
+async function markNotifRead(notifId) {
+  try {
+    await fetch(API_BASE + "/notifications/" + notifId + "/read", { method: "PUT" });
+    var el = document.getElementById("notif-" + notifId);
+    if (el) {
+      el.style.background = "transparent";
+      var dot = el.querySelector("div[style*='border-radius:50%']");
+      if (dot) dot.remove();
+      var title = el.querySelector("div[style*='font-weight']");
+      if (title) title.style.fontWeight = "500";
+    }
+    await refreshNotifBadge();
+  } catch (e) {}
+}
+
+async function markAllNotifRead() {
+  var user = AppState.currentUser;
+  if (!user) return;
+  try {
+    await fetch(API_BASE + "/notifications/" + user.id + "/read-all", { method: "PUT" });
+    await loadNotifications();
+    toast("All notifications marked as read", "info");
+  } catch (e) {}
+}
+
+async function refreshNotifBadge() {
+  var user = AppState.currentUser;
+  if (!user) return;
+  var badge = document.getElementById("notif-badge");
+  if (!badge) return;
+  try {
+    var res = await fetch(API_BASE + "/notifications/" + user.id);
+    var notifs = res.ok ? await res.json() : [];
+    var unread = notifs.filter(function(n){ return !n.isRead; }).length;
+    if (unread > 0) {
+      badge.textContent = unread > 9 ? "9+" : unread;
+      badge.style.display = "inline-block";
+    } else {
+      badge.style.display = "none";
+    }
+  } catch (e) {}
+}
+
+// Close modal on backdrop click
+document.addEventListener("DOMContentLoaded", function() {
+  var modal = document.getElementById("job-applicants-modal");
+  if (modal) {
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) closeJobApplicantsModal();
+    });
+  }
+});
