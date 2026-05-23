@@ -1,11 +1,9 @@
 /* ──────────────────────────────────────────────
    EMPLOYER DASHBOARD — Employer_dashboard.js
-   Fixes applied:
-   - Task 1: Search debounce (500ms) instead of per-keystroke
-   - Task 2: Removed All Jobs filter, job chips, Hiring button
-   - Task 3: Fixed All Status filter with real API filtering
-   - Task 4: Fixed Interview notification (backend now sends it)
-   - Task 5: Added View Profile button per applicant
+   - Search debounce (500ms)
+   - Status filter dropdown removed
+   - Interview notification fixed (backend)
+   - View Profile button per applicant
 ────────────────────────────────────────────── */
 
 var APPLICANT_STATUSES = ["Shortlisted", "Interviewing", "Rejected"];
@@ -257,11 +255,11 @@ function closeJobApplicantsModal() {
   if (modal) modal.style.display = "none";
 }
 
-/* ── Applicants Table (Global) — Task 1: debounce search, Task 3: status filter ── */
+/* ── Applicants Table (Global) ── */
 var _allApplicantsCache = [];
 var _searchDebounceTimer = null;
 
-async function renderApplicantsTable(statusFilter) {
+async function renderApplicantsTable() {
   var tbody = document.getElementById("applicants-tbody");
   if (!tbody) return;
   var user = AppState.currentUser;
@@ -269,13 +267,7 @@ async function renderApplicantsTable(statusFilter) {
 
   tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text-secondary)">Loading…</td></tr>';
 
-  // Build URL with optional status filter
-  var url = API_BASE + "/applications/employer/" + user.id;
-  if (statusFilter && statusFilter !== "All Status") {
-    url += "?status=" + encodeURIComponent(statusFilter);
-  }
-
-  var res = await fetch(url);
+  var res = await fetch(API_BASE + "/applications/employer/" + user.id);
   _allApplicantsCache = res.ok ? await res.json() : [];
 
   _renderApplicantRows(_allApplicantsCache);
@@ -340,12 +332,6 @@ function onApplicantSearchInput(inputEl) {
     });
     _renderApplicantRows(filtered);
   }, 500);
-}
-
-/* ── Task 3: Status filter handler ── */
-function onStatusFilterChange(selectEl) {
-  var status = selectEl.value;
-  renderApplicantsTable(status);
 }
 
 /* ── Change Applicant Status ── */

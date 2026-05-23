@@ -113,7 +113,7 @@
       <!-- Tabs -->
       <div class="tab-row">
         <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
-        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps');renderApplicantsTable('All Status')">👥 Applicants</button>
+        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps');renderApplicantsTable()">👥 Applicants</button>
         <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
         <button class="tab-btn" id="tab-notif-btn" onclick="switchTab('tab-notif');loadNotifications()" style="position:relative">
           🔔 Notifications
@@ -140,12 +140,7 @@
               <span class="search-icon">🔍</span>
               <input class="search-input" id="applicant-search-input" placeholder="Search by name, title, email or job…" oninput="onApplicantSearchInput(this)">
             </div>
-            <select id="applicant-status-filter" style="width:auto;padding:9px 12px;font-size:13px;border:1px solid var(--border-mid);border-radius:9px;font-family:var(--font-body);outline:none" onchange="onStatusFilterChange(this)">
-              <option value="All Status">All Status</option>
-              <option value="Shortlisted">Shortlisted</option>
-              <option value="Interviewing">Interviewing</option>
-              <option value="Rejected">Rejected</option>
-            </select>
+
           </div>
           <div class="table-wrap">
             <table>
@@ -273,7 +268,7 @@
       if (!user || user.role !== 'employer') return; // guard will redirect
       refreshEmployerStats   && await refreshEmployerStats();
       renderPostedJobsTable  && await renderPostedJobsTable();
-      renderApplicantsTable  && await renderApplicantsTable("All Status");
+      renderApplicantsTable  && await renderApplicantsTable();
     }
 
     // FIX: Wait for authRoleReady (DB role confirmed) before loading data
