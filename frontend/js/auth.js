@@ -73,12 +73,19 @@ window._authResolved = new Promise(function(resolve) {
           if (dbProfile && dbProfile.role) {
             // FIX ④: Merge ALL DB profile fields — not just role
             appUser = Object.assign({}, appUser, {
-              role:       dbProfile.role,
-              title:      dbProfile.title      || '',
-              bio:        dbProfile.bio        || '',
-              location:   dbProfile.location   || '',
-              skills:     dbProfile.skills     || [],
-              experience: dbProfile.experience || [],
+              role:            dbProfile.role,
+              title:           dbProfile.title           || '',
+              bio:             dbProfile.bio             || '',
+              location:        dbProfile.location        || '',
+              phone:           dbProfile.phone           || '',
+              website:         dbProfile.website         || '',
+              linkedin:        dbProfile.linkedin        || '',
+              github:          dbProfile.github          || '',
+              company:         dbProfile.company         || '',
+              experienceYears: dbProfile.experienceYears || '',
+              skills:          dbProfile.skills          || [],
+              experience:      dbProfile.experience      || [],
+              education:       dbProfile.education       || [],
             });
             // Keep localStorage cache in sync with DB
             try { localStorage.setItem('tb_user_role_' + fbUser.uid, dbProfile.role); } catch(e) {}

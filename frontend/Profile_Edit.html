@@ -313,6 +313,15 @@
             </select>
           </div>
         </div>
+        <div class="pe-form-row">
+          <div class="pe-input-group">
+            <label>Company / Organization <span style="font-size:11px;color:var(--text-secondary)">(employers: your company name)</span></label>
+            <div class="pe-input-icon-wrap">
+              <i class="fa-solid fa-building"></i>
+              <input type="text" id="edit-company" placeholder="e.g. TechNova Solutions">
+            </div>
+          </div>
+        </div>
         <div class="pe-input-group" style="margin-bottom:0">
           <label>Professional Summary / Bio</label>
           <textarea id="edit-bio" rows="4" placeholder="Write a short professional summary about yourself, your experience, and what you're looking for..."></textarea>
@@ -612,6 +621,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     _setVal('edit-website',          user.website          || '');
     _setVal('edit-linkedin',         user.linkedin         || '');
     _setVal('edit-github',           user.github           || '');
+    _setVal('edit-company',          user.company          || '');
 
     updateAvatarPreview();
 
@@ -684,6 +694,7 @@ async function saveProfilePage() {
     website:         (document.getElementById('edit-website')?.value          || '').trim(),
     linkedin:        (document.getElementById('edit-linkedin')?.value         || '').trim(),
     github:          (document.getElementById('edit-github')?.value           || '').trim(),
+    company:         (document.getElementById('edit-company')?.value          || '').trim(),
     skills:          window._peSkills,
     experience:      window._peExperience,
     education:       window._peEducation,
