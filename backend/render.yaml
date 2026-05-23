@@ -1,0 +1,27 @@
+# render.yaml — TalentBridge backend deployment config
+# Place this file in the backend/ folder (or repo root if deploying backend/ as root)
+#
+# Render docs: https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: talentbridge-api
+    runtime: node
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DB_HOST
+        sync: false
+      - key: DB_PORT
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASS
+        sync: false
+      - key: DB_NAME
+        sync: false
+      - key: FRONTEND_URL
+        sync: false

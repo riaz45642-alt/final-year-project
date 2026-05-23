@@ -1,27 +1,27 @@
 /**
- * TalentBridge — API Base URL
+ * TalentBridge — API Base URL Configuration
  *
- * Automatically switches between local dev and Railway production.
+ * Automatically switches between:
+ *  • Local dev  → http://localhost:8080/api
+ *  • Production → Render backend URL
  *
- * SETUP (one-time after Railway deploy):
- *   Replace YOUR-APP-NAME below with the subdomain from:
- *   Railway dashboard → your service → Settings → Domains
- *   e.g.  talentbridge-production.up.railway.app
- *
- * DO NOT change anything else.
+ * SETUP (one-time after Render deploy):
+ *   Replace RENDER_DOMAIN below with your Render service domain.
+ *   Find it in: Render dashboard → your service → top of page
+ *   e.g.  talentbridge-api.onrender.com
  */
 (function () {
-  // ← Paste your Railway domain here (no https://, no /api, no trailing slash)
-  var RAILWAY_DOMAIN = "YOUR-APP-NAME.up.railway.app";
+  // ← Paste your Render domain here (no https://, no /api, no trailing slash)
+  var RENDER_DOMAIN = "YOUR-SERVICE-NAME.onrender.com";
 
   var isLocal =
     location.hostname === "localhost" ||
     location.hostname === "127.0.0.1";
 
   window.TB_API_BASE = isLocal
-    ? "http://localhost:5000/api"
-    : "https://" + RAILWAY_DOMAIN + "/api";
+    ? "http://localhost:8080/api"
+    : "https://" + RENDER_DOMAIN + "/api";
 
-  // Uncomment the line below while debugging to see which URL is active:
+  // Uncomment to debug:
   // console.log("[TalentBridge] API base:", window.TB_API_BASE);
 })();

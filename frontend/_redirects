@@ -1,1 +1,9 @@
-﻿/*    /index.html   200
+/dashboard        /dashboard.html         200
+/auth             /auth.html              200
+/profile          /profile_page.html      200
+/profile-edit     /Profile_Edit.html      200
+/employer-dashboard /Employer_dashboard.html 200
+/my-applications  /My_applications.html   200
+/saved-jobs       /Save_job.html          200
+/cv-generator     /cv_generator.html      200
+/*                /index.html             200
