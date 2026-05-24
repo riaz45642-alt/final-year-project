@@ -29,13 +29,13 @@ async function saveProfile() {
   if (saveBtn) { saveBtn.textContent = "Saving..."; saveBtn.disabled = true; }
 
   // Update local session cache first (Firebase UID + updated display name)
-  // <i class="fa-solid fa-fire"></i> Firebase: update the cached session so the nav updates immediately
+  // 🔥 Firebase: update the cached session so the nav updates immediately
   AppState.currentUser.name  = newName;
   AppState.currentUser.email = newEmail;
   AppState.currentUser.avatar = newName.split(" ").map(function(w){ return w[0]||""; }).join("").slice(0,2).toUpperCase();
   DB.setSession(AppState.currentUser);
 
-  // <i class="fa-solid fa-wrench"></i> TiDB: POST /api/users  → upsert profile row in TiDB users table
+  // 🔧 TiDB: POST /api/users  → upsert profile row in TiDB users table
   await DB.saveProfile(AppState.currentUser);
 
   if (typeof updateAuthUI === "function") updateAuthUI();
