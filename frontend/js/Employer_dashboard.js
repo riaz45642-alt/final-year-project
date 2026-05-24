@@ -6,13 +6,13 @@
    - View Profile button per applicant
 ────────────────────────────────────────────── */
 
-var APPLICANT_STATUSES = ["Shortlisted", "Interviewing", "Rejected"];
+var APPLICANT_STATUSES = ["Shortlisted", "Interview", "Rejected"];
 
 /* ── Status badge colors ── */
 function getStatusStyle(status) {
   switch (status) {
     case "Shortlisted":  return "background:#d1fae5;color:#065f46";
-    case "Interviewing": return "background:#dbeafe;color:#1e40af";
+    case "Interview": return "background:#dbeafe;color:#1e40af";
     case "Rejected":     return "background:#fee2e2;color:#991b1b";
     default:             return "background:var(--accent-light,#e0e7ff);color:var(--accent,#4f46e5)";
   }
@@ -31,7 +31,7 @@ async function refreshEmployerStats() {
   var myApplicants = res2.ok ? await res2.json() : [];
 
   var shortlisted  = myApplicants.filter(function(a){ return a.status === "Shortlisted"; }).length;
-  var interviewing = myApplicants.filter(function(a){ return a.status === "Interviewing"; }).length;
+  var interviewing = myApplicants.filter(function(a){ return a.status === "Interview"; }).length;
 
   function getEl(id) { return document.getElementById(id); }
   if (getEl("emp-stat-jobs"))  getEl("emp-stat-jobs").textContent  = myJobs.length;
@@ -369,7 +369,7 @@ async function changeApplicantStatus(selectEl, appId) {
 
     var statusMessages = {
       "Shortlisted":  "✅ Applicant shortlisted — notification sent!",
-      "Interviewing": "📅 Interview stage set — applicant notified!",
+      "Interview": "📅 Interview stage set — applicant notified!",
       "Rejected":     "❌ Application rejected — applicant notified."
     };
     toast(statusMessages[newStatus] || "Status updated → " + newStatus, newStatus === "Rejected" ? "warning" : "success");

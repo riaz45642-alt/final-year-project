@@ -1,7 +1,5 @@
 /* ──────────────────────────────────────────────
    APPLIED JOBS PAGE — applied_jobpage.js
-   Async TiDB edition: data fetched from API.
-   Status comes from the database, not random.
 ────────────────────────────────────────────── */
 
 async function cancelApplication(appId) {
@@ -16,14 +14,50 @@ async function cancelApplication(appId) {
   }
 }
 
+async function renderSeekerNotifications() {
+  const container = document.getElementById('seeker-notif-list');
+  if (!container) return;
+  const uid = AppState.currentUser ? AppState.currentUser.id : null;
+  if (!uid) return;
+
+  const notifs = await DB.getNotifications(uid);
+  const statusNotifs = notifs.filter(function(n) {
+    return n.type === 'status_update' || n.type === 'application';
+  });
+
+  if (!statusNotifs.length) {
+    container.innerHTML = '<p style="color:var(--text-secondary);font-size:13px;padding:8px 0">No notifications yet.</p>';
+    return;
+  }
+
+  container.innerHTML = statusNotifs.map(function(n) {
+    const dt = new Date(n.createdAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' });
+    const icon = n.type === 'status_update' ? '🔔' : '📩';
+    return `<div onclick="markSeekerNotifRead('${n.id}',this)" id="snotif-${n.id}"
+      style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;
+             border:1px solid var(--border-mid,#eee);background:${n.isRead ? 'transparent' : 'var(--bg-hover,#f0f4ff)'}">
+      <span style="font-size:18px;flex-shrink:0">${icon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600;color:var(--text-primary)">${n.title}</div>
+        <div style="font-size:12px;color:var(--text-secondary);margin-top:2px">${n.message}</div>
+        <div style="font-size:11px;color:var(--text-secondary);margin-top:4px">${dt}</div>
+      </div>
+      ${!n.isRead ? '<span style="width:8px;height:8px;border-radius:50%;background:var(--accent,#4f6ef7);flex-shrink:0;margin-top:4px"></span>' : ''}
+    </div>`;
+  }).join('');
+}
+
+async function markSeekerNotifRead(notifId, el) {
+  await DB.markNotifRead(notifId);
+  if (el) { el.style.background = 'transparent'; const dot = el.querySelector('span[style*="border-radius:50%"]'); if (dot) dot.remove(); }
+}
+
 async function renderAppliedJobs() {
   const appliedList = document.getElementById('applied-jobs-list');
   if (!appliedList) return;
 
-  // Show loading state
   appliedList.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading applications…</p></div>';
 
-  // Both DB calls run in parallel
   const [applications, allJobs] = await Promise.all([
     DB.getApps(),
     getAllJobs(),
@@ -41,7 +75,6 @@ async function renderAppliedJobs() {
     return;
   }
 
-  // Status → CSS class mapping (matches real DB status values)
   const statusColorMap = {
     Reviewing:   'reviewing',
     Shortlisted: 'active',
@@ -73,7 +106,7 @@ async function renderAppliedJobs() {
         <button class="btn btn-outline btn-sm"
           onclick="window.location.href='dashboard.html'">View Job</button>
         ${canCancel
-          ? `<button class="btn btn-sm" style="background:var(--danger,#ef4444);color:#fff;border:none;cursor:pointer;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600"
+          ? `<button class="btn btn-sm" style="background:var(--danger,#e24b4a);color:#fff;border:none;cursor:pointer;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600"
               onclick="cancelApplication('${app.id}')">✕ Cancel</button>`
           : ''}
       </div>
@@ -81,9 +114,10 @@ async function renderAppliedJobs() {
   }).join('');
 }
 
-// Expose globally
-window.renderAppliedJobs = renderAppliedJobs;
-window.cancelApplication = cancelApplication;
+window.renderAppliedJobs      = renderAppliedJobs;
+window.cancelApplication      = cancelApplication;
+window.renderSeekerNotifications = renderSeekerNotifications;
+window.markSeekerNotifRead    = markSeekerNotifRead;
 
 
 

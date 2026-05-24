@@ -105,6 +105,16 @@
         <div class="page-title">My Applications</div>
         <div class="page-subtitle">Track the status of your job applications</div>
       </div>
+
+      <!-- Notifications Panel -->
+      <div class="card mb-16" style="padding:16px 20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div style="font-size:14px;font-weight:600;color:var(--text-primary)">🔔 Notifications</div>
+          <button class="btn btn-outline btn-sm" onclick="DB.markAllNotifsRead(AppState.currentUser&&AppState.currentUser.id).then(()=>renderSeekerNotifications())">Mark all read</button>
+        </div>
+        <div id="seeker-notif-list"><p style="color:var(--text-secondary);font-size:13px">Loading…</p></div>
+      </div>
+
       <div id="applied-jobs-list"></div>
     </section>
 
@@ -147,11 +157,11 @@
     await initCommon();
     // 🔒 ROLE GUARD: job seekers only
     Guard.requireSeeker();
-    await renderAppliedJobs();
+    await Promise.all([renderAppliedJobs(), renderSeekerNotifications()]);
     // Re-render once Firebase settles (covers page-refresh with no session cache yet)
     // FIX: Re-render after DB auth confirmed (real user data available)
     document.addEventListener('authRoleReady', async function(e) {
-      if (e.detail) await renderAppliedJobs();
+      if (e.detail) await Promise.all([renderAppliedJobs(), renderSeekerNotifications()]);
     }, { once: true });
   });
 </script>
