@@ -76,10 +76,10 @@
     <button class="sidebar-nav-item" id="sidebar-login-signup-btn" onclick="openAuth('login');closeMobileSidebar()"><span class="nav-icon"><i class="fa-solid fa-unlock"></i></span>Login / Signup</button>
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
-        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div class="sidebar-user-avatar" id="sb-avatar"></div>
         <div class="sidebar-user-details">
-          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
-          <div class="sidebar-user-role" id="sb-role">Job Seeker</div>
+          <div class="sidebar-user-name" id="sb-name"></div>
+          <div class="sidebar-user-role" id="sb-role"></div>
         </div>
 
       </div>
@@ -110,19 +110,20 @@
             <div class="form-section">
               <div class="form-section-title"><span class="num">1</span>Personal Information</div>
               <div class="cv-form-row">
-                <div class="cv-form-group"><label>First Name</label><input type="text" id="cv-fname" data-cv-field placeholder="Ahmed" value="Ahmed"></div>
-                <div class="cv-form-group"><label>Last Name</label><input type="text" id="cv-lname" data-cv-field placeholder="Khan" value="Khan"></div>
+                <div class="cv-form-group"><label>First Name</label><input type="text" id="cv-fname" data-cv-field placeholder="Enter your first name" value=""></div>
+                <div class="cv-form-group"><label>Last Name</label><input type="text" id="cv-lname" data-cv-field placeholder="Enter your last name" value=""></div>
               </div>
-              <div class="cv-form-group"><label>Professional Title</label><input type="text" id="cv-job-title" data-cv-field placeholder="Full Stack Developer" value="Full Stack Developer"></div>
+              <div class="cv-form-group"><label>Professional Title</label><input type="text" id="cv-job-title" data-cv-field placeholder="Enter your job title" value=""></div>
               <div class="cv-form-row">
-                <div class="cv-form-group"><label>Email</label><input type="email" id="cv-email" data-cv-field placeholder="ahmed@email.com" value="ahmed@email.com"></div>
-                <div class="cv-form-group"><label>Phone</label><input type="tel" id="cv-phone" data-cv-field placeholder="+92 300 1234567" value="+92 300 1234567"></div>
+
+                <div class="cv-form-group"><label>Email</label><input type="email" id="cv-email" data-cv-field placeholder="Enter your email" value=""></div>
+                <div class="cv-form-group"><label>Phone</label><input type="tel" id="cv-phone" data-cv-field placeholder="Enter your phone number" value=""></div>
               </div>
               <div class="cv-form-row">
-                <div class="cv-form-group"><label>Location</label><input type="text" id="cv-loc" data-cv-field placeholder="Lahore, Pakistan" value="Lahore, Pakistan"></div>
-                <div class="cv-form-group"><label>LinkedIn (optional)</label><input type="text" id="cv-linkedin" placeholder="linkedin.com/in/your-profile"></div>
+                <div class="cv-form-group"><label>Location</label><input type="text" id="cv-loc" data-cv-field placeholder="Enter your location" value=""></div>
+                <div class="cv-form-group"><label>LinkedIn (optional)</label><input type="text" id="cv-linkedin" placeholder="Enter your LinkedIn profile URL"></div>
               </div>
-              <div class="cv-form-group"><label>Professional Summary</label><textarea id="cv-summary" data-cv-field rows="3">Experienced Full Stack Developer with 4+ years building scalable web applications using React, Node.js, and cloud technologies. Passionate about clean code and user experience.</textarea></div>
+              <div class="cv-form-group"><label>Professional Summary</label><textarea id="cv-summary" data-cv-field rows="3"></textarea></div>
             </div>
 
             <!-- Education -->
@@ -151,7 +152,6 @@
             <!-- Action buttons: only Download + Save -->
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
               <button class="btn btn-success" id="download-cv-btn" onclick="downloadCV()"><i class="fa-solid fa-file-arrow-down"></i> Download CV as PDF</button>
-              <button class="btn btn-primary" onclick="saveCVToBackend()"><i class="fa-solid fa-floppy-disk"></i> Save CV</button>
             </div>
           </div>
         </div>
@@ -174,23 +174,23 @@
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-bottom-nav">
   <button class="mobile-bottom-nav-item " onclick="window.location.href='dashboard.html'">
-    <span class="mobile-nav-icon">🏠</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-house"></i></span>
     <span class="mobile-nav-label">Jobs</span>
   </button>
   <button class="mobile-bottom-nav-item " onclick="window.location.href='Save_job.html'">
-    <span class="mobile-nav-icon">🔖</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-bookmark"></i></span>
     <span class="mobile-nav-label">Saved</span>
   </button>
   <button class="mobile-bottom-nav-item active" onclick="window.location.href='cv_generator.html'">
-    <span class="mobile-nav-icon">📄</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-file-lines"></i></span>
     <span class="mobile-nav-label">CV</span>
   </button>
   <button class="mobile-bottom-nav-item " onclick="window.location.href='profile_page.html'">
-    <span class="mobile-nav-icon">👤</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-user"></i></span>
     <span class="mobile-nav-label">Profile</span>
   </button>
   <button class="mobile-bottom-nav-item" onclick="if(typeof logout==='function')logout();else{localStorage.clear();window.location.href='index.html';}">
-    <span class="mobile-nav-icon">🚪</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-sign-out-alt"></i></span>
     <span class="mobile-nav-label">Sign Out</span>
   </button>
 </nav>

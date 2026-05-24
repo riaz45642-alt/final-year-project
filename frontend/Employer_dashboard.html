@@ -77,9 +77,9 @@
 
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
-        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div class="sidebar-user-avatar" id="sb-avatar"></div>
         <div class="sidebar-user-details">
-          <div class="sidebar-user-name" id="sb-name">Ahmed Khan</div>
+          <div class="sidebar-user-name" id="sb-name"></div>
           <div class="sidebar-user-role" id="sb-role">Employer</div>
         </div>
       </div>
@@ -112,11 +112,11 @@
       </div>
       <!-- Tabs -->
       <div class="tab-row">
-        <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')">📋 My Jobs</button>
-        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps');renderApplicantsTable()">👥 Applicants</button>
-        <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')">+ Post Job</button>
+        <button class="tab-btn active" id="tab-jobs-btn" onclick="switchTab('tab-jobs')"><i class="fa-solid fa-briefcase"></i> My Jobs</button>
+        <button class="tab-btn" id="tab-apps-btn" onclick="switchTab('tab-apps');renderApplicantsTable()"><i class="fa-solid fa-users"></i> Applicants</button>
+        <button class="tab-btn" id="tab-post-btn" onclick="switchTab('tab-post')"><i class="fa-solid fa-plus"></i>+ Post Job</button>
         <button class="tab-btn" id="tab-notif-btn" onclick="switchTab('tab-notif');loadNotifications()" style="position:relative">
-          🔔 Notifications
+          <i class="fa-solid fa-bell"></i> Notifications
           <span id="notif-badge" style="display:none;position:absolute;top:6px;right:6px;background:#ef4444;color:#fff;border-radius:50%;font-size:10px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 2px">0</span>
         </button>
       </div>
@@ -137,7 +137,7 @@
         <div class="card">
           <div class="search-row" style="margin-bottom:16px">
             <div class="search-input-wrap">
-              <span class="search-icon">🔍</span>
+              <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
               <input class="search-input" id="applicant-search-input" placeholder="Search by name, title, email or job…" oninput="onApplicantSearchInput(this)">
             </div>
 
@@ -154,7 +154,7 @@
       <!-- Tab: Post Job -->
       <div class="tab-panel" id="tab-post">
         <div class="card post-job-form">
-          <div class="section-title" style="font-size:18px;margin-bottom:20px">📣 Post a New Job</div>
+          <div class="section-title" style="font-size:18px;margin-bottom:20px"><i class="fa-solid fa-signs-post"></i> Post a New Job</div>
           <div class="form-group"><label>Job Title *</label><input type="text" id="pj-title" placeholder="e.g., Senior React Developer"></div>
           <div class="form-row">
             <div class="form-group"><label>Department</label><input type="text" id="pj-dept" placeholder="Engineering"></div>
@@ -208,9 +208,8 @@
           <!-- ══ END CONTACT SECTION ══ -->
 
           <div style="display:flex;gap:10px;margin-top:16px;flex-wrap:wrap">
-            <button class="btn btn-primary" id="post-job-btn" onclick="postJob()">📣 Publish Job</button>
-            <button class="btn btn-outline" onclick="saveDraft()">💾 Save Draft</button>
-            <button class="btn" style="color:var(--text-muted);border:1px solid var(--border)" onclick="toast('Preview mode coming soon','info')">👁️ Preview</button>
+            <button class="btn btn-primary" id="post-job-btn" onclick="postJob()"><i class="fa-solid fa-briefcase"></i> Publish Job</button>
+        
           </div>
         </div>
       </div>
@@ -219,7 +218,7 @@
       <div class="tab-panel" id="tab-notif">
         <div class="card">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-            <div style="font-size:16px;font-weight:600">🔔 Notifications</div>
+            <div style="font-size:16px;font-weight:600"><i class="fa-solid fa-bell"></i> Notifications</div>
             <button class="btn btn-outline btn-sm" onclick="markAllNotifRead()">Mark all as read</button>
           </div>
           <div id="notif-list" style="display:flex;flex-direction:column;gap:10px">

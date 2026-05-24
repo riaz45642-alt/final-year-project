@@ -226,7 +226,7 @@
 
     <div class="sidebar-user-block hidden" id="sidebar-user-block">
       <div class="sidebar-user-info">
-        <div class="sidebar-user-avatar" id="sb-avatar">AK</div>
+        <div class="sidebar-user-avatar" id="sb-avatar"></div>
         <div class="sidebar-user-details">
           <div class="sidebar-user-name" id="sb-name"></div>
           <div class="sidebar-user-role" id="sb-role"></div>
@@ -254,10 +254,10 @@
 
       <!-- ── Avatar Preview ── -->
       <div class="pe-section" style="display:flex;align-items:center;gap:20px;padding:20px 28px">
-        <div class="pe-avatar-preview" id="pe-avatar-preview">AK</div>
+        <div class="pe-avatar-preview" id="pe-avatar-preview"></div>
         <div>
           <div style="font-weight:700;font-size:15px" id="pe-avatar-name-label">Your Name</div>
-          <div style="font-size:13px;color:var(--text-secondary);margin-top:2px">Avatar is generated from your initials</div>
+          <div style="font-size:13px;color:var(--text-secondary);margin-top:2px"> </div>
         </div>
       </div>
 
@@ -269,23 +269,23 @@
         <div class="pe-form-row">
           <div class="pe-input-group">
             <label>Full Name *</label>
-            <input type="text" id="edit-name" placeholder="e.g. Ahmed Khan" oninput="updateAvatarPreview()">
+            <input type="text" id="edit-name" placeholder="Enter your full name" oninput="updateAvatarPreview()">
           </div>
           <div class="pe-input-group">
             <label>Email Address *</label>
-            <input type="email" id="edit-email" placeholder="you@example.com">
+            <input type="email" id="edit-email" placeholder="your.email@example.com">
           </div>
         </div>
         <div class="pe-form-row">
           <div class="pe-input-group">
             <label>Professional Title</label>
-            <input type="text" id="edit-title-field" placeholder="e.g. Full Stack Developer">
+            <input type="text" id="edit-title-field" placeholder="Enter your Professional Title">
           </div>
           <div class="pe-input-group">
             <label>Phone Number</label>
             <div class="pe-input-icon-wrap">
               <i class="fa-solid fa-phone"></i>
-              <input type="tel" id="edit-phone" placeholder="+92 300 1234567">
+              <input type="tel" id="edit-phone" placeholder="Enter your phone number">
             </div>
           </div>
         </div>
@@ -294,7 +294,7 @@
             <label>Location / City</label>
             <div class="pe-input-icon-wrap">
               <i class="fa-solid fa-location-dot"></i>
-              <input type="text" id="edit-location" placeholder="Lahore, Pakistan">
+              <input type="text" id="edit-location" placeholder="Enter your city or location">
             </div>
           </div>
           <div class="pe-input-group">
@@ -318,13 +318,13 @@
             <label>Company / Organization <span style="font-size:11px;color:var(--text-secondary)">(employers: your company name)</span></label>
             <div class="pe-input-icon-wrap">
               <i class="fa-solid fa-building"></i>
-              <input type="text" id="edit-company" placeholder="e.g. TechNova Solutions">
+              <input type="text" id="edit-company" placeholder="Enter your company or organization name">
             </div>
           </div>
         </div>
         <div class="pe-input-group" style="margin-bottom:0">
           <label>Professional Summary / Bio</label>
-          <textarea id="edit-bio" rows="4" placeholder="Write a short professional summary about yourself, your experience, and what you're looking for..."></textarea>
+          <textarea id="edit-bio" rows="4" placeholder="Enter a brief summary of your professional background and career goals..."></textarea>
         </div>
       </div>
 
@@ -452,16 +452,16 @@
       <div class="pe-form-row" style="margin-bottom:14px">
         <div class="pe-input-group">
           <label>Job Title *</label>
-          <input type="text" id="exp-title-input" placeholder="e.g. Senior React Developer">
+          <input type="text" id="exp-title-input" placeholder="Enter your job title">
         </div>
         <div class="pe-input-group">
           <label>Company Name *</label>
-          <input type="text" id="exp-company-input" placeholder="e.g. Systems Limited">
+          <input type="text" id="exp-company-input" placeholder="Enter company name">
         </div>
       </div>
       <div class="pe-input-group" style="margin-bottom:14px">
         <label>Location</label>
-        <input type="text" id="exp-location-input" placeholder="e.g. Lahore, Pakistan / Remote">
+        <input type="text" id="exp-location-input" placeholder="Enter your work location">
       </div>
       <div class="pe-form-row" style="margin-bottom:6px">
         <div class="pe-input-group">
@@ -502,20 +502,20 @@
       <div class="pe-form-row" style="margin-bottom:14px">
         <div class="pe-input-group">
           <label>Degree / Qualification *</label>
-          <input type="text" id="edu-degree-input" placeholder="e.g. Bachelor of Science">
+          <input type="text" id="edu-degree-input" placeholder="Enter your degree or qualification ">
         </div>
         <div class="pe-input-group">
           <label>Field of Study *</label>
-          <input type="text" id="edu-field-input" placeholder="e.g. Computer Science">
+          <input type="text" id="edu-field-input" placeholder="Enter your field of study">
         </div>
       </div>
       <div class="pe-input-group" style="margin-bottom:14px">
         <label>Institution / University *</label>
-        <input type="text" id="edu-institution-input" placeholder="e.g. FAST NUCES, LUMS, COMSATS...">
+        <input type="text" id="edu-institution-input" placeholder="Enter institution or university name">
       </div>
       <div class="pe-input-group" style="margin-bottom:14px">
         <label>Grade / CGPA</label>
-        <input type="text" id="edu-grade-input" placeholder="e.g. 3.8 / 4.0 or A Grade">
+        <input type="text" id="edu-grade-input" placeholder="Enter your grade or CGPA">
       </div>
       <div class="pe-form-row" style="margin-bottom:6px">
         <div class="pe-input-group">
@@ -533,7 +533,7 @@
       </div>
       <div class="pe-input-group" style="margin-bottom:22px">
         <label>Additional Notes</label>
-        <textarea id="edu-desc-input" rows="2" placeholder="e.g. Relevant courses, thesis, honors, achievements..."></textarea>
+        <textarea id="edu-desc-input" rows="2" placeholder="Enter any additional information about your education..."></textarea>
       </div>
       <div style="display:flex;gap:10px">
         <button class="btn btn-primary" style="flex:1" onclick="saveEducation()">Save Education</button>
@@ -547,16 +547,16 @@
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-bottom-nav">
   <button class="mobile-bottom-nav-item" onclick="window.location.href='dashboard.html'">
-    <span class="mobile-nav-icon">🏠</span><span class="mobile-nav-label">Jobs</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-briefcase"></i>span><span class="mobile-nav-label">Jobs</span>
   </button>
   <button class="mobile-bottom-nav-item" onclick="window.location.href='Save_job.html'">
-    <span class="mobile-nav-icon">🔖</span><span class="mobile-nav-label">Saved</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-bookmark"></i></span><span class="mobile-nav-label">Saved</span>
   </button>
   <button class="mobile-bottom-nav-item" onclick="window.location.href='cv_generator.html'">
-    <span class="mobile-nav-icon">📄</span><span class="mobile-nav-label">CV</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-file-pdf"></i></span><span class="mobile-nav-label">CV</span>
   </button>
   <button class="mobile-bottom-nav-item active" onclick="window.location.href='profile_page.html'">
-    <span class="mobile-nav-icon">👤</span><span class="mobile-nav-label">Profile</span>
+    <span class="mobile-nav-icon"><i class="fa-solid fa-user"></i></span><span class="mobile-nav-label">Profile</span>
   </button>
 </nav>
 
@@ -710,7 +710,7 @@ async function saveProfilePage() {
   if (!result || !result.success) {
     toast('Saved locally, but could not reach the server. Check your connection.', 'warning');
   } else {
-    toast('Profile updated successfully! ✅', 'success');
+    toast('Profile updated successfully! <i class="fa-solid fa-check"></i>', 'success');
   }
 
   saveBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Save All Changes';
@@ -755,7 +755,7 @@ function saveSkill() {
   window._peSkills.push({ name, level });
   _renderSkills();
   closeAddSkillModal();
-  toast(`"${name}" added ✅`, 'success');
+  toast(`"${name}" added <i class="fa-solid fa-check"></i>`, 'success');
 }
 
 function removeSkill(index) {
@@ -844,8 +844,8 @@ function saveExperience() {
     description: document.getElementById('exp-desc-input').value.trim(),
   };
   const idx = parseInt(document.getElementById('exp-edit-index').value);
-  if (idx >= 0) { window._peExperience[idx] = exp; toast('Experience updated ✅', 'success'); }
-  else          { window._peExperience.unshift(exp); toast(`Experience at "${company}" added ✅`, 'success'); }
+  if (idx >= 0) { window._peExperience[idx] = exp; toast('Experience updated <i class="fa-solid fa-check"></i>', 'success'); }
+  else          { window._peExperience.unshift(exp); toast(`Experience at "${company}" added <i class="fa-solid fa-check"></i>`, 'success'); }
   _renderExperience();
   closeAddExpModal();
 }
@@ -853,7 +853,7 @@ function saveExperience() {
 function removeExperience(index) {
   const removed = window._peExperience.splice(index, 1);
   _renderExperience();
-  if (removed.length) toast(`"${removed[0].title}" removed`, 'info');
+  if (removed.length) toast(`"${removed[0].title}" removed <i class="fa-solid fa-trash"></i>`, 'info');
 }
 
 /* ══════════════════════════════════════════════
@@ -939,8 +939,8 @@ function saveEducation() {
     description: document.getElementById('edu-desc-input').value.trim(),
   };
   const idx = parseInt(document.getElementById('edu-edit-index').value);
-  if (idx >= 0) { window._peEducation[idx] = edu; toast('Education updated ✅', 'success'); }
-  else          { window._peEducation.unshift(edu); toast(`"${degree}" added ✅`, 'success'); }
+  if (idx >= 0) { window._peEducation[idx] = edu; toast('Education updated <i class="fa-solid fa-check"></i>', 'success'); }
+  else          { window._peEducation.unshift(edu); toast(`"${degree}" added <i class="fa-solid fa-check"></i>`, 'success'); }
   _renderEducation();
   closeAddEduModal();
 }
@@ -948,7 +948,7 @@ function saveEducation() {
 function removeEducation(index) {
   const removed = window._peEducation.splice(index, 1);
   _renderEducation();
-  if (removed.length) toast(`"${removed[0].degree}" removed`, 'info');
+  if (removed.length) toast(`"${removed[0].degree}" removed <i class="fa-solid fa-trash"></i>`, 'info');
 }
 </script>
 </body>
