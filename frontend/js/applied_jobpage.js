@@ -22,7 +22,9 @@ async function renderSeekerNotifications() {
 
   const notifs = await DB.getNotifications(uid);
   const statusNotifs = notifs.filter(function(n) {
-    return n.type === 'status_update' || n.type === 'application';
+    // Only show status-change notifications (Shortlisted / Interviewing / Rejected)
+    // 'application' type is for employers only — never show here
+    return n.type === 'success' || n.type === 'info' || n.type === 'warning' || n.type === 'status_update';
   });
 
   if (!statusNotifs.length) {
