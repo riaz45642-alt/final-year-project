@@ -670,17 +670,6 @@ async function initCVGenerator() {
     }
   }
 
-  // Seed default data if nothing loaded
-  if (cvData.education.length===0) {
-    cvData.education = [{ degree:'BS Computer Science', institution:'FAST-NUCES, Lahore', year:'2015–2019', grade:'3.7/4.0' }];
-  }
-  if (cvData.experience.length===0) {
-    cvData.experience = [{ title:'Senior Developer', company:'TechNova Solutions', duration:'Jan 2022–Present', desc:'Led a team of 5 developers. Improved app performance by 40%.' }];
-  }
-  if (cvData.skills.length===0) {
-    cvData.skills = ['React.js','Node.js','TypeScript','Python','PostgreSQL','Docker','AWS','Git'];
-  }
-
   renderTemplateSelector();
   renderEducationEntries();
   renderExperienceEntries();
