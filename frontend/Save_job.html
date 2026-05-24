@@ -146,7 +146,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', async function() {
     await initCommon();
-    // 🔒 ROLE GUARD: job seekers only
+    // <i class="fa-solid fa-lock"></i> ROLE GUARD: job seekers only
     Guard.requireSeeker();
     await renderSavedJobs();
     // Re-render once Firebase settles (covers page-refresh with no session cache yet)

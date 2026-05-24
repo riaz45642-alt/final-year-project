@@ -146,7 +146,7 @@
 <script>
   document.addEventListener('DOMContentLoaded', async function() {
     await initCommon();
-    // 🔒 ROLE GUARD: job seekers only
+    // <i class="fa-solid fa-lock"></i> ROLE GUARD: job seekers only
     Guard.requireSeeker();
     await renderAppliedJobs();
     document.addEventListener('authRoleReady', async function(e) {

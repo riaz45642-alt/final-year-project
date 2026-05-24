@@ -8,7 +8,7 @@ async function renderSavedJobs() {
   if (!savedGrid) return;
 
   // Show loading state
-  savedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading saved jobs…</p></div>';
+  savedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-hourglass-half"></i></div><p>Loading saved jobs…</p></div>';
 
   // Fetch saved IDs and all jobs from TiDB
   const [savedIds, allJobs] = await Promise.all([
@@ -21,7 +21,7 @@ async function renderSavedJobs() {
   if (!savedJobs.length) {
     savedGrid.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🔖</div>
+        <div class="empty-icon"><i class="fa-solid fa-bookmark"></i></div>
         <h3>No saved jobs yet</h3>
         <p>Browse jobs and click the bookmark icon to save them here</p>
         <button class="btn btn-primary" style="margin-top:16px"

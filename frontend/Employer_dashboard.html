@@ -185,7 +185,7 @@
 
           <!-- ══ CONTACT INFORMATION SECTION (NEW) ══ -->
           <div style="margin:20px 0 8px;padding:16px 0 0;border-top:1px solid var(--border-mid,#eee)">
-            <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:var(--text-primary)">📞 Contact Information for Candidates</div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:4px;color:var(--text-primary)"><i class="fa-solid fa-phone"></i> Contact Information for Candidates</div>
             <div style="font-size:12.5px;color:var(--text-secondary,#888);margin-bottom:14px">This will be displayed on the job listing so candidates can reach you directly.</div>
             <div class="form-row">
               <div class="form-group">
@@ -230,7 +230,7 @@
       <!-- Per-Job Applicants Modal (NEW) -->
       <div id="job-applicants-modal" style="display:none;position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,0.45);overflow-y:auto">
         <div style="margin:40px auto;max-width:760px;background:var(--bg-card,#fff);border-radius:16px;padding:28px;position:relative">
-          <button onclick="closeJobApplicantsModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">✕</button>
+          <button onclick="closeJobApplicantsModal()" style="position:absolute;top:16px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-secondary)">&times;</button>
           <div id="job-applicants-modal-title" style="font-size:18px;font-weight:700;margin-bottom:20px">Applicants</div>
           <div id="job-applicants-modal-body"></div>
         </div>
@@ -259,7 +259,7 @@
   document.addEventListener('DOMContentLoaded', async function() {
     await (initCommon && initCommon());
 
-    // 🔒 ROLE GUARD: waits for DB role before enforcing
+    // <i class="fa-solid fa-lock"></i> ROLE GUARD: waits for DB role before enforcing
     Guard.requireEmployer();
 
     async function loadDashboard() {
