@@ -282,21 +282,14 @@
         <button class="category-chip" onclick="setCategory('logistics',this)"><i class="fa-solid fa-boxes-stacked"></i> Logistics</button>
       </div>
 
-      <!-- Search & Sort Row -->
-      <div class="flex-between mb-16" style="gap:12px;flex-wrap:wrap">
-        <div class="search-input-wrap" style="min-width:220px;max-width:360px">
-          <span class="search-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
-          <input class="search-input" id="main-search" placeholder="Filter jobs by title, skill, company...">
-        </div>
-        <div class="flex-between gap-12">
-          <div style="font-size:14px;color:var(--text-secondary)">Showing <strong id="job-count">0</strong> jobs</div>
-          <select id="sort-select" style="width:auto;padding:8px 12px;border-radius:9px;border:1px solid var(--border-mid);font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer">
-            <option value="relevant">Most Relevant</option>
-            <option value="newest">Newest First</option>
-            <option value="salary-high">Salary: High to Low</option>
-            <option value="salary-low">Salary: Low to High</option>
-          </select>
-        </div>
+      <!-- Sort Row -->
+      <div class="flex-between mb-16" style="justify-content:flex-end">
+        <select id="sort-select" style="width:auto;padding:8px 12px;border-radius:9px;border:1px solid var(--border-mid);font-family:var(--font-body);font-size:13px;outline:none;cursor:pointer">
+          <option value="relevant">Most Relevant</option>
+          <option value="newest">Newest First</option>
+          <option value="salary-high">Salary: High to Low</option>
+          <option value="salary-low">Salary: Low to High</option>
+        </select>
       </div>
 
       <!-- Job Grid -->
@@ -344,14 +337,7 @@
     // Render job feed (async — hits TiDB)
     await filterAndRender();
 
-    // Live search
-    var mainSearch = document.getElementById('main-search');
-    if (mainSearch) {
-      mainSearch.addEventListener('input', function(e) {
-        AppState.searchQuery = e.target.value;
-        filterAndRender();
-      });
-    }
+    // Live search via hero bar (main-search removed — hero bar is the single search)
     // Sort dropdown (async — getAllJobs hits TiDB)
     var sortDropdown = document.getElementById('sort-select');
     if (sortDropdown) {

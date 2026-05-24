@@ -180,6 +180,22 @@ router.post("/", async (req, res) => {
   }
 });
 
+// ── Cancel (delete) a seeker's own application ───────────────────────────────
+router.delete("/:id", async (req, res) => {
+  try {
+    const [result] = await db.query(
+      "DELETE FROM applications WHERE id = ?",
+      [req.params.id]
+    );
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Application not found" });
+    }
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ── Update an application's status ───────────────────────────────────────────
 router.put("/:id/status", async (req, res) => {
   try {

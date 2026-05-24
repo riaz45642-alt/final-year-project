@@ -106,6 +106,7 @@ const DB = {
     return Array.isArray(data) ? data : [];
   },
   async addApp(app)    { return await this._post("/applications", app); },
+  async cancelApp(appId) { return await this._delete("/applications/" + appId); },
   async hasApplied(jobId) {
     const uid = AppState.currentUser ? AppState.currentUser.id : null;
     if (!uid) return false;
@@ -445,12 +446,27 @@ async function filterAndRender() {
   var jobs = allActiveJobs.slice();
   if (AppState.activeCategory !== "all") jobs = jobs.filter(function(j){ return j.category === AppState.activeCategory; });
   if (AppState.searchQuery) {
-    var q = AppState.searchQuery.toLowerCase();
+    var q = AppState.searchQuery.toLowerCase().trim();
+    // Map human-readable category names → DB category values
+    var categoryNameMap = {
+      'technology': 'tech', 'tech': 'tech',
+      'medical': 'medical', 'medicine': 'medical',
+      'teaching': 'teaching', 'education': 'teaching',
+      'civil': 'civil', 'engineering': 'civil', 'civil / eng': 'civil',
+      'finance': 'finance', 'banking': 'finance',
+      'design': 'design', 'graphic': 'design',
+      'legal': 'legal', 'law': 'legal',
+      'logistics': 'logistics', 'supply': 'logistics',
+    };
+    var mappedCat = categoryNameMap[q] || null;
     jobs = jobs.filter(function(j){
+      var cat = (j.category || '').toLowerCase();
       return j.title.toLowerCase().includes(q) ||
-        (j.company||"").toLowerCase().includes(q) ||
-        (j.tags||[]).some(function(t){ return t.toLowerCase().includes(q); }) ||
-        j.location.toLowerCase().includes(q);
+        (j.company || '').toLowerCase().includes(q) ||
+        (j.tags || []).some(function(t){ return t.toLowerCase().includes(q); }) ||
+        j.location.toLowerCase().includes(q) ||
+        cat.includes(q) ||
+        (mappedCat !== null && cat === mappedCat);
     });
   }
   await renderJobFeed(jobs);
@@ -458,6 +474,12 @@ async function filterAndRender() {
 
 function setCategory(cat, chip) {
   AppState.activeCategory = cat;
+  // FIX: Clear search so jobs reappear correctly when switching categories
+  AppState.searchQuery = '';
+  var si = document.getElementById('main-search');
+  if (si) si.value = '';
+  var hi = document.getElementById('hero-search-input');
+  if (hi) hi.value = '';
   document.querySelectorAll(".category-chip,.chip").forEach(function(c){ c.classList.remove("active"); });
   chip.classList.add("active");
   filterAndRender();

@@ -4,6 +4,18 @@
    Status comes from the database, not random.
 ────────────────────────────────────────────── */
 
+async function cancelApplication(appId) {
+  if (!confirm('Cancel this application? This cannot be undone.')) return;
+  const result = await DB.cancelApp(appId);
+  if (result && result.success) {
+    toast('Application cancelled.', 'info');
+    await renderAppliedJobs();
+    await updateSidebarBadges();
+  } else {
+    toast('Failed to cancel application. Please try again.', 'error');
+  }
+}
+
 async function renderAppliedJobs() {
   const appliedList = document.getElementById('applied-jobs-list');
   if (!appliedList) return;
@@ -45,6 +57,7 @@ async function renderAppliedJobs() {
     const cssClass = statusColorMap[status] || 'reviewing';
     const dt       = new Date(app.appliedAt || app.applied_at)
                        .toLocaleDateString('en-PK', { day: 'numeric', month: 'short', year: 'numeric' });
+    const canCancel = status === 'Reviewing';
     return `
     <div class="card mb-16" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
       <div class="company-logo" style="flex-shrink:0">${job.emoji || '🏢'}</div>
@@ -56,14 +69,21 @@ async function renderAppliedJobs() {
         </div>
       </div>
       <span class="status-badge ${cssClass}">● ${status}</span>
-      <button class="btn btn-outline btn-sm"
-        onclick="window.location.href='dashboard.html'">View Job</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-outline btn-sm"
+          onclick="window.location.href='dashboard.html'">View Job</button>
+        ${canCancel
+          ? `<button class="btn btn-sm" style="background:var(--danger,#ef4444);color:#fff;border:none;cursor:pointer;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:600"
+              onclick="cancelApplication('${app.id}')">✕ Cancel</button>`
+          : ''}
+      </div>
     </div>`;
   }).join('');
 }
 
 // Expose globally
 window.renderAppliedJobs = renderAppliedJobs;
+window.cancelApplication = cancelApplication;
 
 
 
