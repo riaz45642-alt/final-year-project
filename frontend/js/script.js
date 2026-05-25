@@ -170,7 +170,7 @@ const AppState = {
 ────────────────────────────────────────────── */
 function toast(message, type, duration) {
   type = type || "info"; duration = duration || 3000;
-  const icons = { success: "✅", error: "❌", info: "ℹ️", warning: "⚠️" };
+  const icons = { success: <i class="fa-solid fa-check"></i>, error: <i class="fa-solid fa-exclamation-circle"></i>, info: <i class="fa-solid fa-info-circle"></i>, warning: <i class="fa-solid fa-exclamation-triangle"></i> };
   const container = document.getElementById("toast-container");
   if (!container) return;
   const el = document.createElement("div");
@@ -317,19 +317,19 @@ async function openJobDetail(jobId) {
         '<div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text-primary)">📞 Contact Information</div>' +
         (job.contactEmail
           ? '<div style="font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px">' +
-              '<span style="color:var(--text-secondary)">📧 Email:</span>' +
+              '<span style="color:var(--text-secondary)"><i class="fa-solid fa-envelope"></i> Email:</span>' +
               '<a href="mailto:'+job.contactEmail+'" style="color:var(--accent);text-decoration:none;font-weight:500">'+job.contactEmail+'</a>' +
             '</div>'
           : '') +
         (job.contactPhone
           ? '<div style="font-size:13px;margin-bottom:6px;display:flex;align-items:center;gap:8px">' +
-              '<span style="color:var(--text-secondary)">📞 Phone:</span>' +
+              '<span style="color:var(--text-secondary)"><i class="fa-solid fa-phone"></i> Phone:</span>' +
               '<a href="tel:'+job.contactPhone+'" style="color:var(--accent);text-decoration:none;font-weight:500">'+job.contactPhone+'</a>' +
             '</div>'
           : '') +
         (job.jobLocation
           ? '<div style="font-size:13px;display:flex;align-items:flex-start;gap:8px">' +
-              '<span style="color:var(--text-secondary);flex-shrink:0">📍 Address:</span>' +
+              '<span style="color:var(--text-secondary);flex-shrink:0"><i class="fa-solid fa-location-dot"></i> Address:</span>' +
               '<span style="font-weight:500">'+job.jobLocation+'</span>' +
             '</div>'
           : '') +
@@ -340,14 +340,14 @@ async function openJobDetail(jobId) {
     '<button class="modal-close" onclick="closeJobDetail()">✕</button>' +
     '<div class="job-detail-content">' +
       '<div class="job-detail-header">' +
-        '<div class="job-detail-logo">'+(job.emoji||"🏢")+'</div>' +
+        '<div class="job-detail-logo">'+(job.emoji||'<i class="fa-solid fa-building"></i>')+'</div>' +
         '<div style="flex:1">' +
           '<div class="job-detail-title">'+job.title+'</div>' +
           '<div style="font-size:14px;color:var(--text-secondary);margin-top:4px">'+(job.company||"")+'</div>' +
           '<div class="job-meta" style="margin-top:8px">' +
-            '<span class="job-meta-item">📍 '+job.location+'</span>' +
-            '<span class="job-meta-item">⏰ '+job.type+'</span>' +
-            '<span class="job-meta-item">🕐 '+(job.posted||"Recently")+'</span>' +
+            '<span class="job-meta-item"><i class="fa-solid fa-location-dot"></i> '+job.location+'</span>' +
+            '<span class="job-meta-item"><i class="fa-solid fa-clock"></i> '+job.type+'</span>' +
+            '<span class="job-meta-item"><i class="fa-solid fa-clock"></i> '+(job.posted||"Recently")+'</span>' +
           '</div>' +
           '<div style="margin-top:8px">' +
             '<span class="salary">Rs '+formatSalary(job.salaryMin)+'–'+formatSalary(job.salaryMax)+' <span>/month</span></span>' +
@@ -357,13 +357,24 @@ async function openJobDetail(jobId) {
       '<div class="job-tags">' + tags + (job.remote?'<span class="tag green">Remote OK</span>':"") + (job.urgent?'<span class="tag orange">Urgent</span>':"") + '</div>' +
       '<div style="margin:16px 0;font-size:14px;color:var(--text-secondary);line-height:1.7">' + (job.desc||"<em>No description provided.</em>") + '</div>' +
       contactSection +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
-        (!isEmployer ?
-          '<button class="btn btn-primary" id="modal-apply-btn" onclick="applyJob(\''+job.id+'\', this)" '+(isApplied?"disabled":"")+'>'+(isApplied?"✓ Applied":"Apply Now →")+'</button>' +
-          '<button class="btn btn-outline" id="modal-save-btn" onclick="toggleBookmarkModal(\''+job.id+'\',this)">'+(isBookmarked?"🔖 Saved":"🔖 Save Job")+'</button>'
-        : "") +
-      '</div>' +
-    '</div>';
+'<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">' +
+  (!isEmployer
+    ? (
+        '<button class="btn btn-primary" id="modal-apply-btn" onclick="applyJob(\'' + job.id + '\', this)" ' + (isApplied ? 'disabled' : '') + '>' +
+          (isApplied ? '✓ Applied' : 'Apply Now →') +
+        '</button>' +
+
+        '<button class="btn btn-outline" id="modal-save-btn" onclick="toggleBookmarkModal(\'' + job.id + '\', this)">' +
+          (isBookmarked
+            ? '<i class="fa-solid fa-bookmark"></i> Saved'
+            : '<i class="fa-regular fa-bookmark"></i> Save Job'
+          ) +
+        '</button>'
+      )
+    : ''
+  ) +
+'</div>' +
+'</div>';
   var modal = document.getElementById("job-detail-modal");
   if (modal) modal.classList.add("open");
 }
@@ -372,7 +383,7 @@ function closeJobDetail() { var m = document.getElementById("job-detail-modal");
 
 async function toggleBookmarkModal(jobId, btn) {
   var isSaved = await DB.toggleSave(jobId);
-  btn.textContent = isSaved ? "🔖 Saved" : "🔖 Save Job";
+  btn.innerHTML = isSaved ? '<i class="fa-solid fa-bookmark"></i> Saved' : '<i class="fa-regular fa-bookmark"></i> Save Job';
   var jobs = await getAllJobs();
   var job  = jobs.find(function(j){ return j.id === jobId; });
   toast(isSaved ? 'Saved "'+(job?job.title:"")+'"' : "Removed from saved", isSaved?"success":"info");
@@ -395,7 +406,7 @@ async function renderJobFeed(jobsList) {
     }
   });
   if (!jobsList.length) {
-    feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
+    feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-search"></i></div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
     return;
   }
   var savedIds      = await DB.getSaved();
@@ -415,12 +426,12 @@ function buildJobCardHTML(job, savedIds, appliedJobIds) {
   return (
     '<div class="job-card" onclick="openJobDetail(\''+job.id+'\')">' +
       '<div class="job-card-top">' +
-        '<div class="company-logo">'+(job.emoji||"🏢")+'</div>' +
-        (!isEmployer ? '<button class="job-bookmark '+(isSaved?"saved":"")+'\" data-bookmark="'+job.id+'" onclick="event.stopPropagation();toggleBookmark(\''+job.id+'\',this)">🔖</button>' : "") +
+        '<div class="company-logo">'+(job.emoji||'<i class="fa-solid fa-building"></i>')+'</div>' +
+        (!isEmployer ? '<button class="job-bookmark '+(isSaved?"saved":"")+'\" data-bookmark="'+job.id+'" onclick="event.stopPropagation();toggleBookmark(\''+job.id+'\',this)"><i class="fa-solid fa-bookmark"></i></button>' : "") +
       '</div>' +
       '<div class="job-title">'+job.title+'</div>' +
       '<div class="company-name">'+(job.company||"")+'</div>' +
-      '<div class="job-meta"><span class="job-meta-item">📍 '+job.location+'</span><span class="job-meta-item">⏰ '+job.type+'</span></div>' +
+      '<div class="job-meta"><span class="job-meta-item"><i class="fa-solid fa-map-marker"></i> '+job.location+'</span><span class="job-meta-item"><i class="fa-solid fa-clock"></i> '+job.type+'</span></div>' +
       '<div class="job-tags">'+tags+(job.remote?'<span class="tag green">Remote OK</span>':"")+(job.urgent?'<span class="tag orange">Urgent</span>':"")+'</div>' +
       '<div class="job-footer">' +
         '<div class="salary">Rs '+formatSalary(job.salaryMin)+'–'+formatSalary(job.salaryMax)+' <span>/month</span></div>' +
@@ -524,7 +535,7 @@ async function applyJob(jobId, btn) {
   }
 
   if (btn) { btn.textContent = "✓ Applied"; btn.classList.add("applied"); }
-  toast('Applied to "'+(job?job.title:"")+'" successfully! 🎉',"success");
+  toast('Applied to "'+(job?job.title:"")+'" successfully! <i class="fa-solid fa-flag-checkered"></i>',"success");
   await updateSidebarBadges();
 }
 
@@ -582,8 +593,9 @@ async function initCommon() {
     updateSidebarBadges();
   }, { once: true });
 
-  console.log("TalentBridge ready ✅ | user:", AppState.currentUser ? AppState.currentUser.name : "guest");
-}
+ console.log('TalentBridge ready <i class="fa-solid fa-check"></i> | user:',
+  AppState.currentUser ? AppState.currentUser.name : 'guest'
+);}
 
 /* ──────────────────────────────────────────────
    15. DOMContentLoaded

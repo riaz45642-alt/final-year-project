@@ -34,7 +34,7 @@ async function renderSeekerNotifications() {
 
   container.innerHTML = statusNotifs.map(function(n) {
     const dt = new Date(n.createdAt).toLocaleDateString('en-PK', { day: 'numeric', month: 'short' });
-    const icon = n.type === 'status_update' ? '🔔' : '📩';
+    const icon = n.type === 'status_update' ? '<i class="fa-solid fa-bell"></i>' : '<i class="fa-solid fa-envelope-open-text"></i>';
     return `<div onclick="markSeekerNotifRead('${n.id}',this)" id="snotif-${n.id}"
       style="display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border-radius:10px;margin-bottom:8px;cursor:pointer;
              border:1px solid var(--border-mid,#eee);background:${n.isRead ? 'transparent' : 'var(--bg-hover,#f0f4ff)'}">
@@ -58,7 +58,7 @@ async function renderAppliedJobs() {
   const appliedList = document.getElementById('applied-jobs-list');
   if (!appliedList) return;
 
-  appliedList.innerHTML = '<div class="empty-state"><div class="empty-icon">⏳</div><p>Loading applications…</p></div>';
+  appliedList.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-hourglass"></i></div><p>Loading applications…</p></div>';
 
   const [applications, allJobs] = await Promise.all([
     DB.getApps(),
@@ -68,7 +68,7 @@ async function renderAppliedJobs() {
   if (!AppState.currentUser || !applications.length) {
     appliedList.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📋</div>
+        <div class="empty-icon"><i class="fa-solid fa-clipboard"></i></div>
         <h3>No applications yet</h3>
         <p>Apply to jobs and track your progress here</p>
         <button class="btn btn-primary" style="margin-top:16px"
@@ -87,7 +87,7 @@ async function renderAppliedJobs() {
 
   appliedList.innerHTML = applications.map(function(app) {
     const job      = allJobs.find(j => j.id === (app.jobId || app.job_id))
-                     || { title: 'Unknown Job', company: 'Unknown Company', emoji: '🏢' };
+                     || { title: 'Unknown Job', company: 'Unknown Company', emoji: '<i class="fa-solid fa-building"></i>' };
     const status   = app.status || 'Reviewing';
     const cssClass = statusColorMap[status] || 'reviewing';
     const dt       = new Date(app.appliedAt || app.applied_at)
@@ -95,12 +95,12 @@ async function renderAppliedJobs() {
     const canCancel = status === 'Reviewing';
     return `
     <div class="card mb-16" style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
-      <div class="company-logo" style="flex-shrink:0">${job.emoji || '🏢'}</div>
+      <div class="company-logo" style="flex-shrink:0">${job.emoji || '<i class="fa-solid fa-building"></i>'}</div>
       <div style="flex:1;min-width:160px">
         <div class="job-title" style="font-size:14.5px">${job.title}</div>
         <div class="company-name">${job.company || ''}</div>
         <div class="job-meta" style="margin-top:6px">
-          <span class="job-meta-item">📅 Applied ${dt}</span>
+          <span class="job-meta-item"><i class="fa-solid fa-briefcase"></i> Applied ${dt}</span>
         </div>
       </div>
       <span class="status-badge ${cssClass}">● ${status}</span>

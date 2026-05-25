@@ -300,10 +300,10 @@ function buildClassicHTML(d, s) {
         '<div style="font-family:Georgia,serif;font-size:40px;font-weight:700;line-height:1.2;color:#fff;letter-spacing:-0.5px">' + esc((d.fname+' '+d.lname).trim()||'Your Name') + '</div>' +
         '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:16px;opacity:0.88;margin-top:6px;letter-spacing:0.2px">' + esc(d.title) + '</div>' +
         '<div style="display:flex;gap:18px;flex-wrap:wrap;font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;opacity:0.78;margin-top:12px;line-height:1.6">' +
-          (d.email?'<span>✉ '+esc(d.email)+'</span>':'') +
-          (d.phone?'<span>📞 '+esc(d.phone)+'</span>':'') +
-          (d.loc?'<span>📍 '+esc(d.loc)+'</span>':'') +
-          (d.linkedin?'<span>🔗 '+esc(d.linkedin)+'</span>':'') +
+          (d.email?'<span><i class="fa-solid fa-envelope"></i> '+esc(d.email)+'</span>':'') +
+          (d.phone?'<span><i class="fa-solid fa-phone"></i> '+esc(d.phone)+'</span>':'') +
+          (d.loc?'<span><i class="fa-solid fa-location-dot"></i> '+esc(d.loc)+'</span>':'') +
+          (d.linkedin?'<span><i class="fa-solid fa-linkedin"></i> '+esc(d.linkedin)+'</span>':'') +
         '</div>' +
       '</div>' +
       '<div style="padding:26px 40px 32px">' +
@@ -326,8 +326,8 @@ function buildSidebarHTML(d, s) {
         '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:16px;margin-bottom:16px">' +
           '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;opacity:0.7;margin-bottom:10px">Contact</div>' +
           (d.email?'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;margin-bottom:8px;opacity:0.92;word-break:break-all">✉ '+esc(d.email)+'</div>':'') +
-          (d.phone?'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;margin-bottom:8px;opacity:0.92">📞 '+esc(d.phone)+'</div>':'') +
-          (d.loc?'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;margin-bottom:8px;opacity:0.92">📍 '+esc(d.loc)+'</div>':'') +
+          (d.phone?'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;margin-bottom:8px;opacity:0.92"><i class="fa-solid fa-phone"></i> '+esc(d.phone)+'</div>':'') +
+          (d.loc?'<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:13px;margin-bottom:8px;opacity:0.92"><i class="fa-solid fa-location-dot"></i> '+esc(d.loc)+'</div>':'') +
         '</div>' +
         (d.skills.length ? '<div style="border-top:1px solid rgba(255,255,255,0.3);padding-top:16px">' +
           '<div style="font-family:\'Segoe UI\',Arial,sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:2px;opacity:0.7;margin-bottom:12px">Skills</div>' +
@@ -565,7 +565,7 @@ async function downloadCV() {
     var lname = getField('cv-lname') || '';
     var filename = (fname+'_'+lname).replace(/\s+/g,'_').replace(/^_+|_+$/g,'') + '_CV.pdf';
     doc.save(filename);
-    if (typeof toast==='function') toast('PDF downloaded! ✅','success');
+    if (typeof toast==='function') toast('PDF downloaded! <i class="fa-solid fa-check"></i>','success');
 
   } catch(e) {
     if (document.body.contains(container)) document.body.removeChild(container);
@@ -610,7 +610,7 @@ async function saveCVToBackend() {
       fetch(apiBase+'/users', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(profilePayload) }),
     ]);
     var d1 = await r1.json();
-    if (d1&&d1.success) { if(typeof toast==='function') toast('CV saved successfully! ✅','success'); }
+    if (d1&&d1.success) { if(typeof toast==='function') toast('CV saved successfully! <i class="fa-solid fa-check"></i>','success'); }
     else { if(typeof toast==='function') toast('Save failed — check your connection','warning'); }
   } catch(e) {
     if(typeof toast==='function') toast('Could not reach server','error');
