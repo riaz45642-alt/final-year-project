@@ -7,7 +7,7 @@ function renderJobFeed(jobsList) {
   if (!feedGrid) return;
   jobCount.textContent = jobsList.length;
   if (!jobsList.length) {
-    feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
+    feedGrid.innerHTML = '<div class="empty-state"><div class="empty-icon">🔍</div><h3>No jobs found</h3><p>Try different keywords or category filters</p></div>';
     return;
   }
   feedGrid.innerHTML = jobsList.map(job => buildJobCardHTML(job)).join('');
@@ -29,15 +29,15 @@ function buildJobCardHTML(job) {
   return `
   <div class="job-card" onclick="openJobDetail('${job.id}')">
     <div class="job-card-top">
-      <div class="company-logo">${job.emoji || '<i class="fa-solid fa-building"></i>'}</div>
+      <div class="company-logo">${job.emoji || '🏢'}</div>
       <button class="job-bookmark ${DB.isSaved(job.id) ? 'saved' : ''}" data-bookmark="${job.id}"
-        onclick="event.stopPropagation();toggleBookmark('${job.id}',this)"><i class="fa-solid fa-bookmark"></i></button>
+        onclick="event.stopPropagation();toggleBookmark('${job.id}',this)">🔖</button>
     </div>
     <div class="job-title">${job.title}</div>
     <div class="company-name">${job.company}</div>
     <div class="job-meta">
-      <span class="job-meta-item"><i class="fa-solid fa-location-dot"></i> ${job.location}</span>
-      <span class="job-meta-item"><i class="fa-solid fa-clock"></i> ${job.type}</span>
+      <span class="job-meta-item">📍 ${job.location}</span>
+      <span class="job-meta-item">⏰ ${job.type}</span>
     </div>
     <div class="job-tags">
       ${(job.tags || []).slice(0, 3).map(tag => `<span class="tag">${tag}</span>`).join('')}
@@ -107,7 +107,7 @@ function applyJob(jobId, applyBtn) {
     DB.addApp({ jobId, userId: AppState.currentUser.id, appliedAt: Date.now(), status: 'reviewing' });
     applyBtn.textContent = '✓ Applied';
     applyBtn.classList.add('applied');
-    toast(`Applied to "${job?.title}" successfully! <i class="fa-solid fa-flag-checkered"></i>`, 'success');
+    toast(`Applied to "${job?.title}" successfully! 🎉`, 'success');
     const appliedCount = DB.getApps().length;
     document.querySelectorAll('.sidebar-badge[data-for="applied"], .badge[data-for="applied"]').forEach(badge => badge.textContent = appliedCount);
   }, 800);

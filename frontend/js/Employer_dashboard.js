@@ -38,9 +38,9 @@ async function refreshEmployerStats() {
   if (getEl("emp-stat-apps"))  getEl("emp-stat-apps").textContent  = myApplicants.length;
   if (getEl("emp-stat-short")) getEl("emp-stat-short").textContent = shortlisted;
 
-  if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? <i class="fa-solid fa-caret-up"></i>  + myJobs.length + " active"       : "No jobs yet";
-  if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? <i class="fa-solid fa-caret-up"></i>  + myApplicants.length + " total"   : "No applicants yet";
-  if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? <i class="fa-solid fa-caret-up"></i>  + shortlisted + " shortlisted"     : "None shortlisted";
+  if (getEl("emp-stat-jobs-change"))  getEl("emp-stat-jobs-change").textContent  = myJobs.length       ? "▲ " + myJobs.length + " active"       : "No jobs yet";
+  if (getEl("emp-stat-apps-change"))  getEl("emp-stat-apps-change").textContent  = myApplicants.length ? "▲ " + myApplicants.length + " total"   : "No applicants yet";
+  if (getEl("emp-stat-short-change")) getEl("emp-stat-short-change").textContent = shortlisted         ? "▲ " + shortlisted + " shortlisted"     : "None shortlisted";
 
   await refreshNotifBadge();
 }
@@ -79,7 +79,7 @@ async function postJob() {
 
   var newJob = {
     id:           "job_" + Date.now(),
-    emoji:        <i class="fa-solid fa-building"></i>,
+    emoji:        "🏢",
     title:        jobTitle,
     dept:         department,
     type:         jobType || "Full-Time",
@@ -102,7 +102,7 @@ async function postJob() {
   var result = await DB.addPostedJob(newJob);
 
   if (result && result.success) {
-    toast('"' + jobTitle + '" published successfully! <i class="fa-solid fa-flag-checkered"></i>', "success");
+    toast('"' + jobTitle + '" published successfully! 🎉', "success");
     ["pj-title","pj-dept","pj-location","pj-sal-min","pj-sal-max","pj-desc","pj-skills",
      "pj-contact-email","pj-contact-phone","pj-job-location"].forEach(function(fid){
       var el = document.getElementById(fid);
@@ -116,7 +116,7 @@ async function postJob() {
     toast("Failed to publish job — is the server running?", "error");
   }
 
-  if (publishBtn) { publishBtn.textContent = '<i class="fa-solid fa-bullhorn"></i> Publish Job'; publishBtn.disabled = false; }
+  if (publishBtn) { publishBtn.textContent = "📣 Publish Job"; publishBtn.disabled = false; }
 }
 
 function saveDraft() {
@@ -153,7 +153,7 @@ async function renderPostedJobsTable() {
     tr.className = "dynamic-row";
     tr.innerHTML =
       '<td><strong>' + escapeHtml(job.title) + '</strong>' +
-        (job.contactEmail ? '<div style="font-size:11px;color:var(--text-secondary,#888);margin-top:2px"><i class="fa-solid fa-envelope"></i> ' + escapeHtml(job.contactEmail) + '</div>' : '') +
+        (job.contactEmail ? '<div style="font-size:11px;color:var(--text-secondary,#888);margin-top:2px">📧 ' + escapeHtml(job.contactEmail) + '</div>' : '') +
       '</td>' +
       '<td>' + escapeHtml(job.dept || job.category || "—") + '</td>' +
       '<td>' + escapeHtml(job.location || "—") + '</td>' +
@@ -235,8 +235,8 @@ async function openJobApplicants(jobId, jobTitle) {
           '<div style="flex:1;min-width:140px">' +
             '<div style="font-weight:600;font-size:14px">' + escapeHtml(name) + '</div>' +
             (app.seekerTitle ? '<div style="font-size:12px;color:var(--text-secondary)">' + escapeHtml(app.seekerTitle) + '</div>' : '') +
-            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px"><i class="fa-solid fa-envelope"></i> <a href="https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(app.seekerEmail) + '" target="_blank" style="color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</a></div>' : '') +
-            (app.seekerPhone ? '<div style="font-size:12px"><i class="fa-solid fa-phone"></i> ' + escapeHtml(app.seekerPhone) + '</div>' : '') +
+            (app.seekerEmail ? '<div style="font-size:12px;margin-top:3px">📧 <a href="https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(app.seekerEmail) + '" target="_blank" style="color:var(--accent)">' + escapeHtml(app.seekerEmail) + '</a></div>' : '') +
+            (app.seekerPhone ? '<div style="font-size:12px">📞 ' + escapeHtml(app.seekerPhone) + '</div>' : '') +
           '</div>' +
           '<div style="font-size:12px;color:var(--text-secondary);min-width:80px">Applied: ' + date + '</div>' +
           '<span style="padding:3px 10px;border-radius:12px;font-size:11px;font-weight:600;' + statusStyle + '">' + escapeHtml(app.status || "Reviewing") + '</span>' +
@@ -307,7 +307,7 @@ function _renderApplicantRows(apps) {
       '<td>' + buildStatusDropdown(status, app.id, false) + '</td>' +
       '<td style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">' +
         (app.seekerEmail ? '<a class="btn btn-outline btn-sm" href="https://mail.google.com/mail/?view=cm&to=' + encodeURIComponent(app.seekerEmail) + '" target="_blank" style="text-decoration:none">Email</a>' : '') +
-        '<a href="profile_page.html?uid=' + escapeHtml(app.userId) + '" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;font-size:12px"><i class="fa-solid fa-user"></i> Profile</a>' +
+        '<a href="profile_page.html?uid=' + escapeHtml(app.userId) + '" target="_blank" class="btn btn-outline btn-sm" style="text-decoration:none;font-size:12px">👤 Profile</a>' +
       '</td>';
     tbody.appendChild(tr);
   });
@@ -368,9 +368,9 @@ async function changeApplicantStatus(selectEl, appId) {
     });
 
     var statusMessages = {
-      "Shortlisted":  '<i class="fa-solid fa-check"></i>' + " Applicant shortlisted — notification sent!",
-      "Interview": '<i class="fa-solid fa-calendar"></i>' + " Interview stage set — applicant notified!",
-      "Rejected":     '<i class="fa-solid fa-times"></i>' + " Application rejected — applicant notified."
+      "Shortlisted":  "✅ Applicant shortlisted — notification sent!",
+      "Interview": "📅 Interview stage set — applicant notified!",
+      "Rejected":     "❌ Application rejected — applicant notified."
     };
     toast(statusMessages[newStatus] || "Status updated → " + newStatus, newStatus === "Rejected" ? "warning" : "success");
     await refreshEmployerStats();
@@ -399,7 +399,7 @@ async function loadNotifications() {
 
     listEl.innerHTML = notifs.map(function(n) {
       var date = n.createdAt ? new Date(n.createdAt).toLocaleString("en-PK",{month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"}) : "";
-      var typeIcon = n.type === "application" ? <i class="fa-solid fa-user"></i> : n.type === "success" ? '<i class="fa-solid fa-check"></i>' : n.type === "info" ? '<i class="fa-solid fa-info-circle"></i>' : n.type === "warning" ? '<i class="fa-solid fa-exclamation-triangle"></i>' : '<i class="fa-solid fa-bell"></i>';
+      var typeIcon = n.type === "application" ? "👤" : n.type === "success" ? "✅" : n.type === "info" ? "📅" : n.type === "warning" ? "❌" : "🔔";
       return (
         '<div style="display:flex;gap:12px;padding:14px 16px;border-radius:10px;border:1px solid var(--border-mid,#eee);background:' + (n.isRead ? "transparent" : "var(--bg-hover,#f9f9ff)") + ';cursor:pointer;margin-bottom:8px" onclick="markNotifRead(\'' + n.id + '\')" id="notif-' + n.id + '">' +
           '<div style="font-size:22px;flex-shrink:0">' + typeIcon + '</div>' +
