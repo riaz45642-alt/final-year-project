@@ -89,7 +89,7 @@ function esc(str) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-/* ── 4. TEMPLATE SELECTOR THUMBNAILS ── */
+/*  4. TEMPLATE SELECTOR THUMBNAILS */
 function renderTemplateSelector() {
   var grid = document.getElementById('template-selector');
   if (!grid) return;

@@ -105,7 +105,8 @@ router.get("/setup", async (req, res) => {
         INDEX idx_user_id (user_id),
         INDEX idx_is_read (is_read)
       )
-    `);
+        
+      `);
 
     // CV Data — full CV details stored per user
     await db.query(`

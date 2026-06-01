@@ -25,7 +25,7 @@ const _FB_CONFIG = {
   measurementId:     "G-3XQHW50SMS"
 };
 
-/* ── FIX ①: Promise that resolves only after DB role is confirmed ── */
+/* FIX ①: Promise that resolves only after DB role is confirmed*/
 window._authResolved = new Promise(function(resolve) {
   window._resolveAuth = resolve;
 });
@@ -34,7 +34,7 @@ window._authResolved = new Promise(function(resolve) {
 (function () {
   const s = document.createElement('script');
   s.type = 'module';
-  s.textContent = `
+  s.textContent = ` 
     import { initializeApp }                    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
     import { getAuth, onAuthStateChanged,
              signInWithEmailAndPassword,
@@ -56,7 +56,7 @@ window._authResolved = new Promise(function(resolve) {
     window._fbSignOut = ()     => fbSignOut(auth);
     window._fbProfile = (u,d)  => updateProfile(u, d);
 
-    /* ── FIX ②: Auth observer — always await DB fetch before resolving ── */
+    /*  FIX : Auth observer — always await DB fetch before resolving  */
     onAuthStateChanged(auth, async fbUser => {
       if (fbUser) {
         // Start with cached/Firebase data
@@ -113,7 +113,7 @@ window._authResolved = new Promise(function(resolve) {
         document.dispatchEvent(new CustomEvent('authRoleReady', { detail: null }));
       }
 
-      // FIX ②: Resolve the global promise once — Guard.requireEmployer() awaits this
+      // FIX Resolve the global promise once — Guard.requireEmployer() awaits this
       if (typeof window._resolveAuth === 'function') {
         window._resolveAuth(typeof AppState !== 'undefined' ? AppState.currentUser : null);
         window._resolveAuth = null;
